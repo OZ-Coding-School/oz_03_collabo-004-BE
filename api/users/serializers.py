@@ -22,10 +22,10 @@ class UserTokenRefreshSerializer(serializers.Serializer):
         try:
             # Verify and decode the Refresh token
             token = RefreshToken(refresh_token)
-            user_uuid = token["user_uuid"]
+            user_username = token["user_username"]
 
             # Verify the user exists and is active
-            get_object_or_404(User, uuid=user_uuid, is_active=True)
+            get_object_or_404(User, username=user_username, is_active=True)
         except (InvalidToken, TokenError, KeyError):
             raise AuthenticationFailed({"message": "Invalid refresh token"})
         except User.DoesNotExist:
@@ -46,10 +46,10 @@ class UserLogoutSerializer(serializers.Serializer):
         try:
             # Verify Refresh token
             token = RefreshToken(refresh_token)
-            user_uuid = token["user_uuid"]
+            user_username = token["user_username"]
 
             # Verify valid user
-            get_object_or_404(User, uuid=user_uuid, is_active=True)
+            get_object_or_404(User, username=user_username, is_active=True)
             attrs["refresh_token"] = token
         except (InvalidToken, TokenError):
             raise AuthenticationFailed({"message": "Invalid refresh token"})
@@ -75,8 +75,10 @@ class UserDeleteSerializer(serializers.Serializer):
         try:
             # Verify Refresh token
             token = RefreshToken(refresh_token)
-            user_uuid = token["user_uuid"]
-            user = get_object_or_404(User, uuid=user_uuid, email=email, is_active=True)
+            user_username = token["user_username"]
+            user = get_object_or_404(
+                User, username=user_username, email=email, is_active=True
+            )
         except (InvalidToken, TokenError) as e:
             raise AuthenticationFailed({"message": "Invalid refresh token"})
         except User.DoesNotExist:

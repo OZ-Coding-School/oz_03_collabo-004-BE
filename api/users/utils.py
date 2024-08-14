@@ -19,7 +19,7 @@ class GoogleEnvironments:
     _google_client_id: str = field(init=False, repr=False)
     _google_client_secret: str = field(init=False, repr=False)
     _main_domain: str = field(init=False, repr=False)
-    _google_state: str = field(init=False, repr=False)
+    # _google_state: str = field(init=False, repr=False)
 
     def __post_init__(self):
         # 기능은 init과 동일
@@ -27,7 +27,7 @@ class GoogleEnvironments:
         self._google_client_id = self.get_env_variable("GOOGLE_CLIENT_ID")
         self._google_client_secret = self.get_env_variable("GOOGLE_CLIENT_SECRET")
         self._main_domain = self.get_env_variable("MAIN_DOMAIN")
-        self._google_state = self.get_env_variable("GOOGLE_CSRF_STATE")
+        # self._google_state = self.get_env_variable("GOOGLE_CSRF_STATE")
 
     @staticmethod
     def get_env_variable(name):
@@ -95,9 +95,9 @@ class HunsooKingAuthClass:
         """
 
         if key == "access":
-            expires_at = EmotreeAuthClass()._access_expiration
+            expires_at = HunsooKingAuthClass()._access_expiration
         elif key == "refresh":
-            expires_at = EmotreeAuthClass()._refresh_expiration
+            expires_at = HunsooKingAuthClass()._refresh_expiration
         else:
             raise ValueError("key should be 'access' or 'refresh'")
 
@@ -117,11 +117,11 @@ class HunsooKingAuthClass:
     def new_access_token_for_user(refresh_token):
         """
         기존 Refresh token을 사용하여 새로운 access token을 생성하는 함수
-        이때, 새로 생성된 access token에는, user_uuid가 정보가 없는데, 직접 payload에 추가해주어야함
+        이때, 새로 생성된 access token에는, user_username이 정보가 없는데, 직접 payload에 추가해주어야함
         """
         token = RefreshToken(refresh_token)
         new_access_token = token.access_token
-        new_access_token["user_uuid"] = token["user_uuid"]
+        new_access_token["user_username"] = token["user_username"]
         return str(new_access_token)
 
     @staticmethod
@@ -139,11 +139,11 @@ class HunsooKingAuthClass:
     def set_new_access_token_for_user(refresh_token):
         """
         기존 Refresh token을 사용하여 새로운 access token을 생성하는 함수
-        이때, 새로 생성된 access token에는, user_uuid가 정보가 없는데, 직접 payload에 추가해주어야함
+        이때, 새로 생성된 access token에는, user_username이 정보가 없는데, 직접 payload에 추가해주어야함
         """
         token = RefreshToken(refresh_token)
         new_access_token = token.access_token
-        new_access_token["user_uuid"] = token["user_uuid"]
+        new_access_token["user_username"] = token["user_username"]
         return str(new_access_token)
 
 
