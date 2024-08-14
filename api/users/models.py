@@ -1,6 +1,6 @@
 import uuid
 
-from common.models import TimeStampModel
+from common.models import TimeStampedModel
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import models
 
@@ -58,7 +58,7 @@ class UserManager(BaseUserManager):
         return user
 
 
-class User(TimeStampModel, AbstractBaseUser):
+class User(TimeStampedModel, AbstractBaseUser):
     username = models.CharField(max_length=255, unique=True, null=False)
     email = models.EmailField(unique=True, null=False)
     nickname = models.CharField(max_length=255, null=False)
