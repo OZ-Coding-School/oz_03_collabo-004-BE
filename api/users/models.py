@@ -4,7 +4,6 @@ from common.models import TimeStampModel
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import models
 
-
 class UserManager(BaseUserManager):
     def create_user(
         self,
@@ -69,6 +68,7 @@ class User(TimeStampModel, AbstractBaseUser):
         default="none",
     )
     is_superuser = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)  # 사용자 활성 상태 관리 필드 추가
 
     objects = UserManager()
 

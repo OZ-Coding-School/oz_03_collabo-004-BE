@@ -37,7 +37,15 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
+    "rest_framework_simplejwt.token_blacklist",
 ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -98,6 +106,29 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),  # Access 토큰의 유효 기간
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),  # Refresh 토큰의 유효 기간
+    "ROTATE_REFRESH_TOKENS": True,  # Refresh 토큰을 재발급 시 기존 토큰을 회전할지 여부
+    "BLACKLIST_AFTER_ROTATION": True,  # 회전된 Refresh 토큰을 블랙리스트에 추가할지 여부
+    "ALGORITHM": "HS256",  # JWT 토큰의 암호화 알고리즘
+    "SIGNING_KEY": SECRET_KEY,  # 토큰 서명을 위한 비밀 키
+    "AUTH_HEADER_TYPES": ("Bearer",),  # Authorization 헤더에서 사용할 토큰 타입
+    "USER_ID_FIELD": "id",  # 사용자 ID를 식별하는 필드
+    "USER_ID_CLAIM": "user_id",  # JWT 클레임에서 사용자 ID를 나타내는 필드명
+    "AUTH_TOKEN_CLASSES": (
+        "rest_framework_simplejwt.tokens.AccessToken",
+    ),  # 사용할 토큰 클래스
+    "TOKEN_TYPE_CLAIM": "token_type",  # 토큰 유형을 나타내는 클레임 필드
+    "JTI_CLAIM": "jti",  # JWT ID를 나타내는 클레임 필드
+    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),  # 슬라이딩 토큰의 유효 기간
+    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(
+        days=1
+    ),  # 슬라이딩 토큰의 리프레시 유효 기간
+}
 
 
 # Internationalization
