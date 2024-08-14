@@ -12,13 +12,13 @@ class UserManager(BaseUserManager):
         username=None,
         password=None,
         nickname=None,
-        social_platform="none",
+        social_platform="general",
         **extra_fields
     ):
         if not email:
             raise ValueError("이메일 정보를 가져올 수 없습니다")
 
-        if social_platform == "none":  # 일반 로그인인 경우
+        if social_platform == "general":  # 일반 로그인인 경우
             if not username or not password or not nickname:
                 raise ValueError(
                     "일반 로그인에는 username(id), password, nickname이 필요합니다"
@@ -37,7 +37,7 @@ class UserManager(BaseUserManager):
             **extra_fields
         )
 
-        if social_platform == "none":
+        if social_platform == "general":
             user.set_password(password)
         else:
             user.set_unusable_password()
@@ -47,7 +47,7 @@ class UserManager(BaseUserManager):
 
     def create_superuser(self, email, password=None, **extra_fields):
         extra_fields.setdefault("is_superuser", True)
-        extra_fields.setdefault("social_platform", "none")
+        extra_fields.setdefault("social_platform", "general")
 
         if not email:
             raise ValueError("이메일 정보를 가져올 수 없습니다")
@@ -60,7 +60,7 @@ class UserManager(BaseUserManager):
 
 class User(TimeStampModel, AbstractBaseUser):
     username = models.CharField(max_length=255, unique=True, null=False)
-    email = models.CharField(max_length=255, unique=True, null=False)
+    email = models.EmailField(unique=True, null=False)
     nickname = models.CharField(max_length=255, null=False)
     social_platform = models.CharField(
         choices=[("general", "general"), ("google", "google")],

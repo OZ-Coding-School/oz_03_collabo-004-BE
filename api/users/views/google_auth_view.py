@@ -7,7 +7,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from users.models import User
 from users.serializers import EmptySerializer
-from users.utils import EmotreeAuthClass
+from users.utils import HunsooKingAuthClass
 
 
 class UserGoogleTokenReceiver(generics.GenericAPIView):
@@ -45,35 +45,49 @@ class UserGoogleTokenReceiver(generics.GenericAPIView):
         name = userinfo.get("name")
 
         try:
-            with transaction.atomic():
-                user, created = User.objects.get_or_create(
-                    email=email,
-                    defaults={
-                        "nickname": name,
-                        "social_platform": "google",
-                        "last_login": timezone.now(),
-                    },
-                )
-                response = Response(
-                    data={"message": "Login successful"}, status=status.HTTP_201_CREATED
+            user = User.objects.get(email=email)
+
+            if user.social_platform == "general":
+                # 이미 일반 회원가입으로 가입된 이메일인 경우 오류 반환
+                return Response(
+                    {"message": "이미 일반 회원가입으로 가입된 이메일입니다."},
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
 
-                if not created:
-                    # 기존 회원이 존재하는 경우
-                    user.last_login = timezone.now()
-                    user.save()
-                    response.status_code = status.HTTP_200_OK
+            elif user.social_platform == "google":
+                # 기존 구글 소셜 로그인 회원인 경우 로그인 처리
+                user.last_login = timezone.now()
+                user.save()
+                created = False
 
-                jwt_tokens = EmotreeAuthClass.set_auth_tokens_for_user(user)
-
-            response = EmotreeAuthClass().set_jwt_auth_cookie(
-                response=response, jwt_tokens=jwt_tokens
+        except User.DoesNotExist:
+            # 신규 구글 소셜 로그인 회원인 경우 회원 가입 및 로그인 처리
+            user = User.objects.create_user(
+                email=email,
+                username=None,
+                password=None,
+                nickname=name,
+                social_platform="google",
+                last_login=timezone.now(),
             )
-            logger.info(f"/api/auth/google/receiver: {user}")
-            return response
+            created = True
 
-        except Exception as e:
-            logger.error(f"/api/auth/google/receiver: {str(e)}")
-            return Response(
-                {"message": f"{str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        response = Response(data={"message": "Login successful"})
+
+        if not created:  # 기존 회원인 경우
+            response.status_code = status.HTTP_200_OK
+        else:  # 신규 회원인 경우
+            response.status_code = status.HTTP_201_CREATED
+
+        jwt_tokens = HunsooKingAuthClass.set_auth_tokens_for_user(user)
+        response = HunsooKingAuthClass().set_jwt_auth_cookie(
+            response=response, jwt_tokens=jwt_tokens
+        )
+        logger.info(f"/api/auth/google/receiver: {user}")
+        return response
+
+        # except Exception as e:
+        #     logger.error(f"/api/auth/google/receiver: {str(e)}")
+        #     return Response(
+        #         {"message": f"{str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        #     )
