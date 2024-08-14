@@ -4,7 +4,7 @@ LABEL maintainer="hunsooking"
 ENV PYTHONUNBUFFERED 1
 ENV DISPLAY=:99
 
-WORKDIR /api
+WORKDIR /app
 
 # Poetry 설치
 RUN pip install poetry

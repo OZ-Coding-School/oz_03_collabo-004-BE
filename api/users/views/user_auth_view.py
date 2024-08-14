@@ -16,6 +16,8 @@ from users.serializers import (
 from users.utils import HunsooKingAuthClass
 
 
+
+
 class UserTokenVerifyView(generics.GenericAPIView):
     serializer_class = EmptySerializer
     permission_classes = [AllowAny]

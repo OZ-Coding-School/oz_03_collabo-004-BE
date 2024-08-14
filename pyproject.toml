@@ -10,6 +10,8 @@ python = "^3.11"
 django = "^5.1"
 psycopg2-binary = "^2.9"  # PostgreSQL을 사용하기 위한 패키지
 python-dotenv = "^1.0"  # .env 파일을 로드하기 위한 패키지
+djangorestframework = "^3.14" 
+djangorestframework-simplejwt = "^5.3.1"
 
 
 

@@ -9,7 +9,9 @@ class Profile(TimeStampedModel):
     )
     bio = models.TextField()
     hunsoo_level = models.PositiveIntegerField(default=1)
-    profile_image = models.ForeignKey("profiles.ProfileImage", null=True, blank=True)
+    profile_image = models.ForeignKey(
+        "profiles.ProfileImage", null=True, blank=True, on_delete=models.SET_NULL
+    )
     selectd_comment_count = models.PositiveIntegerField(default=0)
 
 
