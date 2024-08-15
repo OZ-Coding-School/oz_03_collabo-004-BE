@@ -69,6 +69,7 @@ class User(TimeStampedModel, AbstractBaseUser):
         default="none",
     )
     is_superuser = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)  # 사용자 활성 상태 관리 필드 추가
 
     objects = UserManager()
 
