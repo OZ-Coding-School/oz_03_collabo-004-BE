@@ -25,9 +25,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     "구글계정으로 이미 가입된 사용자 입니다."
                 )
-            raise serializers.ValidationError(
-                "일반회원으로 이미 가입된 사용자 입니다."
-            )
+            raise serializers.ValidationError("일반회원으로 이미 가입된 사용자 입니다.")
         return value
 
     def create(self, validated_data):
@@ -49,7 +47,7 @@ class UserLoginSerializer(serializers.Serializer):
         password = data.get("password")
 
         if not username or not password:
-            raise serializers.ValidationError("사용자이름과 비밀번호가 필요합니다.")
+            raise serializers.ValidationError("아이디와 비밀번호가 필요합니다.")
 
         return data
 
@@ -65,10 +63,10 @@ class UserTokenRefreshSerializer(serializers.Serializer):
         try:
             # Verify and decode the Refresh token
             token = RefreshToken(refresh_token)
-            user_username = token["user_username"]
+            user_id = token["user_id"]
 
             # Verify the user exists and is active
-            get_object_or_404(User, username=user_username, is_active=True)
+            get_object_or_404(User, id=user_id, is_active=True)
         except (InvalidToken, TokenError, KeyError):
             raise AuthenticationFailed({"message": "Invalid refresh token"})
         except User.DoesNotExist:
@@ -89,10 +87,10 @@ class UserLogoutSerializer(serializers.Serializer):
         try:
             # Verify Refresh token
             token = RefreshToken(refresh_token)
-            user_username = token["user_username"]
+            user_id = token["user_id"]
 
             # Verify valid user
-            get_object_or_404(User, username=user_username, is_active=True)
+            get_object_or_404(User, id=user_id, is_active=True)
             attrs["refresh_token"] = token
         except (InvalidToken, TokenError):
             raise AuthenticationFailed({"message": "Invalid refresh token"})
@@ -118,10 +116,8 @@ class UserDeleteSerializer(serializers.Serializer):
         try:
             # Verify Refresh token
             token = RefreshToken(refresh_token)
-            user_username = token["user_username"]
-            user = get_object_or_404(
-                User, username=user_username, email=email, is_active=True
-            )
+            user_id = token["user_id"]
+            user = get_object_or_404(User, id=user_id, email=email, is_active=True)
         except (InvalidToken, TokenError) as e:
             raise AuthenticationFailed({"message": "Invalid refresh token"})
         except User.DoesNotExist:
