@@ -1,9 +1,9 @@
-from common.models import TimeStampModel
+from common.models import TimeStampedModel
 from django.db import models
 from users.models import User
 
 
-class Profile(TimeStampModel):
+class Profile(TimeStampedModel):
     user = models.ForeignKey(
         "users.User", on_delete=models.CASCADE, null=True, blank=True
     )
