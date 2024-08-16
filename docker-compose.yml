@@ -34,3 +34,4 @@ services:
     
 # volumes:
 #   postgres_data:  # PostgreSQL 데이터를 저장하는 볼륨
+
