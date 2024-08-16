@@ -11,6 +11,47 @@ class EmptySerializer(serializers.Serializer):
     pass
 
 
+class UserRegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ["username", "email", "password", "nickname"]
+
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            user = User.objects.get(email=value)
+            if user.social_platform != "general":
+                raise serializers.ValidationError(
+                    "구글계정으로 이미 가입된 사용자 입니다."
+                )
+            raise serializers.ValidationError("일반회원으로 이미 가입된 사용자 입니다.")
+        return value
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            username=validated_data["username"],
+            email=validated_data["email"],
+            password=validated_data["password"],
+            nickname=validated_data["nickname"],
+        )
+        return user
+
+
+class UserLoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        username = data.get("username")
+        password = data.get("password")
+
+        if not username or not password:
+            raise serializers.ValidationError("아이디와 비밀번호가 필요합니다.")
+
+        return data
+
+
 class UserTokenRefreshSerializer(serializers.Serializer):
     refresh_token = serializers.CharField(write_only=True)
 

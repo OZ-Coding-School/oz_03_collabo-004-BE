@@ -32,7 +32,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", "default_secret_key")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["0.0.0.0", "localhost", "127.0.0.1"]
 
 
 # Application definition
@@ -82,6 +82,11 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": False,  # 순환 사용 시 이전 리프레시 토큰 블랙리스트 등록 여부
     "AUTH_HEADER_TYPES": ("Bearer",),  # 인증 헤더 타입
     "UPDATE_LAST_LOGIN": True,
+    "ALGORITHM": "HS256",  # JWT 서명에 “HS256” 알고리즘을 사용
+    "AUTH_TOKEN_CLASSES": (
+        "rest_framework_simplejwt.tokens.AccessToken",
+    ),  # 기본적으로 AccessToken 클래스를 사용
+    "TOKEN_TYPE_CLAIM": "token_type",  # JWT에서 토큰 유형을 token_type 클레임으로 저장
 }
 
 ROOT_URLCONF = "config.urls"
