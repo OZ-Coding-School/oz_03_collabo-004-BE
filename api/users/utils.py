@@ -117,11 +117,11 @@ class HunsooKingAuthClass:
     def new_access_token_for_user(refresh_token):
         """
         기존 Refresh token을 사용하여 새로운 access token을 생성하는 함수
-        이때, 새로 생성된 access token에는, user_username이 정보가 없는데, 직접 payload에 추가해주어야함
+        이때, 새로 생성된 access token에는, user_id이 정보가 없는데, 직접 payload에 추가해주어야함
         """
         token = RefreshToken(refresh_token)
         new_access_token = token.access_token
-        new_access_token["user_username"] = token["user_username"]
+        new_access_token["user_id"] = token["user_id"]
         return str(new_access_token)
 
     @staticmethod
@@ -139,11 +139,11 @@ class HunsooKingAuthClass:
     def set_new_access_token_for_user(refresh_token):
         """
         기존 Refresh token을 사용하여 새로운 access token을 생성하는 함수
-        이때, 새로 생성된 access token에는, user_username이 정보가 없는데, 직접 payload에 추가해주어야함
+        이때, 새로 생성된 access token에는, user_id이 정보가 없는데, 직접 payload에 추가해주어야함
         """
         token = RefreshToken(refresh_token)
         new_access_token = token.access_token
-        new_access_token["user_username"] = token["user_username"]
+        new_access_token["user_id"] = token["user_id"]
         return str(new_access_token)
 
 
