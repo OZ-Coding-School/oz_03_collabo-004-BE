@@ -10,4 +10,4 @@ class Profile(TimeStampModel):
     bio = models.TextField()
     hunsoo_level = models.PositiveIntegerField(default=1)
     profile_image = models.CharField(max_length=255, null=True, blank=True)
-    selectd_comment_count = models.PositiveIntegerField(default=0)
+    selected_comment_count = models.PositiveIntegerField(default=0)
