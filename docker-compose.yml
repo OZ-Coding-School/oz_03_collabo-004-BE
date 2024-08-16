@@ -20,3 +20,18 @@ services:
       - DB_PASSWORD=${RDS_PASSWORD}
     env_file:
       - .env
+
+#   db:
+#     image: postgres:15.7  # PostgreSQL 15.7 버전 이미지를 사용합니다.
+#     environment:
+#       POSTGRES_DB: ${RDS_DB_NAME}  # 데이터베이스 이름을 환경 변수로 설정합니다.
+#       POSTGRES_USER: ${RDS_USERNAME}  # 데이터베이스 사용자 이름을 환경 변수로 설정합니다.
+#       POSTGRES_PASSWORD: ${RDS_PASSWORD}  # 데이터베이스 비밀번호를 환경 변수로 설정합니다.
+#     ports:
+#       - "5432:5432"  # 호스트의 5432 포트를 컨테이너의 5432 포트에 매핑합니다.
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data  # 데이터베이스 데이터를 영구적으로 저장하기 위해 볼륨을 사용합니다.
+    
+# volumes:
+#   postgres_data:  # PostgreSQL 데이터를 저장하는 볼륨
+
