@@ -19,11 +19,11 @@ jobs:
 
     - name: Create .env file
       run: |
-        echo "DB_HOST=${RDS_HOSTNAME}" >> .env
-        echo "DB_NAME=${RDS_DB_NAME}" >> .env
-        echo "DB_USER=${RDS_USERNAME}" >> .env
-        echo "DB_PASSWORD=${RDS_PASSWORD}" >> .env
-        echo "DB_PORT=${RDS_DB_PORT}" >> .env
+        echo "RDS_HOSTNAME=${RDS_HOSTNAME}" >> .env
+        echo "RDS_DB_NAME=${RDS_DB_NAME}" >> .env
+        echo "RDS_USERNAME=${RDS_USERNAME}" >> .env
+        echo "RDS_PASSWORD=${RDS_PASSWORD}" >> .env
+        echo "RDS_DB_PORT=${RDS_DB_PORT}" >> .env
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
