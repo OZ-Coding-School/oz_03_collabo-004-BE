@@ -12,9 +12,16 @@ jobs:
       RDS_DB_NAME: ${{ secrets.RDS_DB_NAME }}
       RDS_USERNAME: ${{ secrets.RDS_USERNAME }}
       RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}
-      
+
     steps:
     - uses: actions/checkout@v3
+
+    - name: Create .env file
+        run: |
+          echo "DB_HOST=${RDS_HOSTNAME}" >> .env
+          echo "DB_NAME=${RDS_DB_NAME}" >> .env
+          echo "DB_USER=${RDS_USERNAME}" >> .env
+          echo "DB_PASSWORD=${RDS_PASSWORD}" >> .env
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
