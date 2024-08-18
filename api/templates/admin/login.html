@@ -1,0 +1,13 @@
+# login templates for admin
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block content %}
+<div id="content-main">
+    <form method="post" action="{% url 'admin_login' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="{% trans 'Log in' %}">
+    </form>
+</div>
+{% endblock %}
