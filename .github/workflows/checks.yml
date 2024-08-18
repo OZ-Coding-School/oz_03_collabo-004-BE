@@ -7,7 +7,12 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+    env:
+      RDS_HOSTNAME: ${{ secrets.RDS_HOSTNAME }} 
+      RDS_DB_NAME: ${{ secrets.RDS_DB_NAME }}
+      RDS_USERNAME: ${{ secrets.RDS_USERNAME }}
+      RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}
+      
     steps:
     - uses: actions/checkout@v3
 
