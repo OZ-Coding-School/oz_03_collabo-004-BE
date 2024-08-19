@@ -19,5 +19,6 @@ services:
       - DB_NAME=${RDS_DB_NAME}
       - DB_USER=${RDS_USERNAME}
       - DB_PASSWORD=${RDS_PASSWORD}
+    user: django-user  # 컨테이너 내부에서 django-user로 실행
     env_file:
       - .env
