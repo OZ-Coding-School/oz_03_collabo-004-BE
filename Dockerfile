@@ -19,9 +19,6 @@ RUN poetry config virtualenvs.create false \
 # 프로젝트 코드 복사
 COPY . .
 
-# /app 디렉토리 및 하위 디렉토리에 django-user 소유권 부여
-RUN chown -R django-user:django-user /app
-
 # 필요한 시스템 패키지 설치 
 RUN apk add --update --no-cache jpeg-dev 
 
