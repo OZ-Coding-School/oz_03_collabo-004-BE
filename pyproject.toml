@@ -16,6 +16,9 @@ pytz = "*"
 
 
 
+[tool.poetry.group.dev.dependencies]
+coverage = "^7.6.1"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
