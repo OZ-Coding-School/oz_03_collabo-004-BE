@@ -6,6 +6,15 @@ ENV DISPLAY=:99
 
 WORKDIR /app
 
+
+# 필수 빌드 도구 및 패키지 설치
+RUN apk add --update --no-cache \
+    gcc \
+    musl-dev \
+    python3-dev \
+    linux-headers \
+    jpeg-dev
+
 # Poetry 설치
 RUN pip install poetry
 
@@ -15,6 +24,9 @@ COPY pyproject.toml poetry.lock ./
 # 의존성 설치 (가상 환경 생성 및 의존성 설치)
 RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi
+
+# Install safety
+RUN pip install safety
 
 # 프로젝트 코드 복사
 COPY . .
