@@ -42,7 +42,9 @@ jobs:
       run: docker-compose run --rm app python manage.py test
 
     - name: Run tests with coverage
-      run: docker-compose run --rm app coverage run --data-file=/tmp/.coverage manage.py test
+      run: |
+        docker-compose run -d --name coverage_container app coverage run --data-file=/tmp/.coverage manage.py test
+        docker wait coverage_container
 
     - name: Copy coverage data
       run: docker cp oz_03_collabo-004-be_app:/tmp/.coverage ./.coverage
