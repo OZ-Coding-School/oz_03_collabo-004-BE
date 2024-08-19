@@ -9,6 +9,7 @@ services:
       - "8000:8000"
     volumes:
       - ./api:/app
+      - ./.coverage:/app/.coverage  # .coverage 파일 마운트 추가
     command: >
       sh -c "python manage.py makemigrations &&
              python manage.py migrate &&

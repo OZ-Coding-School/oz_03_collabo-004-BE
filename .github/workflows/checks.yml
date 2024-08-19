@@ -44,8 +44,11 @@ jobs:
     - name: Run tests with coverage
       run: docker-compose run --rm app coverage run manage.py test
 
+    - name: Copy coverage data
+      run: docker cp oz_03_collabo-004-be_app_run:/app/.coverage ./.coverage 
+
     - name: Generate coverage report
-      run: docker-compose run --rm app coverage report
+      run: coverage report
 
     - name: Run security checks
       run: docker-compose run --rm app safety check
