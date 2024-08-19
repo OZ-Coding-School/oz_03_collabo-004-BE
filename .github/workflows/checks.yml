@@ -41,10 +41,11 @@ jobs:
     - name: Run tests
       run: docker-compose run --rm app python manage.py test
 
-    - name: Run coverage
-      run: |
-        docker-compose run --rm app coverage run manage.py test
-        docker-compose run --rm app coverage report
+    - name: Run tests with coverage
+      run: docker-compose run --rm app coverage run manage.py test
+
+    - name: Generate coverage report
+      run: docker-compose run --rm app coverage report
 
     - name: Run security checks
       run: docker-compose run --rm app safety check
