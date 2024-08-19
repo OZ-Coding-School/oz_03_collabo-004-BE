@@ -6,23 +6,6 @@ ENV DISPLAY=:99
 
 WORKDIR /app
 
-# 사용자 및 그룹 생성
-RUN addgroup -S django-user \
-    && adduser -S django-user -G django-user
-
-# 홈 디렉토리 생성 및 권한 설정
-RUN mkdir -p /home/django-user \
-    && chown -R django-user:django-user /home/django-user \
-    && chmod 700 /home/django-user
-
-# 필수 빌드 도구 및 패키지 설치
-RUN apk add --update --no-cache \
-    gcc \
-    musl-dev \
-    python3-dev \
-    linux-headers \
-    jpeg-dev
-
 # Poetry 설치
 RUN pip install poetry
 
@@ -33,15 +16,20 @@ COPY pyproject.toml poetry.lock ./
 RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi
 
-# Safety 설치
-RUN pip install safety
-
 # 프로젝트 코드 복사
 COPY . .
 
-# /app 디렉토리 권한 설정
-RUN chown -R django-user:django-user /app \
-    && chmod -R 755 /app
+RUN chmod -R 777 /app
+
+# 필요한 시스템 패키지 설치 
+RUN apk add --update --no-cache jpeg-dev 
+
+# 사용자 추가 및 /app 디렉토리 소유권 변경
+RUN adduser \
+        --disabled-password \
+        --no-create-home \
+        django-user \
+    && chown -R django-user:django-user /app  # /app 디렉토리 소유권 변경
 
 EXPOSE 8000
 
