@@ -19,6 +19,8 @@ RUN poetry config virtualenvs.create false \
 # 프로젝트 코드 복사
 COPY . .
 
+RUN chmod -R 777 /app
+
 # 필요한 시스템 패키지 설치 
 RUN apk add --update --no-cache jpeg-dev 
 
