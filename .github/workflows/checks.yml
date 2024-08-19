@@ -45,7 +45,7 @@ jobs:
       run: docker-compose run --rm app coverage run --data-file=/tmp/.coverage manage.py test
 
     - name: Copy coverage data
-      run: docker cp oz_03_collabo-004-be_app_run:/tmp/.coverage ./.coverage
+      run: docker cp oz_03_collabo-004-be_app:/tmp/.coverage ./.coverage
 
     - name: Generate coverage report
       run: coverage report
