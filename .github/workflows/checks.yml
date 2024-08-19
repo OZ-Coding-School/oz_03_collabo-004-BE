@@ -41,21 +41,25 @@ jobs:
     # - name: Run tests
     #   run: docker-compose run --rm app python manage.py test
 
-    - name: Run tests with coverage
+    # - name: Run tests with coverage
+    #   run: |
+    #     docker-compose run -d --name coverage_container app coverage run --data-file=/tmp/.coverage manage.py test
+    #     docker wait coverage_container
+
+    # - name: Set up Python environment
+    #   run: |
+    #     python -m pip install --upgrade pip
+    #     pip install coverage
+
+    # - name: Copy coverage data
+    #   run: docker cp coverage_container:/tmp/.coverage ./.coverage
+
+    # - name: Generate coverage report
+    #   run: docker-compose run --rm app coverage report --data-file=/tmp/.coverage
+
+    - name: Run tests with coverage and generate report
       run: |
-        docker-compose run -d --name coverage_container app coverage run --data-file=/tmp/.coverage manage.py test
-        docker wait coverage_container
-
-    - name: Set up Python environment
-      run: |
-        python -m pip install --upgrade pip
-        pip install coverage
-
-    - name: Copy coverage data
-      run: docker cp coverage_container:/tmp/.coverage ./.coverage
-
-    - name: Generate coverage report
-      run: coverage report --data-file=.coverage
+        docker-compose run --rm app sh -c "coverage run --data-file=/tmp/.coverage manage.py test && coverage report --data-file=/tmp/.coverage"
 
     - name: Run security checks
       run: docker-compose run --rm app safety check
