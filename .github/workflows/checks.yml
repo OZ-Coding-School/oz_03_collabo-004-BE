@@ -50,7 +50,7 @@ jobs:
       run: docker cp coverage_container:/tmp/.coverage ./.coverage
 
     - name: Generate coverage report
-      run: coverage report
+      run: docker-compose run --rm app coverage report
 
     - name: Run security checks
       run: docker-compose run --rm app safety check
