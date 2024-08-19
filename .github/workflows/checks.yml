@@ -46,6 +46,11 @@ jobs:
         docker-compose run -d --name coverage_container app coverage run --data-file=/tmp/.coverage manage.py test
         docker wait coverage_container
 
+    - name: Set up Python environment
+      run: |
+        python -m pip install --upgrade pip
+        pip install coverage
+
     - name: Copy coverage data
       run: docker cp coverage_container:/tmp/.coverage ./.coverage
 
