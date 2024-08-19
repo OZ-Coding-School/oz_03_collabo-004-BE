@@ -9,6 +9,7 @@ services:
       - "8000:8000"
     volumes:
       - ./api:/app
+      # - ./.coverage:/app/.coverage  # .coverage 파일 마운트 추가
     command: >
       sh -c "python manage.py makemigrations &&
              python manage.py migrate &&
@@ -18,6 +19,7 @@ services:
       - DB_NAME=${RDS_DB_NAME}
       - DB_USER=${RDS_USERNAME}
       - DB_PASSWORD=${RDS_PASSWORD}
+    user: django-user  # 컨테이너 내부에서 django-user로 실행
     env_file:
       - .env
     networks:

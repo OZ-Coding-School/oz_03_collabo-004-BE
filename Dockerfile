@@ -19,14 +19,17 @@ RUN poetry config virtualenvs.create false \
 # 프로젝트 코드 복사
 COPY . .
 
+RUN chmod -R 777 /app
+
 # 필요한 시스템 패키지 설치 
 RUN apk add --update --no-cache jpeg-dev 
 
-# 사용자 추가
+# 사용자 추가 및 /app 디렉토리 소유권 변경
 RUN adduser \
         --disabled-password \
         --no-create-home \
-        django-user
+        django-user \
+    && chown -R django-user:django-user /app  # /app 디렉토리 소유권 변경
 
 EXPOSE 8000
 
@@ -36,4 +39,5 @@ ARG DEV=false
 CMD ["poetry", "run", "python", "manage.py", "runserver", "0.0.0.0:8000"]
 
 USER django-user
+
 

@@ -32,7 +32,7 @@ class UserManager(BaseUserManager):
         user = self.model(
             email=email,
             username=username,
-            nickname=nickname,  # nickname 추가
+            nickname=nickname,
             social_platform=social_platform,
             **extra_fields
         )
