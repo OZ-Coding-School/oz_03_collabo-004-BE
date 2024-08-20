@@ -16,6 +16,7 @@ pytz = "*"
 boto3 = "*"
 django-storages = "*"
 coverage = "^7.6.1"
+django-cors-headers = "^3.14.0"
 
 
 
