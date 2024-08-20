@@ -1,0 +1,9 @@
+version: 0.0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: "hunsooking:latest"
+        LoadBalancerInfo:
+          ContainerName: "hoonsuimagecontainer"  # ECS 태스크 정의에서 지정한 컨테이너 이름
+          ContainerPort: 8000                    # Django 앱이 사용하는 포트
