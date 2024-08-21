@@ -42,5 +42,9 @@ jobs:
       run: |
         docker-compose run --rm app sh -c "coverage run --data-file=/tmp/.coverage manage.py test --noinput && coverage report --data-file=/tmp/.coverage"
 
+    # - name: Run security checks
+    #   run: docker-compose run --rm app safety check
+    # safety 설치해야 함
+
     - name: Tear down Docker containers
       run: docker-compose down

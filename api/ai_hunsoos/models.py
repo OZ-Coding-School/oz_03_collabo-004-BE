@@ -1,3 +1,8 @@
+from articles.models import Article
+from common.models import TimeStampModel
 from django.db import models
 
-# Create your models here.
+
+class AiHunsoo(TimeStampModel):
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, null=False)
+    content = models.TextField(null=False)
