@@ -22,6 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # .env 파일 로드
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -32,15 +33,14 @@ SECRET_KEY = os.getenv("SECRET_KEY", "default_secret_key")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    "0.0.0.0",
-    "localhost",
-    "127.0.0.1",
-    "api.hunsuking.yoyobar.xyz",
-    "hunsooking-alb-665945560.ap-northeast-2.elb.amazonaws.com",
-]
 
-CORS_ALLOW_ALL_ORIGINS = True
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(",")
+
+
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS").split(",")
+
+
+#CORS_ALLOW_ALL_ORIGINS = True
 
 # Application definition
 
