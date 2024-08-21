@@ -6,7 +6,7 @@ from users.models import User
 
 class Comment(TimeStampModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
-    articles = models.ForeignKey(Article, on_delete=models.CASCADE, null=False)
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, null=False)
     content = models.TextField(null=False)
     is_selected = models.BooleanField(default=False)
 
