@@ -1,11 +1,21 @@
-from common.models import TimeStampModel
+from django.apps import apps
+from django.contrib.auth import get_user_model
 from django.db import models
-from users.models import User
+from tags.models import Tag
+
+User = get_user_model()
 
 
-class Profile(TimeStampModel):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    bio = models.TextField()
-    hunsoo_level = models.PositiveIntegerField(default=1)
-    profile_image = models.CharField(max_length=255, null=True, blank=True)
-    selected_comment_count = models.PositiveIntegerField(default=0)
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    bio = models.TextField(blank=True, null=True)
+    profile_image = models.ImageField(
+        upload_to="profile_images/", blank=True, null=True
+    )
+    selected_tags = models.ManyToManyField("tags.Tag", blank=True)
+    warning_count = models.IntegerField(default=0)
+    hunsoo_level = models.IntegerField(default=1)
+
+
+    def __str__(self):
+        return self.user.username
