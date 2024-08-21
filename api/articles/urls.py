@@ -1,0 +1,20 @@
+from django.urls import path
+from .views.article_crud_views import ArticleCreateView, ArticleDeleteView, ArticleUpdateView
+from .views.article_list_views import ArticleListView, ArticleDetailView, ArticleByTagView
+from .views.article_reaction_views import ArticleViewCountView, ArticleLikeToggleView
+
+urlpatterns = [
+    # CRUD 관련 URL
+    path('create/', ArticleCreateView.as_view(), name='article-create'),
+    path('delete/<int:pk>/', ArticleDeleteView.as_view(), name='article-delete'),
+    path('update/<int:pk>/', ArticleUpdateView.as_view(), name='article-update'),
+
+    # 게시글 리스트 및 상세 조회 관련 URL
+    path('', ArticleListView.as_view(), name='article-list'),
+    path('<int:pk>/', ArticleDetailView.as_view(), name='article-detail'),
+    path('tag/<int:tag_id>/', ArticleByTagView.as_view(), name='articles-by-tag'),
+
+    # 반응 (조회수, 좋아요) 관련 URL
+    path('<int:id>/view/', ArticleViewCountView.as_view(), name='article-view-count'),
+    path('<int:id>/like/', ArticleLikeToggleView.as_view(), name='article-like'),
+]
