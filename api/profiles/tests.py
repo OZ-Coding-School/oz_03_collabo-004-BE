@@ -3,9 +3,11 @@ import json
 import pytz
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
+from tags.models import Tag
 
 from .models import Profile
 
@@ -70,5 +72,99 @@ class UpdateHunsooLevelTest(APITestCase):
 
     def tearDown(self):
         # 테스트 후 데이터 정리
+        self.user.delete()
+        self.profile.delete()
+
+
+class UserProfileDetailTest(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+        # 테스트용 사용자 및 프로필 생성
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            username="testuser",
+            password="testpassword",
+            nickname="testnickname",
+            social_platform="general",
+        )
+        self.profile = Profile.objects.create(
+            user=self.user, hunsoo_level=1, bio="This is a test bio."
+        )
+
+        # JWT 토큰 생성
+        self.refresh = RefreshToken.for_user(self.user)
+        self.access_token = str(self.refresh.access_token)
+        self.refresh_token = str(self.refresh)
+
+        # 쿠키에 토큰 설정
+        self.client.cookies["access"] = self.access_token
+        self.client.cookies["refresh"] = self.refresh_token
+
+        # 테스트할 URL
+        self.url = "/api/account/profile/"
+
+    def test_get_user_profile(self):
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["nickname"], "testnickname")
+        self.assertEqual(response.data["hunsoo_level"], 1)
+        self.assertEqual(response.data["bio"], "This is a test bio.")
+
+    def test_update_user_profile(self):
+        data = {"bio": "Updated bio"}
+        response = self.client.put(self.url, data, format="json")
+
+        self.profile.refresh_from_db()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.profile.bio, "Updated bio")
+
+    def test_unauthenticated_user_profile_access(self):
+        self.client.cookies.clear()
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def tearDown(self):
+        self.user.delete()
+        self.profile.delete()
+
+
+class PublicUserProfileViewTest(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+        # 테스트용 사용자 및 프로필 생성
+        self.user = User.objects.create_user(
+            email="publicuser@example.com",
+            username="publicuser",
+            password="publicpassword",
+            nickname="publicnickname",
+            social_platform="general",
+        )
+        self.profile = Profile.objects.create(
+            user=self.user, bio="This is a test bio.", hunsoo_level=1
+        )
+
+        # 테스트할 URL
+        self.url = reverse("public-profile", kwargs={"username": self.user.username})
+
+    def test_get_public_user_profile(self):
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("nickname", response.data)
+        self.assertEqual(response.data["bio"], "This is a test bio.")
+        self.assertEqual(response.data["nickname"], "publicnickname")
+        self.assertEqual(response.data["hunsoo_level"], 1)
+
+    def test_public_user_profile_not_found(self):
+        url = reverse("public-profile", kwargs={"username": "nonexistentuser"})
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def tearDown(self):
         self.user.delete()
         self.profile.delete()
