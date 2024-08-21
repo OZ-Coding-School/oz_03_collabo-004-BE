@@ -3,6 +3,7 @@ services:
   app:
     build:
       context: .
+      dockerfile: Dockerfile
       args:
         - DEV=true
     ports:
@@ -26,6 +27,9 @@ services:
       - app_network
 
   jenkins:
+    build:
+      context: .
+      dockerfile: Dockerfile.jenkins
     image: jenkins/jenkins:lts
     user: root  # Docker 소켓 접근을 위해 root 사용자로 실행
     ports:

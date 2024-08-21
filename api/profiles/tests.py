@@ -3,13 +3,16 @@ import json
 import pytz
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
+from tags.models import Tag
 
-from .models import Profile, Tag
+from .models import Profile
 
 User = get_user_model()
+
 
 class UpdateHunsooLevelTest(APITestCase):
     def setUp(self):
@@ -72,6 +75,7 @@ class UpdateHunsooLevelTest(APITestCase):
         self.user.delete()
         self.profile.delete()
 
+
 class UserProfileDetailTest(APITestCase):
     def setUp(self):
         self.client = APIClient()
@@ -84,7 +88,9 @@ class UserProfileDetailTest(APITestCase):
             nickname="testnickname",
             social_platform="general",
         )
-        self.profile = Profile.objects.create(user=self.user, hunsoo_level=1, bio="This is a test bio.")
+        self.profile = Profile.objects.create(
+            user=self.user, hunsoo_level=1, bio="This is a test bio."
+        )
 
         # JWT 토큰 생성
         self.refresh = RefreshToken.for_user(self.user)
@@ -124,6 +130,7 @@ class UserProfileDetailTest(APITestCase):
         self.user.delete()
         self.profile.delete()
 
+
 class PublicUserProfileViewTest(APITestCase):
     def setUp(self):
         self.client = APIClient()
@@ -136,21 +143,24 @@ class PublicUserProfileViewTest(APITestCase):
             nickname="publicnickname",
             social_platform="general",
         )
-        self.profile = Profile.objects.create(user=self.user, bio="This is a test bio.", hunsoo_level=1)
+        self.profile = Profile.objects.create(
+            user=self.user, bio="This is a test bio.", hunsoo_level=1
+        )
 
         # 테스트할 URL
-        self.url = f"api/account/profile/<username>/{self.user.username}/"
+        self.url = reverse("public-profile", kwargs={"username": self.user.username})
 
     def test_get_public_user_profile(self):
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("nickname", response.data)
         self.assertEqual(response.data["bio"], "This is a test bio.")
         self.assertEqual(response.data["nickname"], "publicnickname")
         self.assertEqual(response.data["hunsoo_level"], 1)
 
     def test_public_user_profile_not_found(self):
-        url = "/api/profile/nonexistentuser/"
+        url = reverse("public-profile", kwargs={"username": "nonexistentuser"})
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
