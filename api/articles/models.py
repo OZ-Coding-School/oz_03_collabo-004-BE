@@ -20,9 +20,13 @@ class Article(TimeStampModel):
 
 
 class ArticleImage(TimeStampModel):
-    article = models.ForeignKey(Article, on_delete=models.CASCADE, null=False)
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, null=False, related_name='images')
     image = models.ImageField(upload_to="articles/", null=False)
     is_thumbnail = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.article.title} - {self.id}"
+    
+    @property
+    def image_url(self):
+        return self.image.url if self.image else None
