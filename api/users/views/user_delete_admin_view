@@ -1,0 +1,29 @@
+from django.contrib.auth import authenticate, get_user_model
+from users.serializers import UserSerializer
+from rest_framework import generics
+from rest_framework.permissions import IsAdminUser
+
+User = get_user_model()
+
+
+class AdminUserDeleteView(generics.ListCreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = AdminUserDeleteSerializer
+    permission_classes = [IsAdminUser]
+
+    def list(self, request):
+    # added AdminUserDeleteView
+        queryset = self.get_queryset()
+        serializer = UserSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+class UserRoleChangeView(generics.ListCreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserRoleChangeSerializer
+    permission_classes = [IsAdminUser]
+
+    def list(self, request):
+    # added UserRoleChangeView
+        queryset = self.get_queryset()
+        serializer = UserSerializer(queryset, many=True)
+        return Response(serializer.data)

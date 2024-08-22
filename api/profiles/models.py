@@ -2,8 +2,6 @@ from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.db import models
 from tags.models import Tag
-# added MyPage
-from django.contrib.auth.models import User
 
 User = get_user_model()
 
@@ -17,8 +15,6 @@ class Profile(models.Model):
     selected_tags = models.ManyToManyField("tags.Tag", blank=True)
     warning_count = models.IntegerField(default=0)
     hunsoo_level = models.IntegerField(default=1)
-    # added nickname field
-    nickname = models.CharField(max_length=50, blank=True, null=True)
 
 
     def __str__(self):

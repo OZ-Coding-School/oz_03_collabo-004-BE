@@ -126,3 +126,9 @@ class UserDeleteSerializer(serializers.Serializer):
         attrs["refresh_token"] = token
         attrs["user"] = user
         return attrs
+
+class AdminUserDeleteSerializer(serializers.Serializer):
+    refresh_token = serializers.CharField(write_only=True)
+
+class UserRoleChangeSerializer(serializers.Serializer):
+    refresh_token = serializers.CharField(write_only=True)
