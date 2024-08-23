@@ -141,13 +141,14 @@ class UserTokenRefreshView(generics.GenericAPIView):
             HunsooKingAuthClass.set_cookie_attributes(
                 response=response, key="access", token=access_token
             )
-            HunsooKingAuthClass.log_info("Token refreshed successfully")
         except ValueError:
-            HunsooKingAuthClass.log_error("Failed to set access token cookie")
+            logger.error("/api/auth/token/refresh: Failed to set access token cookie")
             return Response(
                 {"error occurs": "UserTokenRefreshView"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+        logger.info("/api/auth/token/refresh: Token refreshed successfully")
         return response
 
 
