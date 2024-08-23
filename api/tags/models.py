@@ -13,7 +13,7 @@ class Tag(models.Model):
         (7, "교육 훈수"),
     ]
 
-    tag_id = models.IntegerField(choices=TAG_CHOICES, unique=True)
+    tag_id = models.IntegerField(choices=TAG_CHOICES, unique=True, primary_key=True)
     name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):

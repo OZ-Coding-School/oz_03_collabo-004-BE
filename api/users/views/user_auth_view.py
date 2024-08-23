@@ -147,9 +147,7 @@ class UserTokenRefreshView(generics.GenericAPIView):
                 {"error occurs": "UserTokenRefreshView"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-
         return response
-
 
 class UserLogoutView(generics.GenericAPIView):
     serializer_class = UserLogoutSerializer
@@ -166,17 +164,22 @@ class UserLogoutView(generics.GenericAPIView):
             with transaction.atomic():
                 refresh_token.blacklist()
             response = Response(status=status.HTTP_200_OK)
-            response = HunsooKingAuthClass.delete_auth_cookies(response)
-            HunsooKingAuthClass.log_info("Logout successful")
+            response.delete_cookie(
+                "access", domain=os.getenv("COOKIE_DOMAIN"), path="/"
+            )
+            response.delete_cookie(
+                "refresh", domain=os.getenv("COOKIE_DOMAIN"), path="/"
+            )
+            logger.info("/api/auth/logout: Logout successful")
             return response
         except (InvalidToken, TokenError) as e:
-            HunsooKingAuthClass.log_error(f"Logout error: {e}")
+            logger.error(f"/api/auth/logout: {e}")
             return Response(
                 data={"message": "Invalid refresh token", "error": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as e:
-            HunsooKingAuthClass.log_error(f"Logout exception: {str(e)}")
+            logger.error(f"/api/auth/logout: {str(e)}")
             return Response(
                 {"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
@@ -200,14 +203,22 @@ class UserDeleteView(generics.GenericAPIView):
                 user.delete()
                 refresh_token.blacklist()
             response = Response(status=status.HTTP_204_NO_CONTENT)
-            response = HunsooKingAuthClass.delete_auth_cookies(response)
+            response.delete_cookie(
+                "access", domain=os.getenv("COOKIE_DOMAIN"), path="/"
+            )
+            response.delete_cookie(
+                "refresh", domain=os.getenv("COOKIE_DOMAIN"), path="/"
+            )
+            logger.info("/api/auth/delete: User deleted successfully")
             return response
         except (InvalidToken, TokenError) as e:
+            logger.error(f"/api/auth/delete: {e}")
             return Response(
                 data={"message": "Invalid refresh token", "error": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as e:
+            logger.error(f"/api/auth/delete: {str(e)}")
             return Response(
                 {"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
