@@ -19,14 +19,11 @@ class ArticleLikeToggleView(APIView):
 
         if user in article.likes.all():
             article.likes.remove(user)
-            article.like_count -= 1
             message = "Like removed"
         else:
             article.likes.add(user)
-            article.like_count += 1
             message = "Like added"
 
-        article.save()
         response_data = {
             "article_id": article_id,
             "like_count": article.like_count,
