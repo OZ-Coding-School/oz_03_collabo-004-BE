@@ -11,12 +11,17 @@ class Article(TimeStampModel):
     content = models.TextField(null=False)
     is_closed = models.BooleanField(default=False)
     view_count = models.IntegerField(default=0)
-    like_count = models.IntegerField(default=0)
+    likes = models.ManyToManyField(User, related_name="liked_articles", blank=True)
     tags = models.ManyToManyField(Tag, blank=True)
     #hunsoo_count = models.IntegerField(default=0)
 
     def __str__(self):
         return self.title
+    
+    #좋아요 집계 동적 실시간 반영
+    @property
+    def like_count(self):
+        return self.likes.count()
 
 
 class ArticleImage(TimeStampModel):

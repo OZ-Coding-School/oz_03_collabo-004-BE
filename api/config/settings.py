@@ -90,6 +90,8 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": False,  # 리프레시 토큰 순환 사용 여부
     "BLACKLIST_AFTER_ROTATION": False,  # 순환 사용 시 이전 리프레시 토큰 블랙리스트 등록 여부
     "AUTH_HEADER_TYPES": ("Bearer",),  # 인증 헤더 타입
+    "USER_ID_FIELD": "id",  # 기본 Django 사용자 모델의 ID 필드
+    "USER_ID_CLAIM": "user_id",
     "UPDATE_LAST_LOGIN": True,
     "ALGORITHM": "HS256",  # JWT 서명에 “HS256” 알고리즘을 사용
     "AUTH_TOKEN_CLASSES": (

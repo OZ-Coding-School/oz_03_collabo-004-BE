@@ -14,8 +14,8 @@ class ArticleCreateView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        tags = self.request.data.get("tags", [])
-        if len(tags) > 3:
+        tag_ids = self.request.data.get("tag_ids", [])
+        if len(tag_ids) > 3:
             raise serializers.ValidationError("태그는 최대 3개까지만 가능합니다.")
         serializer.save(user=self.request.user)
 
@@ -38,7 +38,6 @@ class ArticleUpdateView(generics.UpdateAPIView):
     def perform_update(self, serializer):
         article = serializer.save()
         return Response(serializer.data)
-    
 
 
 # 게시글 삭제
@@ -54,4 +53,3 @@ class ArticleDeleteView(generics.DestroyAPIView):
         if instance.is_closed:
             raise PermissionDenied("채택이 이루어진 게시글은 삭제할 수 없습니다.")
         super().perform_destroy(instance)
-
