@@ -46,7 +46,10 @@ ALLOWED_HOSTS = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
+    "http://localhost",
+    "http://localhost:5173",
     "https://hunsuking.yoyobar.xyz",
+
 ]
 
 CORS_ALLOW_CREDENTIALS = True  # 쿠키 등 credential 정보 허용
