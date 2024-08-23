@@ -34,14 +34,20 @@ SECRET_KEY = os.getenv("SECRET_KEY", "default_secret_key")
 DEBUG = True
 
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = [
+    "0.0.0.0",
+    "localhost",
+    "127.0.0.1",
+    "api.hunsuking.yoyobar.xyz",
+    "52.78.179.207",
+    "172.31.6.31",
+    "43.202.248.50",
+    "hunsooking-ec2-alb-113517241.ap-northeast-2.elb.amazonaws.com",
+]
 
-
-CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
-CORS_ALLOWED_ORIGINS = [origin for origin in CORS_ALLOWED_ORIGINS if origin]
-
-
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "https://hunsuking.yoyobar.xyz",
+]
 
 CORS_ALLOW_CREDENTIALS = True  # 쿠키 등 credential 정보 허용
 CORS_ALLOW_METHODS = [
