@@ -25,6 +25,7 @@ User = get_user_model()
 class UserRegisterView(generics.CreateAPIView):
     logger.info("User registration attempt")
     serializer_class = UserRegisterSerializer
+    permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
         logger.info("User registration attempt")

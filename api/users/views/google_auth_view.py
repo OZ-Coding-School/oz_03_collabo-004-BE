@@ -25,6 +25,18 @@ class UserGoogleTokenReceiver(generics.GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Google API를 통해 access token validity check
+        token_info_url = "https://www.googleapis.com/oauth2/v3/tokeninfo"
+        token_info_response = requests.get(
+            f"{token_info_url}?access_token={access_token}"
+        )
+
+        if token_info_response.status_code != 200:
+            return Response(
+                {"message": "Invalid or expired access token"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         # Google API를 통해 사용자 정보 가져오기
         userinfo_url = "https://www.googleapis.com/oauth2/v3/userinfo"
         userinfo_response = requests.get(
