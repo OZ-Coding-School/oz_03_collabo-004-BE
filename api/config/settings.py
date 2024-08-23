@@ -34,14 +34,20 @@ SECRET_KEY = os.getenv("SECRET_KEY", "default_secret_key")
 DEBUG = True
 
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = [
+    "0.0.0.0",
+    "localhost",
+    "127.0.0.1",
+    "api.hunsuking.yoyobar.xyz",
+    "52.78.179.207",
+    "172.31.6.31",
+    "43.202.248.50",
+    "hunsooking-ec2-alb-113517241.ap-northeast-2.elb.amazonaws.com",
+]
 
-
-CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
-CORS_ALLOWED_ORIGINS = [origin for origin in CORS_ALLOWED_ORIGINS if origin]
-
-
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "https://hunsuking.yoyobar.xyz",
+]
 
 CORS_ALLOW_CREDENTIALS = True  # 쿠키 등 credential 정보 허용
 CORS_ALLOW_METHODS = [
@@ -112,6 +118,8 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": False,  # 리프레시 토큰 순환 사용 여부
     "BLACKLIST_AFTER_ROTATION": False,  # 순환 사용 시 이전 리프레시 토큰 블랙리스트 등록 여부
     "AUTH_HEADER_TYPES": ("Bearer",),  # 인증 헤더 타입
+    "USER_ID_FIELD": "id",  # 기본 Django 사용자 모델의 ID 필드
+    "USER_ID_CLAIM": "user_id",
     "UPDATE_LAST_LOGIN": True,
     "ALGORITHM": "HS256",  # JWT 서명에 “HS256” 알고리즘을 사용
     "AUTH_TOKEN_CLASSES": (

@@ -24,4 +24,5 @@ urlpatterns = [
     path("api/auth/", include("users.urls.auth_urls")),
     path("api/account/", include("profiles.urls")),
     path("api/tag/", include("tags.urls")),
+    path("api/article/", include("articles.urls")),
 ]
