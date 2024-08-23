@@ -47,12 +47,17 @@ ALLOWED_HOSTS = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost",
+    "http://43.202.248.50",
     "http://127.0.0.1:5173",
     "http://localhost:5173",
     "https://hunsuking.yoyobar.xyz",
     "http://52.78.179.207",
     "http://172.31.6.31",
+    "https://api.hunsuking.yoyobar.xyz",
 ]
+
+# SSL을 사용하는 경우에만 X-Forwarded-Proto 헤더를 통해 SSL을 확인합니다.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 CORS_ALLOW_CREDENTIALS = True  # 쿠키 등 credential 정보 허용
 CORS_ALLOW_METHODS = [
