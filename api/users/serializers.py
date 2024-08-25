@@ -35,6 +35,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             email=validated_data["email"],
             password=validated_data["password"],
             nickname=validated_data["nickname"],
+            is_staff=False,
         )
         user.social_platform = "general"
         return user

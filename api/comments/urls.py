@@ -10,7 +10,7 @@ from .views.comment_reaction_views import CommentReactionToggleView, CommentSele
 
 urlpatterns = [
     path(
-        "articles/<int:article_id>", CommentCreateView.as_view(), name="comment-create"
+        "create/articles/<int:article_id>", CommentCreateView.as_view(), name="comment-create"
     ),
     path("edit/<int:pk>", CommentUpdateView.as_view(), name="comment-update"),
     path(

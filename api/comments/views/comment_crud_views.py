@@ -17,8 +17,9 @@ class CommentCreateView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user, article_id=self.kwargs["article_id"])
+        
 
-
+#댓글 수정뷰
 class CommentUpdateView(generics.UpdateAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer

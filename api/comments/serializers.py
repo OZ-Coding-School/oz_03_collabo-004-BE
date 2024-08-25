@@ -14,16 +14,14 @@ class CommentImageSerializer(serializers.ModelSerializer):
 # 댓글 작성 및 수정 시리얼라이저
 class CommentSerializer(serializers.ModelSerializer):
     images = CommentImageSerializer(many=True, required=False)
-    article = serializers.PrimaryKeyRelatedField(
-        queryset=Article.objects.all(), write_only=True
-    )
+    user_nickname = serializers.CharField(source="user.nickname", read_only=True)
 
     class Meta:
         model = Comment
         fields = [
             "id",
             "user",
-            "article",
+            "user_nickname",
             "content",
             "is_selected",
             "images",
@@ -33,37 +31,26 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only_fields = [
             "id",
             "user",
-            "article",
+            "user_nickname",
             "is_selected",
             "created_at",
             "updated_at",
         ]
 
     def create(self, validated_data):
-        article = self.context["view"].kwargs["article_id"]
+        article_id = self.context["view"].kwargs["article_id"]
+        article = Article.objects.get(id=article_id)
         images_data = validated_data.pop("images", [])
-        comment = Comment.objects.create(**validated_data)
+        comment = Comment.objects.create(article=article, **validated_data)
         for image_data in images_data:
             CommentImage.objects.create(comment=comment, **image_data)
         return comment
-
-    def update(self, instance, validated_data):
-        images_data = validated_data.pop("images", [])
-        instance.content = validated_data.get("content", instance.content)
-        instance.save()
-
-        # 이미지 업데이트
-        instance.images.all().delete()  # 기존 이미지를 삭제하고
-        for image_data in images_data:
-            CommentImage.objects.create(comment=instance, **image_data)
-
-        return instance
 
 
 # 댓글 목록 조회 시리얼라이저
 class CommentListSerializer(serializers.ModelSerializer):
     images = CommentImageSerializer(many=True, read_only=True)
-    user = serializers.StringRelatedField()  # 유저를 문자열로 표현
+    user_nickname = serializers.CharField(source="user.nickname", read_only=True)
     helpful_count = serializers.IntegerField(read_only=True)
     not_helpful_count = serializers.IntegerField(read_only=True)
 
@@ -72,6 +59,7 @@ class CommentListSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "user",
+            "user_nickname",
             "content",
             "is_selected",
             "helpful_count",
@@ -83,6 +71,7 @@ class CommentListSerializer(serializers.ModelSerializer):
         read_only_fields = [
             "id",
             "user",
+            "user_nickname",
             "is_selected",
             "helpful_count",
             "not_helpful_count",
@@ -94,7 +83,7 @@ class CommentListSerializer(serializers.ModelSerializer):
 # 특정 댓글 조회 시리얼라이저
 class CommentDetailSerializer(serializers.ModelSerializer):
     images = CommentImageSerializer(many=True, read_only=True)
-    user = serializers.StringRelatedField()  # 유저를 문자열로 표현
+    user_nickname = serializers.CharField(source="user.nickname", read_only=True)
     helpful_count = serializers.IntegerField(read_only=True)
     not_helpful_count = serializers.IntegerField(read_only=True)
 
@@ -103,6 +92,7 @@ class CommentDetailSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "user",
+            "user_nickname",
             "content",
             "is_selected",
             "helpful_count",
@@ -114,6 +104,7 @@ class CommentDetailSerializer(serializers.ModelSerializer):
         read_only_fields = [
             "id",
             "user",
+            "user_nickname",
             "is_selected",
             "helpful_count",
             "not_helpful_count",
