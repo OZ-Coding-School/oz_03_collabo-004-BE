@@ -110,10 +110,11 @@ class UserTokenRefreshView(generics.GenericAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
+        logger.info("POST /api/auth/token/refresh")
         refresh_token = request.COOKIES.get("refresh")
 
         if not refresh_token:
-            HunsooKingAuthClass.log_error("Refresh token not found in cookies")
+            logger.error("/api/auth/token/refresh: Refresh token not found in cookies")
             return Response(
                 {"detail": "Refresh token not found in cookies"},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -127,7 +128,7 @@ class UserTokenRefreshView(generics.GenericAPIView):
                 refresh_token=serializer.validated_data["refresh_token"]
             )
         except (InvalidToken, TokenError) as e:
-            HunsooKingAuthClass.log_error(f"Token refresh error: {e}")
+            logger.error(f"/api/auth/token/refresh: {e}")
             return Response(
                 data={"error occurs": "UserTokenRefreshView", "detail": str(e)},
                 status=status.HTTP_401_UNAUTHORIZED,
@@ -140,13 +141,14 @@ class UserTokenRefreshView(generics.GenericAPIView):
             HunsooKingAuthClass.set_cookie_attributes(
                 response=response, key="access", token=access_token
             )
-            HunsooKingAuthClass.log_info("Token refreshed successfully")
         except ValueError:
-            HunsooKingAuthClass.log_error("Failed to set access token cookie")
+            logger.error("/api/auth/token/refresh: Failed to set access token cookie")
             return Response(
                 {"error occurs": "UserTokenRefreshView"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+        logger.info("/api/auth/token/refresh: Token refreshed successfully")
         return response
 
 
