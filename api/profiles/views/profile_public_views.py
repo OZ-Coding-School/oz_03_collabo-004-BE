@@ -1,4 +1,6 @@
+from comments.models import Comment
 from django.contrib.auth import get_user_model
+from django.db.models import Count
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -16,8 +18,9 @@ class PublicUserProfileView(APIView):
 
     def get(self, request, username):
         try:
-            profile = Profile.objects.get(user__username=username)
-        except Profile.DoesNotExist:
+            user = User.objects.get(username=username)
+            profile, created = Profile.objects.get_or_create(user=user)
+        except User.DoesNotExist:
             return Response(
                 {"detail": "유저를 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND
             )
@@ -31,10 +34,20 @@ class PublicUserProfileView(APIView):
                 "nickname",
                 "selected_tags",
                 "hunsoo_level",
+                "selected_comment_count",
             ],
         )
 
         # response_data = serializer.data
         # response_data["nickname"] = profile.user.nickname
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        # 채택된 댓글 수 계산
+        selected_comment_count = Comment.objects.filter(
+            user=profile.user, is_selected=True
+        ).count()
+
+        # 응답 데이터 구성
+        response_data = serializer.data
+        response_data["selected_comment_count"] = selected_comment_count
+
+        return Response(response_data, status=status.HTTP_200_OK)

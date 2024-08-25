@@ -41,13 +41,11 @@ ALLOWED_HOSTS = [
     "api.hunsuking.yoyobar.xyz",
     "52.78.179.207",
     "172.31.6.31",
-    "43.202.248.50",
     "hunsooking-ec2-alb-113517241.ap-northeast-2.elb.amazonaws.com",
 ]
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost",
-    "http://43.202.248.50",
     "http://127.0.0.1:5173",
     "http://localhost:5173",
     "https://hunsuking.yoyobar.xyz",
@@ -111,6 +109,12 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
 }
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost",
+    "http://127.0.0.1:5173",
+    "https://hunsuking.yoyobar.xyz",
+]
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",

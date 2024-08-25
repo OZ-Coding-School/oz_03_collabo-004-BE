@@ -13,7 +13,6 @@ class Article(TimeStampModel):
     view_count = models.IntegerField(default=0)
     likes = models.ManyToManyField(User, related_name="liked_articles", blank=True)
     tags = models.ManyToManyField(Tag, blank=True)
-    #hunsoo_count = models.IntegerField(default=0)
 
     def __str__(self):
         return self.title
