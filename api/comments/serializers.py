@@ -1,3 +1,4 @@
+from articles.models import Article
 from rest_framework import serializers
 
 from .models import Comment, CommentImage, CommentReaction
@@ -13,6 +14,9 @@ class CommentImageSerializer(serializers.ModelSerializer):
 # 댓글 작성 및 수정 시리얼라이저
 class CommentSerializer(serializers.ModelSerializer):
     images = CommentImageSerializer(many=True, required=False)
+    article = serializers.PrimaryKeyRelatedField(
+        queryset=Article.objects.all(), write_only=True
+    )
 
     class Meta:
         model = Comment
@@ -36,6 +40,7 @@ class CommentSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
+        article = self.context["view"].kwargs["article_id"]
         images_data = validated_data.pop("images", [])
         comment = Comment.objects.create(**validated_data)
         for image_data in images_data:

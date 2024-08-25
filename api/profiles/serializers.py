@@ -21,7 +21,7 @@ class ProfileSerializer(ModelSerializer):
         ]
 
     def validate_hunsoo_level(self, value):
-        if value < 1 or value > 10:  # 훈수 레벨의 범위를 1에서 10으로 제한
+        if value < 1 or value > 20:  # 훈수 레벨의 범위를 1에서 20으로 제한
             raise serializers.ValidationError("Invalid hunsoo level")
         return value
 
