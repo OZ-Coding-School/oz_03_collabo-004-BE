@@ -1,3 +1,4 @@
+from django.contrib.auth import authenticate
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
@@ -35,6 +36,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             password=validated_data["password"],
             nickname=validated_data["nickname"],
         )
+        user.social_platform = "general"
         return user
 
 
@@ -48,6 +50,10 @@ class UserLoginSerializer(serializers.Serializer):
 
         if not username or not password:
             raise serializers.ValidationError("아이디와 비밀번호가 필요합니다.")
+        # 사용자 인증 확인
+        user = authenticate(username=username, password=password)
+        if not user:
+            raise serializers.ValidationError("잘못된 아이디 또는 비밀번호입니다.")
 
         return data
 

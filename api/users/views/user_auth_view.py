@@ -17,7 +17,7 @@ from users.serializers import (
     UserRegisterSerializer,
     UserTokenRefreshSerializer,
 )
-from users.utils import HunsooKingAuthClass
+from users.utils import GeneralAuthClass, HunsooKingAuthClass
 
 User = get_user_model()
 
@@ -33,7 +33,7 @@ class UserRegisterView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
-        jwt_tokens = HunsooKingAuthClass.set_auth_tokens_for_user(user)
+        jwt_tokens = GeneralAuthClass.set_auth_tokens_for_user(user)
 
         response = Response(
             {
@@ -47,7 +47,7 @@ class UserRegisterView(generics.CreateAPIView):
             status=status.HTTP_201_CREATED,
         )
 
-        response = HunsooKingAuthClass().set_jwt_auth_cookie(response, jwt_tokens)
+        response = GeneralAuthClass().set_jwt_auth_cookie(response, jwt_tokens)
 
         logger.info(f"User {user.email} registered successfully")
         return response
@@ -64,7 +64,7 @@ class UserLoginView(APIView):
         )
 
         if user is not None:
-            jwt_tokens = HunsooKingAuthClass.set_auth_tokens_for_user(user)
+            jwt_tokens = GeneralAuthClass.set_auth_tokens_for_user(user)
 
             response_data = {
                 "token": jwt_tokens["access"],
@@ -74,7 +74,7 @@ class UserLoginView(APIView):
 
             response = Response(response_data, status=status.HTTP_200_OK)
 
-            response = HunsooKingAuthClass().set_jwt_auth_cookie(response, jwt_tokens)
+            response = GeneralAuthClass().set_jwt_auth_cookie(response, jwt_tokens)
 
             logger.info(f"User {user.email} logged in successfully")
             return response
@@ -148,6 +148,7 @@ class UserTokenRefreshView(generics.GenericAPIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
         return response
+
 
 class UserLogoutView(generics.GenericAPIView):
     serializer_class = UserLogoutSerializer
