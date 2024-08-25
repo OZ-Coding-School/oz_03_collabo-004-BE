@@ -103,6 +103,7 @@ class UserProfileDetailTest(APITestCase):
 
         # 테스트할 URL
         self.url = "/api/account/profile/"
+        self.profile_update_url = "/api/account/profile/update/"
 
     def test_get_user_profile(self):
         response = self.client.get(self.url)
@@ -112,13 +113,40 @@ class UserProfileDetailTest(APITestCase):
         self.assertEqual(response.data["hunsoo_level"], 1)
         self.assertEqual(response.data["bio"], "This is a test bio.")
 
-    def test_update_user_profile(self):
+    def test_update_user_profile_bio(self):
+        # 프로필 바이오 수정 테스트
         data = {"bio": "Updated bio"}
-        response = self.client.put(self.url, data, format="json")
+        response = self.client.put(self.profile_update_url, data, format="json")
 
         self.profile.refresh_from_db()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(self.profile.bio, "Updated bio")
+
+    def test_update_user_profile_nickname(self):
+        # 닉네임 수정 테스트
+        data = {"nickname": "NewNickname"}
+        response = self.client.put(self.profile_update_url, data, format="json")
+
+        self.profile.refresh_from_db()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.profile.user.nickname, "NewNickname")
+
+    # def test_update_user_profile_tags(self):
+    #     # 선택된 태그 수정 테스트
+    #     new_tags = [1, 3, 4]  # 테스트용 태그 ID들
+    #     data = {"selected_tags": new_tags}
+    #     response = self.client.put(self.profile_update_url, data, format="json")
+
+    #     self.profile.refresh_from_db()
+
+    #     if response.status_code != status.HTTP_200_OK:
+    #         print(response.data)
+
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #     self.assertEqual(
+    #         list(self.profile.selected_tags.values_list("id", flat=True)),
+    #         new_tags,
+    #     )
 
     def test_unauthenticated_user_profile_access(self):
         self.client.cookies.clear()
