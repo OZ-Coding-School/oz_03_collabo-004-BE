@@ -1,3 +1,4 @@
+from comments.serializers import CommentListSerializer
 from django.core.files.storage import default_storage
 from rest_framework import serializers
 from tags.models import Tag
@@ -24,6 +25,7 @@ class ArticleListSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     user = serializers.SerializerMethodField()
     thumbnail_image = serializers.SerializerMethodField()
+    comments_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Article
@@ -34,11 +36,12 @@ class ArticleListSerializer(serializers.ModelSerializer):
             "user",
             "tag_ids",
             "tags",
-            "created_at",
             "view_count",
             "like_count",
+            "comments_count",
+            "created_at",
+            "updated_at",
             "thumbnail_image",
-            # "hoonsu_count",
         ]
 
     def get_user(self, obj):
@@ -50,8 +53,11 @@ class ArticleListSerializer(serializers.ModelSerializer):
             return thumbnail_image.image_url
         return None  # 썸네일 이미지가 없는경우(이미지가 아예없는 게시글)
 
+    def get_comments_count(self, obj):
+        return obj.comments.count()  # 댓글 수 반환
 
-# 유저의 게시글 작성과 조회를 위한 시리얼라이저
+
+# 유저의 게시글 작성과 수정을 위한 시리얼라이저
 class ArticleSerializer(serializers.ModelSerializer):
     article_id = serializers.ReadOnlyField(source="id")
     images = ArticleImageSerializer(many=True, required=False)
@@ -60,6 +66,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     )
     tags = TagSerializer(many=True, read_only=True)
     user = serializers.SerializerMethodField()
+    comments_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Article
@@ -74,13 +81,16 @@ class ArticleSerializer(serializers.ModelSerializer):
             "is_closed",
             "view_count",
             "like_count",
+            "comments_count",
             "created_at",
             "updated_at",
-            # "hoonsu_count",
         ]
 
     def get_user(self, obj):
         return {"user_id": obj.user.id, "nickname": obj.user.nickname}
+
+    def get_comments_count(self, obj):
+        return obj.comments.count()
 
     def create(self, validated_data):
         tags = validated_data.pop("tag_ids", [])
@@ -127,3 +137,48 @@ class ArticleSerializer(serializers.ModelSerializer):
                 )
 
         return instance
+
+
+# 게시글 상세 조회를 위한 시리얼라이저
+class ArticleDetailSerializer(serializers.ModelSerializer):
+    article_id = serializers.ReadOnlyField(source="id")
+    thumbnail_image = serializers.SerializerMethodField()
+    images = ArticleImageSerializer(many=True, required=False)
+    tag_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(), many=True, write_only=True
+    )
+    tags = TagSerializer(many=True, read_only=True)
+    user = serializers.SerializerMethodField()
+    comments = CommentListSerializer(many=True, read_only=True)  # 댓글 목록을 포함
+    comments_count = serializers.IntegerField(
+        source="comments.count", read_only=True
+    )  # 댓글 수
+
+    class Meta:
+        model = Article
+        fields = [
+            "article_id",
+            "user",
+            "thumbnail_image",
+            "title",
+            "content",
+            "images",
+            "tag_ids",
+            "tags",
+            "is_closed",
+            "view_count",
+            "like_count",
+            "comments_count",
+            "created_at",
+            "updated_at",
+            "comments",
+        ]
+
+    def get_user(self, obj):
+        return {"user_id": obj.user.id, "nickname": obj.user.nickname}
+
+    def get_thumbnail_image(self, obj):
+        thumbnail_image = obj.images.filter(is_thumbnail=True).first()
+        if thumbnail_image:
+            return thumbnail_image.image_url
+        return None  # 썸네일 이미지가 없는경우(이미지가 아예없는 게시글)
