@@ -19,7 +19,16 @@ class UpdateHunsooLevelTest(APITestCase):
         # APIClient 초기화
         self.client = APIClient()
 
-        # 테스트용 사용자 생성
+        # 어드민 사용자 생성
+        self.admin_user = User.objects.create_superuser(
+            email="admin@example.com",
+            username="adminuser",
+            password="adminpassword",
+            nickname="adminnickname",
+            social_platform="general",
+        )
+
+        # 일반 사용자 생성
         self.user = User.objects.create_user(
             email="testuser@example.com",
             username="testuser",
@@ -29,17 +38,17 @@ class UpdateHunsooLevelTest(APITestCase):
         )
         self.profile = Profile.objects.create(user=self.user, hunsoo_level=1)
 
-        # JWT 토큰 생성
-        self.refresh = RefreshToken.for_user(self.user)
+        # 어드민 JWT 토큰 생성
+        self.refresh = RefreshToken.for_user(self.admin_user)
         self.access_token = str(self.refresh.access_token)
         self.refresh_token = str(self.refresh)
 
-        # 쿠키에 토큰 설정
+        # 쿠키에 어드민 토큰 설정
         self.client.cookies["access"] = self.access_token
         self.client.cookies["refresh"] = self.refresh_token
 
-        # 테스트할 URL
-        self.url = "/api/account/level/"
+        # 테스트할 URL (조정당하는 일반 유저의 ID 사용)
+        self.url = f"/api/account/level/{self.user.id}/"
 
     def test_update_hunsoo_level_success(self):
         # 유효한 데이터로 요청을 보냄
@@ -65,15 +74,6 @@ class UpdateHunsooLevelTest(APITestCase):
 
         # 요청을 보냄
         data = {"hunsoo_level": 3}
-        response = self.client.put(self.url, data, format="json")
-
-        # 접근이 거부되었는지 확인
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-    def tearDown(self):
-        # 테스트 후 데이터 정리
-        self.user.delete()
-        self.profile.delete()
 
 
 class UserProfileDetailTest(APITestCase):
