@@ -2,9 +2,10 @@ from articles.models import Article
 from articles.serializers import ArticleListSerializer
 from comments.models import Comment
 from comments.serializers import CommentListSerializer
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.exceptions import NotFound
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from tags.serializers import TagSerializer
@@ -62,23 +63,51 @@ class UserProfileUpdateView(APIView):
 
 # 유저 레벨 수정
 class UserLevelUpdate(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminUser]
 
     def put(self, request, *args, **kwargs):
-        user = request.user
-        try:
-            profile = Profile.objects.get(user=user)
-        except Profile.DoesNotExist:
+        user_id = kwargs.get("id")  # URL에서 유저 ID를 가져옴
+        profile = get_object_or_404(
+            Profile, user__id=user_id
+        )  # 해당 유저의 프로필 조회
+
+        new_level = request.data.get(
+            "hunsoo_level"
+        )  # 클라이언트로부터 레벨 정보 받아옴
+
+        if new_level is None:
             return Response(
-                {"error": "Profile not found"}, status=status.HTTP_404_NOT_FOUND
+                {"error": "훈수레벨값을 입력해주세요."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
-        # profile serializer의 훈수레벨 읽기 전용 필드를 해제하여, 특정 상황에서만 수정 가능하게 함
-        serializer = ProfileSerializer(profile, data=request.data, partial=True)
-        serializer.fields["hunsoo_level"].read_only = False
+
+        try:
+            new_level = int(new_level)  # 레벨이 정수인지 확인
+        except ValueError:
+            return Response(
+                {"error": "정수값을 입력해야합니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # 훈수레벨이 1에서 20 사이의 정수인지 검증
+        if new_level < 1 or new_level > 20:
+            return Response(
+                {"error": "1-20사이의 값을 입력해야합니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # profile serializer의 훈수레벨 읽기 전용 필드를 해제하여, 수정 가능하게 함
+        serializer = ProfileSerializer(
+            profile, data={"hunsoo_level": new_level}, partial=True
+        )
+        serializer.fields["hunsoo_level"].read_only = False  # 읽기 전용 해제
 
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(
+                {"hoonsu_level": serializer.data["hunsoo_level"]},
+                status=status.HTTP_200_OK,
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

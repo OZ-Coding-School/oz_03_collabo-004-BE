@@ -11,7 +11,7 @@ from .views.profile_public_views import PublicUserProfileView
 urlpatterns = [
     path("profile/", UserProfileDetailView.as_view(), name="profile-detail"),
     path("profile/update/", UserProfileUpdateView.as_view(), name="profile-update"),
-    path("level/", UserLevelUpdate.as_view(), name="update-hunsoo-level"),
+    path("level/<int:id>/", UserLevelUpdate.as_view(), name="update-hunsoo-level"),
     path(
         "profile/image/", UpdateProfileImageView.as_view(), name="profile-image-update"
     ),
