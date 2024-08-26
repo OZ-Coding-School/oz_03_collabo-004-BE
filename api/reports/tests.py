@@ -4,6 +4,7 @@ from django.urls import reverse
 from reports.models import ArticleReport
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
+from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
 
@@ -22,6 +23,15 @@ class ArticleReportCreateViewTest(APITestCase):
             nickname="reporter",
             social_platform="general",
         )
+
+        # JWT 토큰 생성
+        self.refresh = RefreshToken.for_user(self.reporter)
+        self.access_token = str(self.refresh.access_token)
+        self.refresh_token = str(self.refresh)
+
+        # 쿠키에 토큰 설정
+        self.client.cookies["access"] = self.access_token
+        self.client.cookies["refresh"] = self.refresh_token
 
         # 신고당할 게시글 작성자 생성
         self.reported_user = User.objects.create_user(
@@ -51,7 +61,6 @@ class ArticleReportCreateViewTest(APITestCase):
         data = {
             "report_detail": "spam or inappropriate content",
         }
-        self.client.force_authenticate(user=self.reporter)
         response = self.client.post(self.url, data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -66,7 +75,6 @@ class ArticleReportCreateViewTest(APITestCase):
     def test_report_article_failure_missing_field(self):
         # 누락된 필드로 POST 요청
         data = {}
-        self.client.force_authenticate(user=self.reporter)
         response = self.client.post(self.url, data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -78,7 +86,6 @@ class ArticleReportCreateViewTest(APITestCase):
         data = {
             "report_detail": "spam or inappropriate content",
         }
-        self.client.force_authenticate(user=self.reporter)
         response = self.client.post(url, data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -86,6 +93,7 @@ class ArticleReportCreateViewTest(APITestCase):
 
     def test_unauthenticated_user(self):
         # 인증되지 않은 사용자로 POST 요청
+        self.client.cookies.clear()
         data = {
             "report_detail": "spam or inappropriate content",
         }
