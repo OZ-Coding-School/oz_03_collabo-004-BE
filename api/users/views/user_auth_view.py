@@ -4,6 +4,7 @@ from common.logger import logger
 from django.contrib.auth import authenticate, get_user_model
 from django.db import transaction
 from rest_framework import generics, status
+from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -54,6 +55,9 @@ class UserRegisterView(generics.CreateAPIView):
 
 
 class UserLoginView(APIView):
+    authentication_classes = []  # 일반 로그인에서는 별도의 인증 클래스 사용 안 함
+    permission_classes = [AllowAny]
+
     def post(self, request, *args, **kwargs):
         logger.info("User login attempt")
         serializer = UserLoginSerializer(data=request.data)
@@ -73,7 +77,6 @@ class UserLoginView(APIView):
             }
 
             response = Response(response_data, status=status.HTTP_200_OK)
-
             response = GeneralAuthClass().set_jwt_auth_cookie(response, jwt_tokens)
 
             logger.info(f"User {user.email} logged in successfully")
