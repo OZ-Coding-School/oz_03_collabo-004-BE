@@ -10,11 +10,15 @@ from .views.comment_reaction_views import CommentReactionToggleView, CommentSele
 
 urlpatterns = [
     path(
-        "create/articles/<int:article_id>", CommentCreateView.as_view(), name="comment-create"
+        "create/articles/<int:article_id>/",
+        CommentCreateView.as_view(),
+        name="comment-create",
     ),
-    path("edit/<int:pk>", CommentUpdateView.as_view(), name="comment-update"),
+    path("edit/<int:pk>/", CommentUpdateView.as_view(), name="comment-update"),
     path(
-        "list/articles/<int:article_id>", CommentListView.as_view(), name="comment-list"
+        "list/articles/<int:article_id>/",
+        CommentListView.as_view(),
+        name="comment-list",
     ),
     path("<int:pk>/", CommentDetailView.as_view(), name="comment-detail"),
     path(
