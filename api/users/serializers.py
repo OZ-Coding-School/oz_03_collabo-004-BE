@@ -1,10 +1,12 @@
 from django.contrib.auth import authenticate
 from django.db import transaction
 from django.shortcuts import get_object_or_404
+from profiles.models import Profile
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
+from tags.models import Tag
 from users.models import User
 
 
@@ -133,3 +135,28 @@ class UserDeleteSerializer(serializers.Serializer):
         attrs["refresh_token"] = token
         attrs["user"] = user
         return attrs
+
+
+class UserSerializer(serializers.ModelSerializer):
+    selected_tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(), many=True, source="profile.selected_tags"
+    )
+    hunsoo_level = serializers.IntegerField(source="profile.hunsoo_level")
+    warning_count = serializers.IntegerField(source="profile.warning_count")
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "username",
+            "email",
+            "social_platform",
+            "is_superuser",
+            "is_active",
+            "last_login",
+            "created_at",
+            "updated_at",
+            "hunsoo_level",
+            "warning_count",
+            "selected_tags",
+        ]

@@ -1,6 +1,6 @@
 from django.urls import path
-from users.views.google_auth_view import UserGoogleTokenReceiver
-from users.views.user_auth_view import (
+from api.users.views.google_auth_views import UserGoogleTokenReceiver
+from api.users.views.user_auth_views import (
     UserDeleteView,
     UserLoginView,
     UserLogoutView,
