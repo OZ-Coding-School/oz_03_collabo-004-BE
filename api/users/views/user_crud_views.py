@@ -95,16 +95,14 @@ class AdminArticleDetailView(RetrieveDestroyAPIView):
     serializer_class = ArticleDetailSerializer
     permission_classes = [IsAdminUser]
     queryset = Article.objects.all()
+    lookup_field = "id"
 
-    def get(self, request, *args, **kwargs):
-        article_id = kwargs.get("id")
-        article = get_object_or_404(Article, id=article_id)
-        serializer = self.get_serializer(article)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_object(self):
+        article_id = self.kwargs.get("id")
+        return get_object_or_404(Article, id=article_id)
 
     def delete(self, request, *args, **kwargs):
-        article_id = kwargs.get("id")
-        article = get_object_or_404(Article, id=article_id)
+        article = self.get_object()
         article.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

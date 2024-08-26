@@ -11,28 +11,35 @@ from ..views.user_crud_views import (
 )
 
 urlpatterns = [
-    # 유저 권한 변경
     path(
         "state/<int:id>/",
         SwitchUserAuthorizationView.as_view(),
         name="change-user-role",
     ),
-    path("users/", UserListForAdmin.as_view(), name="user-list"),
+    path("users/", UserListForAdmin.as_view(), name="user-list-admin"),
     path(
         "user/<int:id>/",
         UserRetrieveUpdateDeleteAdminView.as_view(),
-        name="user-detail",
+        name="user-detail-admin",
     ),
-    path("article/<int:id>/", AdminArticleDetailView.as_view(), name="article-detail"),
-    path("comment/<int:id>/", AdminCommentDetailView.as_view(), name="comment-detail"),
+    path(
+        "article/<int:id>/",
+        AdminArticleDetailView.as_view(),
+        name="article-detail-admin",
+    ),
+    path(
+        "comment/<int:id>/",
+        AdminCommentDetailView.as_view(),
+        name="comment-detail-admin",
+    ),
     path(
         "user/<int:id>/articles-comments/",
         UserArticlesCommentsView.as_view(),
-        name="user-articles-comments",
+        name="user-articles-comments-admin",
     ),
     path(
         "user/<int:id>/articles-comments/delete/",
         UserArticleCommentDeleteView.as_view(),
-        name="user-delete-articles-comments",
+        name="user-delete-articles-comments-admin",
     ),
 ]
