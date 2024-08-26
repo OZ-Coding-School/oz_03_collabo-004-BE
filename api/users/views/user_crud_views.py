@@ -1,3 +1,7 @@
+from articles.models import Article
+from articles.serializers import ArticleDetailSerializer
+from comments.models import Comment
+from comments.serializers import CommentDetailSerializer
 from common.logger import logger
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -16,16 +20,13 @@ from users.models import User
 from users.serializers import EmptySerializer, UserSerializer
 from users.utils import IsAdminUser
 
-from ..models import Article, Comment
-from ..serializers import ArticleDetailSerializer, CommentDetailSerializer
-
 
 class SwitchUserAuthorizationView(UpdateAPIView):
     serializer_class = EmptySerializer
     permission_classes = [IsAdminUser]  # 슈퍼유저만 접근 가능
 
     def put(self, request, *args, **kwargs):
-        user_id = kwargs.get("id") 
+        user_id = kwargs.get("id")
         user = get_object_or_404(User, id=user_id)
 
         is_superuser = request.data.get("is_superuser")

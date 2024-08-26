@@ -1,6 +1,6 @@
 from django.urls import path
 
-from api.users.views.user_crud_views import (
+from ..views.user_crud_views import (
     AdminArticleDetailView,
     AdminCommentDetailView,
     SwitchUserAuthorizationView,
