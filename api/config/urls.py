@@ -26,5 +26,6 @@ urlpatterns = [
     path("api/account/", include("profiles.urls")),
     path("api/tag/", include("tags.urls")),
     path("api/article/", include("articles.urls")),
+    path("api/ai_hunsu/", include("ai_hunsoos.urls")),
     path("api/comment/", include("comments.urls")),
 ]
