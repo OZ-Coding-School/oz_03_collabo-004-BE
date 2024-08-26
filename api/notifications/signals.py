@@ -1,0 +1,64 @@
+from ai_hunsoos.models import AiHunsoo
+from articles.models import Article
+from comments.models import Comment
+from django.contrib.contenttypes.models import ContentType
+from django.db.models.signals import m2m_changed, post_save
+from django.dispatch import receiver
+from notifications.models import Notification
+
+
+# 댓글이 작성될 때 알림
+@receiver(post_save, sender=Comment)
+def notify_user_on_comment(sender, instance, created, **kwargs):
+    if created:
+        Notification.objects.create(
+            recipient=instance.article.user,
+            actor=instance.user,
+            verb="comment",
+            content_type=ContentType.objects.get_for_model(instance),
+            object_id=instance.id,
+        )
+
+
+# 게시글에 좋아요가 추가될 때 알림
+@receiver(m2m_changed, sender=Article.likes.through)
+def notify_user_on_like(sender, instance, action, **kwargs):
+    if action == "post_add":
+        for (
+            user
+        ) in (
+            instance.likes.all()
+        ):  # 여러 명의 사용자가 좋아요를 추가할 수 있으므로 반복문 사용
+            Notification.objects.create(
+                recipient=instance.user,
+                actor=user,
+                verb="like",
+                content_type=ContentType.objects.get_for_model(instance),
+                object_id=instance.id,
+            )
+
+
+# 댓글이 채택될 때 알림
+@receiver(post_save, sender=Comment)
+def notify_user_on_comment_selection(sender, instance, **kwargs):
+    if instance.is_selected:
+        Notification.objects.create(
+            recipient=instance.user,
+            actor=instance.article.user,
+            verb="select",
+            content_type=ContentType.objects.get_for_model(instance),
+            object_id=instance.id,
+        )
+
+
+# AI 댓글이 생성될 때 알림
+@receiver(post_save, sender=AiHunsoo)
+def notify_user_on_ai_hunsoo(sender, instance, created, **kwargs):
+    if created:
+        Notification.objects.create(
+            recipient=instance.article.user,
+            actor=None,  # AI는 사용자 대신 자동으로 생성되므로 actor가 없을 수 있음
+            verb="ai_response",
+            content_type=ContentType.objects.get_for_model(instance),
+            object_id=instance.id,
+        )
