@@ -22,11 +22,13 @@ urlpatterns = [
     ),
     path("<int:pk>/", CommentDetailView.as_view(), name="comment-detail"),
     path(
-        "<int:comment_id>/react/",
+        "<int:pk>/react/",
         CommentReactionToggleView.as_view(),
         name="comment-reaction-toggle",
     ),
     path(
-        "<int:comment_id>/select/", CommentSelectView.as_view(), name="comment-select"
+        "articles/<int:article_id>/comments/<int:pk>/select/",
+        CommentSelectView.as_view(),
+        name="comment-select",
     ),
 ]

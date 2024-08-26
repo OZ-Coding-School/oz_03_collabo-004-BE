@@ -35,8 +35,9 @@ class CommentSelectView(generics.UpdateAPIView):
             raise PermissionDenied("이미 다른 댓글이 채택되었습니다.")
 
         # 댓글을 채택하고 게시글을 마감
-        serializer.save(is_selected=True)
+        comment.is_selected = True
         comment.article.is_closed = True
+        comment.save()
         comment.article.save()
 
         return Response({"message": "댓글이 채택되었고, 게시글이 마감되었습니다."})
