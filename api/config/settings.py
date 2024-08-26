@@ -96,6 +96,7 @@ INSTALLED_APPS = [
     "reports.apps.ReportsConfig",
     "tags.apps.TagsConfig",
     "users.apps.UsersConfig",
+    "notifications.apps.NotificationsConfig",
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
