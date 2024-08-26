@@ -57,7 +57,7 @@ class ArticleReportCreateViewTest(APITestCase):
         )
 
     def test_report_article_success(self):
-        # 올바른 데이터로 POST 요청
+        # 올바른 데이터로 신고 요청
         data = {
             "report_detail": "spam or inappropriate content",
         }
@@ -73,7 +73,7 @@ class ArticleReportCreateViewTest(APITestCase):
         self.assertEqual(ArticleReport.objects.get().reported_user, self.reported_user)
 
     def test_report_article_failure_missing_field(self):
-        # 누락된 필드로 POST 요청
+        # 누락된 필드로 신고 요청
         data = {}
         response = self.client.post(self.url, data, format="json")
 
@@ -92,7 +92,7 @@ class ArticleReportCreateViewTest(APITestCase):
         self.assertEqual(response.data["detail"], "해당 게시글을 찾을 수 없습니다.")
 
     def test_unauthenticated_user(self):
-        # 인증되지 않은 사용자로 POST 요청
+        # 인증되지 않은 사용자로 신고 요청
         self.client.cookies.clear()
         data = {
             "report_detail": "spam or inappropriate content",
