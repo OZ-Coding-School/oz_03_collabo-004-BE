@@ -40,7 +40,13 @@ class CommentSelectView(generics.UpdateAPIView):
         comment.save()
         comment.article.save()
 
-        return Response({"message": "댓글이 채택되었고, 게시글이 마감되었습니다."})
+        serializer.instance = comment
+        return Response(
+            {
+                "message": "댓글이 채택되었고, 게시글이 마감되었습니다.",
+                "data": serializer.data,
+            }
+        )
 
 
 class CommentReactionToggleView(APIView):
