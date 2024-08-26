@@ -29,4 +29,5 @@ urlpatterns = [
     path("api/ai_hunsu/", include("ai_hunsoos.urls")),
     path("api/comment/", include("comments.urls")),
     path("api/notification/", include("notifications.urls")),
+    path("api/report/", include("reports.urls")),
 ]
