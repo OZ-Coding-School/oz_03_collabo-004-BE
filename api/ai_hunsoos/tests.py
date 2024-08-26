@@ -20,7 +20,7 @@ class AiHunsooDetailViewTest(TestCase):
 
         # Article 객체 생성 시, user 필드에 self.user 할당
         self.article = Article.objects.create(
-            user=self.user,  # 여기에서 user를 설정합니다.
+            user=self.user,
             title="Test Article",
             content="This is a test article.",
             is_closed=False,
