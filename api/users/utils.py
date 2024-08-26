@@ -106,7 +106,7 @@ class HunsooKingAuthClass:
             value=token,
             httponly=True,
             samesite="Lax",
-            secure=True,
+            secure=False,
             expires=expires_at,
             domain=os.getenv("COOKIE_DOMAIN"),
             path="/",
@@ -159,3 +159,63 @@ class IsAdminUser(BasePermission):
         return bool(
             request.user and request.user.is_superuser and request.user.is_active
         )
+
+
+class GeneralAuthClass:
+    """
+    일반 로그인 전용 JWT 생성 및 쿠키 설정 클래스
+    """
+
+    def __init__(self):
+        self._seoul_timezone = pytz.timezone("Asia/Seoul")
+
+        self._access_expiration = (
+            timezone.now() + settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"]
+        ).astimezone(self._seoul_timezone)
+
+        self._refresh_expiration = (
+            timezone.now() + settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"]
+        ).astimezone(self._seoul_timezone)
+
+    def set_jwt_auth_cookie(self, response, jwt_tokens):
+        response = self.set_cookie_attributes(
+            response=response,
+            key="access",
+            token=jwt_tokens["access"],
+        )
+        response = self.set_cookie_attributes(
+            response=response,
+            key="refresh",
+            token=jwt_tokens["refresh"],
+        )
+        return response
+
+    @staticmethod
+    def set_cookie_attributes(response, key, token):
+        if key == "access":
+            expires_at = GeneralAuthClass()._access_expiration
+        elif key == "refresh":
+            expires_at = GeneralAuthClass()._refresh_expiration
+        else:
+            raise ValueError("key should be 'access' or 'refresh'")
+
+        response.set_cookie(
+            key=key,
+            value=token,
+            httponly=True,
+            samesite="Lax",
+            secure=False,
+            expires=expires_at,
+            domain=os.getenv("COOKIE_DOMAIN"),
+            path="/",
+        )
+        return response
+
+    @staticmethod
+    def set_auth_tokens_for_user(user):
+        refresh = RefreshToken.for_user(user)
+        refresh["user_id"] = user.id
+        return {
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+        }

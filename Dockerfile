@@ -4,9 +4,18 @@ LABEL maintainer="hunsooking"
 ENV PYTHONUNBUFFERED 1
 ENV DISPLAY=:99
 
-WORKDIR /app
+# 설치에 필요한 패키지 설치
+RUN apk update && apk add --no-cache \
+    jpeg-dev \
+    zlib-dev \
+    libffi-dev \
+    build-base
 
-# Poetry 설치
+# 필요에 따라 추가적인 패키지 설치
+# RUN apk add --no-cache <additional-packages>
+
+# 설치된 패키지로 pip 설치
+WORKDIR /app
 RUN pip install poetry
 
 # pyproject.toml 및 poetry.lock 파일 복사
@@ -20,9 +29,6 @@ RUN poetry config virtualenvs.create false \
 COPY . .
 
 RUN chmod -R 777 /app
-
-# 필요한 시스템 패키지 설치 
-RUN apk add --update --no-cache jpeg-dev 
 
 # 사용자 추가 및 /app 디렉토리 소유권 변경
 RUN adduser \

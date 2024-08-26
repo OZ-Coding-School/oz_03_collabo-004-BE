@@ -4,6 +4,7 @@ from common.logger import logger
 from django.contrib.auth import authenticate, get_user_model
 from django.db import transaction
 from rest_framework import generics, status
+from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -17,7 +18,7 @@ from users.serializers import (
     UserRegisterSerializer,
     UserTokenRefreshSerializer,
 )
-from users.utils import HunsooKingAuthClass
+from users.utils import GeneralAuthClass, HunsooKingAuthClass
 
 User = get_user_model()
 
@@ -33,7 +34,7 @@ class UserRegisterView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
-        jwt_tokens = HunsooKingAuthClass.set_auth_tokens_for_user(user)
+        jwt_tokens = GeneralAuthClass.set_auth_tokens_for_user(user)
 
         response = Response(
             {
@@ -47,13 +48,16 @@ class UserRegisterView(generics.CreateAPIView):
             status=status.HTTP_201_CREATED,
         )
 
-        response = HunsooKingAuthClass().set_jwt_auth_cookie(response, jwt_tokens)
+        response = GeneralAuthClass().set_jwt_auth_cookie(response, jwt_tokens)
 
         logger.info(f"User {user.email} registered successfully")
         return response
 
 
 class UserLoginView(APIView):
+    authentication_classes = []  # 일반 로그인에서는 별도의 인증 클래스 사용 안 함
+    permission_classes = [AllowAny]
+
     def post(self, request, *args, **kwargs):
         logger.info("User login attempt")
         serializer = UserLoginSerializer(data=request.data)
@@ -64,7 +68,7 @@ class UserLoginView(APIView):
         )
 
         if user is not None:
-            jwt_tokens = HunsooKingAuthClass.set_auth_tokens_for_user(user)
+            jwt_tokens = GeneralAuthClass.set_auth_tokens_for_user(user)
 
             response_data = {
                 "token": jwt_tokens["access"],
@@ -73,8 +77,7 @@ class UserLoginView(APIView):
             }
 
             response = Response(response_data, status=status.HTTP_200_OK)
-
-            response = HunsooKingAuthClass().set_jwt_auth_cookie(response, jwt_tokens)
+            response = GeneralAuthClass().set_jwt_auth_cookie(response, jwt_tokens)
 
             logger.info(f"User {user.email} logged in successfully")
             return response
