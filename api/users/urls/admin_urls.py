@@ -3,10 +3,14 @@ from django.urls import path
 from ..views.user_crud_views import (
     AdminArticleDetailView,
     AdminCommentDetailView,
+    ArticleReportStatusUpdateView,
+    CommentReportStatusUpdateView,
+    ReportListView,
     SwitchUserAuthorizationView,
     UserArticleCommentDeleteView,
     UserArticlesCommentsView,
     UserListForAdmin,
+    UserReportStatusView,
     UserRetrieveUpdateDeleteAdminView,
 )
 
@@ -41,5 +45,21 @@ urlpatterns = [
         "user/<int:id>/articles-comments/delete/",
         UserArticleCommentDeleteView.as_view(),
         name="user-delete-articles-comments-admin",
+    ),
+    path(
+        "report/article/<int:pk>/",
+        ArticleReportStatusUpdateView.as_view(),
+        name="article-report-status-update",
+    ),
+    path(
+        "report/comment/<int:pk>/",
+        CommentReportStatusUpdateView.as_view(),
+        name="comment-report-status-update",
+    ),
+    path("report/status/", ReportListView.as_view(), name="report-list"),
+    path(
+        "user/<int:user_id>/reports/",
+        UserReportStatusView.as_view(),
+        name="user-report-status",
     ),
 ]

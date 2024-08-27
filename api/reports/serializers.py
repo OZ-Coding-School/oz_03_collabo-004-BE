@@ -27,3 +27,37 @@ class CommentReportSerializer(serializers.ModelSerializer):
             "report_detail",
             "status",
         ]
+
+
+class ArticleReportStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ArticleReport
+        fields = ["status"]
+
+
+class CommentReportStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ArticleReport
+        fields = ["status"]
+
+
+class ArticleReportAllSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ArticleReport
+        fields = "__all__"
+
+
+class CommentReportAllSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CommentReport
+        fields = "__all__"
+
+
+class UserReportStatusSerializer(serializers.Serializer):
+    article_reports = ArticleReportAllSerializer(many=True)
+    comment_reports = CommentReportAllSerializer(many=True)
+
+
+class ReportStatusSerializer(serializers.Serializer):
+    article_reports = ArticleReportAllSerializer(many=True)
+    comment_reports = CommentReportAllSerializer(many=True)

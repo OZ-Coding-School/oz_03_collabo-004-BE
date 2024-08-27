@@ -47,7 +47,7 @@ def generate_ai_response(question, answer):
 
     # OpenAI API
     client = OpenAI(
-        api_key=os.environ.get("api_key"),
+        api_key=os.environ.get("API_KEY"),
     )
 
     messages = [
