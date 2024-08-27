@@ -53,7 +53,7 @@ class CommentReactionToggleView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        comment_id = kwargs.get("comment_id")
+        comment_id = kwargs.get("pk")
         comment = get_object_or_404(Comment, id=comment_id)
         reaction_type = request.data.get(
             "reaction_type"

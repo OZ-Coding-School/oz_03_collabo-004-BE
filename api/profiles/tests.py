@@ -75,6 +75,10 @@ class UpdateHunsooLevelTest(APITestCase):
         # 요청을 보냄
         data = {"hunsoo_level": 3}
 
+    def tearDown(self):
+        self.user.delete()
+        self.admin_user.delete()
+
 
 class UserProfileDetailTest(APITestCase):
     def setUp(self):
@@ -90,6 +94,15 @@ class UserProfileDetailTest(APITestCase):
         )
         self.profile = Profile.objects.create(
             user=self.user, hunsoo_level=1, bio="This is a test bio."
+        )
+
+        # 닉네임 중복 테스트를 위해 추가 사용자 생성
+        self.user2 = User.objects.create_user(
+            email="duplicate@example.com",
+            username="duplicateuser",
+            password="testpassword",
+            nickname="duplicatenickname",
+            social_platform="general",
         )
 
         # JWT 토큰 생성
@@ -131,22 +144,13 @@ class UserProfileDetailTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(self.profile.user.nickname, "NewNickname")
 
-    # def test_update_user_profile_tags(self):
-    #     # 선택된 태그 수정 테스트
-    #     new_tags = [1, 3, 4]  # 테스트용 태그 ID들
-    #     data = {"selected_tags": new_tags}
-    #     response = self.client.put(self.profile_update_url, data, format="json")
+    def test_update_user_profile_nickname_with_duplicate(self):
+        # 닉네임 중복 수정 테스트
+        data = {"nickname": "duplicatenickname"}  # 이미 존재하는 닉네임 사용
+        response = self.client.put(self.profile_update_url, data, format="json")
 
-    #     self.profile.refresh_from_db()
-
-    #     if response.status_code != status.HTTP_200_OK:
-    #         print(response.data)
-
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     self.assertEqual(
-    #         list(self.profile.selected_tags.values_list("id", flat=True)),
-    #         new_tags,
-    #     )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("이미 사용 중인 닉네임입니다.", response.data["nickname"])
 
     def test_unauthenticated_user_profile_access(self):
         self.client.cookies.clear()
