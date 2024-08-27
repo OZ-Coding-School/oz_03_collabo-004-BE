@@ -75,6 +75,10 @@ class UpdateHunsooLevelTest(APITestCase):
         # 요청을 보냄
         data = {"hunsoo_level": 3}
 
+    def tearDown(self):
+        self.user.delete()
+        self.admin_user.delete()
+
 
 class UserProfileDetailTest(APITestCase):
     def setUp(self):

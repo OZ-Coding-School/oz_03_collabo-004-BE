@@ -119,6 +119,12 @@ class AdminUserTests(APITestCase):
         self.assertFalse(Article.objects.filter(user=self.user).exists())
         self.assertFalse(Comment.objects.filter(user=self.user).exists())
 
+    def tearDown(self):
+        self.user.delete()
+        self.admin_user.delete()
+        self.comment.delete()
+        self.article.delete()
+
 
 class UserStatusTest(APITestCase):
 
@@ -167,3 +173,7 @@ class UserStatusTest(APITestCase):
         # 관리자 유저는 1을 반환
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["status"], 1)
+
+    def tearDown(self):
+        self.user.delete()
+        self.admin_user.delete()

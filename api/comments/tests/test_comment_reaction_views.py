@@ -28,7 +28,7 @@ class CommentReactionTests(APITestCase):
 
         # 도움이 돼요/안돼요 토글 URL
         self.reaction_url = reverse(
-            "comment-reaction-toggle", kwargs={"comment_id": self.comment.id}
+            "comment-reaction-toggle", kwargs={"pk": self.comment.id}
         )
 
     def test_toggle_helpful_reaction(self):
@@ -74,3 +74,8 @@ class CommentReactionTests(APITestCase):
             ).count(),
             0,
         )
+
+    def tearDown(self):
+        self.user.delete()
+        self.article.delete()
+        self.comment.delete()

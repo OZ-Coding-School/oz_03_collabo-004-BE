@@ -150,3 +150,8 @@ class CommentCRUDTests(APITestCase):
         # 403 Forbidden 응답이 반환되어야 함
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertIn("댓글을 수정할 권한이 없습니다.", str(response.data))
+
+    def tearDown(self):
+        self.user.delete()
+        self.article.delete()
+        self.comment.delete()
