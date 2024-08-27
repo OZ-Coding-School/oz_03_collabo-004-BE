@@ -118,20 +118,21 @@ class CommentCRUDTests(APITestCase):
             "이미 마감이 된 게시글에 대하여 수정할 수 없습니다.", str(response.data)
         )
 
-    def test_update_comment_when_other_comment_is_selected(self):
-        # 기존 댓글을 선택된 상태로 만듦
-        self.comment.is_selected = True
-        self.comment.save()
+    # ai 시그널이랑 연결되어 있어 요금 부과
+    # def test_update_comment_when_other_comment_is_selected(self):
+    #     # 기존 댓글을 선택된 상태로 만듦
+    #     self.comment.is_selected = True
+    #     self.comment.save()
 
-        # 댓글 수정 시도
-        data = {"content": "Updated Comment"}
-        response = self.client.put(self.update_url, data, format="json")
+    #     # 댓글 수정 시도
+    #     data = {"content": "Updated Comment"}
+    #     response = self.client.put(self.update_url, data, format="json")
 
-        # 403 Forbidden 응답이 반환되어야 함
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertIn(
-            "이 게시글의 다른 댓글이 이미 채택되었습니다.", str(response.data)
-        )
+    #     # 403 Forbidden 응답이 반환되어야 함
+    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    #     self.assertIn(
+    #         "이 게시글의 다른 댓글이 이미 채택되었습니다.", str(response.data)
+    #     )
 
     def test_update_comment_when_not_owner(self):
         # 다른 유저 생성

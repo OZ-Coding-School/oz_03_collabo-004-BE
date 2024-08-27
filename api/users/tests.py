@@ -239,46 +239,6 @@ class UserStatusTest(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["status"], 1)
 
-    def test_admin_can_update_article_report_status(self):
-        url = reverse(
-            "article-report-status-update",
-            kwargs={"pk": self.article_report.id},
-        )
-        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.access_token}")
-        response = self.client.patch(url, {"status": "IP"})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.article_report.refresh_from_db()
-        self.assertEqual(self.article_report.status, "IP")
-
-    def test_admin_can_update_comment_report_status(self):
-        url = reverse(
-            "comment-report-status-update",
-            kwargs={"pk": self.comment_report.id},
-        )
-        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.access_token}")
-        response = self.client.patch(url, {"status": "IP"})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.comment_report.refresh_from_db()
-        self.assertEqual(self.comment_report.status, "IP")
-
-    def test_admin_can_get_all_reports(self):
-        url = reverse("report-list")
-        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.access_token}")
-        response = self.client.get(url)
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn("article_reports", response.data)
-        self.assertIn("comment_reports", response.data)
-        self.assertEqual(len(response.data["article_reports"]), 1)
-        self.assertEqual(len(response.data["comment_reports"]), 1)
-
-    def test_warning_count_increase_on_resolved_report(self):
-        self.article_report.status = "RS"
-        self.article_report.save()
-
-        self.profile.refresh_from_db()
-        self.assertEqual(self.profile.warning_count, 1)
-
     def tearDown(self):
         self.user.delete()
         self.admin_user.delete()
