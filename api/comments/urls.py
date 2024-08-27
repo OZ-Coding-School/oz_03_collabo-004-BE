@@ -27,7 +27,7 @@ urlpatterns = [
         name="comment-reaction-toggle",
     ),
     path(
-        "articles/<int:article_id>/comments/<int:pk>/select/",
+        "<int:pk>/select/",
         CommentSelectView.as_view(),
         name="comment-select",
     ),
