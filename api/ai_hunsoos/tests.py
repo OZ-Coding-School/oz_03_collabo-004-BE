@@ -1,4 +1,5 @@
-from ai_hunsoos.models import AiHunsoo, Article
+from ai_hunsoos.models import AiHunsoo
+from articles.models import Article
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from rest_framework.test import APIClient
