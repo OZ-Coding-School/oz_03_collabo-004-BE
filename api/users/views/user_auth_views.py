@@ -228,3 +228,11 @@ class UserDeleteView(generics.GenericAPIView):
             return Response(
                 {"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+# 특정유저의 관리자와 일반유저 판단
+class UserStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        status = 1 if user.is_superuser or user.is_staff else 0
+        return Response({"status": status})

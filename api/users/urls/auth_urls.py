@@ -6,6 +6,7 @@ from ..views.user_auth_views import (
     UserLoginView,
     UserLogoutView,
     UserRegisterView,
+    UserStatusView,
     UserTokenRefreshView,
     UserTokenVerifyView,
 )
@@ -18,4 +19,5 @@ urlpatterns = [
     path("token/refresh/", UserTokenRefreshView.as_view(), name="token_refresh"),
     path("logout/", UserLogoutView.as_view(), name="user_logout"),
     path("delete/", UserDeleteView.as_view(), name="user_delete"),
+    path("status/", UserStatusView.as_view(), name="user-status"),
 ]

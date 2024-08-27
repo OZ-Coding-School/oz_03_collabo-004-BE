@@ -99,3 +99,10 @@ class NotificationTests(APITestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Notification.objects.filter(id=self.notification.id).exists())
+
+    def tearDown(self):
+        self.user1.delete()
+        self.user2.delete()
+        self.comment.delete()
+        self.article.delete()
+        self.notification.delete()

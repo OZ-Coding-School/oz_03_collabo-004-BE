@@ -100,6 +100,11 @@ class ArticleCRUDTests(APITestCase):
         self.assertEqual(response.data["title"], article.title)
         self.assertEqual(response.data["content"], article.content)
 
+    def tearDown(self):
+        self.user.delete()
+        Tag.objects.all().delete()
+        Article.objects.all().delete()
+
 
 class ArticleListTests(APITestCase):
 
@@ -145,6 +150,11 @@ class ArticleListTests(APITestCase):
         self.assertEqual(len(response.data), 2)
         self.assertEqual(response.data[0]["title"], "Article 1")
         self.assertEqual(response.data[1]["title"], "Article 2")
+
+    def tearDown(self):
+        self.user.delete()
+        Tag.objects.all().delete()
+        Article.objects.all().delete()
 
 
 class ArticleByTagTests(APITestCase):
@@ -206,3 +216,8 @@ class ArticleByTagTests(APITestCase):
         self.assertEqual(
             len(response.data), 0
         )  # 존재하지 않는 태그에 대한 게시글은 0개여야 함
+
+    def tearDown(self):
+        self.user.delete()
+        Tag.objects.all().delete()
+        Article.objects.all().delete()
