@@ -4,6 +4,13 @@ from comments.models import Comment
 from comments.serializers import CommentDetailSerializer
 from common.logger import logger
 from django.shortcuts import get_object_or_404
+from reports.models import ArticleReport, CommentReport
+from reports.serializers import (
+    ArticleReportAllSerializer,
+    ArticleReportStatusSerializer,
+    CommentReportAllSerializer,
+    CommentReportStatusSerializer,
+)
 from rest_framework import status
 from rest_framework.generics import (
     DestroyAPIView,
@@ -16,6 +23,7 @@ from rest_framework.generics import (
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from users.models import User
 from users.serializers import EmptySerializer, UserSerializer
 from users.utils import IsAdminUser
@@ -166,3 +174,60 @@ class UserArticleCommentDeleteView(DestroyAPIView):
         Comment.objects.filter(user=user).delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# 특정 게시물 신고의 신고 처리 상태 변경
+class ArticleReportStatusUpdateView(UpdateAPIView):
+    queryset = ArticleReport.objects.all()
+    serializer_class = ArticleReportStatusSerializer
+    permission_classes = [IsAdminUser]
+
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    def perform_update(self, serializer):
+        serializer.save()
+        return Response(
+            {"status": "Report status updated successfully"},
+            status=status.HTTP_200_OK,
+        )
+
+
+# 특정 댓글 신고의 신고 처리 상태 변경
+class CommentReportStatusUpdateView(UpdateAPIView):
+    queryset = CommentReport.objects.all()
+    serializer_class = CommentReportStatusSerializer
+    permission_classes = [IsAdminUser]
+
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    def perform_update(self, serializer):
+        serializer.save()
+        return Response(
+            {"status": "Report status updated successfully"},
+            status=status.HTTP_200_OK,
+        )
+
+
+# 신고 내역 전체 확인
+class ReportListView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request, *args, **kwargs):
+        article_reports = ArticleReport.objects.all()
+        comment_reports = CommentReport.objects.all()
+
+        article_reports_data = ArticleReportAllSerializer(
+            article_reports, many=True
+        ).data
+        comment_reports_data = CommentReportAllSerializer(
+            comment_reports, many=True
+        ).data
+
+        return Response(
+            {
+                "article_reports": article_reports_data,
+                "comment_reports": comment_reports_data,
+            }
+        )

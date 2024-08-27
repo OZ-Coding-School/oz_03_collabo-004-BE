@@ -1,6 +1,8 @@
 from articles.models import Article
 from comments.models import Comment
 from django.urls import reverse
+from profiles.models import Profile
+from reports.models import ArticleReport, CommentReport
 from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -26,6 +28,15 @@ class AdminUserTests(APITestCase):
             password="userpassword",
             nickname="testnickname",
         )
+        self.profile = Profile.objects.create(user=self.user, hunsoo_level=1)
+
+        # 일반 유저2 생성
+        self.user2 = User.objects.create_user(
+            username="user2",
+            email="user2@example.com",
+            password="userpassword2",
+            nickname="testnickname2",
+        )
 
         # 테스트용 게시글과 댓글 생성
         self.article = Article.objects.create(
@@ -37,6 +48,20 @@ class AdminUserTests(APITestCase):
             content="This is a test comment.",
             article=self.article,
             user=self.user,
+        )
+
+        # 테스트용 신고 생성
+        self.article_report = ArticleReport.objects.create(
+            reporter=self.user2,
+            reported_user=self.user,
+            reported_article=self.article,
+            report_detail="This is a test report.",
+        )
+        self.comment_report = CommentReport.objects.create(
+            reporter=self.user2,
+            reported_user=self.user,
+            reported_comment=self.comment,
+            report_detail="This is a test report.",
         )
 
     def get_access_token(self, user):
@@ -118,3 +143,44 @@ class AdminUserTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Article.objects.filter(user=self.user).exists())
         self.assertFalse(Comment.objects.filter(user=self.user).exists())
+
+    def test_admin_can_update_article_report_status(self):
+        url = reverse(
+            "article-report-status-update",
+            kwargs={"pk": self.article_report.id},
+        )
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.access_token}")
+        response = self.client.patch(url, {"status": "IP"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.article_report.refresh_from_db()
+        self.assertEqual(self.article_report.status, "IP")
+
+    def test_admin_can_update_comment_report_status(self):
+        url = reverse(
+            "comment-report-status-update",
+            kwargs={"pk": self.comment_report.id},
+        )
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.access_token}")
+        response = self.client.patch(url, {"status": "IP"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.comment_report.refresh_from_db()
+        self.assertEqual(self.comment_report.status, "IP")
+
+    def test_admin_can_get_all_reports(self):
+        url = reverse("report-list")
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.access_token}")
+        response = self.client.get(url)
+        expected_article_report_count = ArticleReport.objects.count()
+        expected_comment_report_count = CommentReport.objects.count()
+        total_reports_count = (
+            expected_article_report_count + expected_comment_report_count
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), total_reports_count)
+
+    def test_warning_count_increase_on_resolved_report(self):
+        self.article_report.status = "RS"
+        self.article_report.save()
+
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.warning_count, 1)
