@@ -56,6 +56,29 @@ class CommentCRUDTests(APITestCase):
         self.assertEqual(Comment.objects.last().content, "New Comment")
         self.assertEqual(Comment.objects.first().article.id, self.article.id)
 
+    def test_create_comment_by_article_owner(self):
+        # 게시글 작성자가 댓글을 달려고 할 때 실패하는지 테스트
+        data = {"content": "Owner's Comment"}
+        response = self.client.post(self.create_url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Comment.objects.count(), 1)  # 기존 댓글 1개 그대로
+
+    def test_create_comment_by_another_user(self):
+        # 다른 사용자가 댓글을 달 수 있는지 테스트
+        new_user = User.objects.create_user(
+            username="anotheruser",
+            email="another@example.com",
+            password="anotherpassword",
+            nickname="AnotherNickname",
+        )
+        self.client.force_authenticate(user=new_user)
+
+        data = {"content": "Another User's Comment"}
+        response = self.client.post(self.create_url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Comment.objects.count(), 2)
+        self.assertEqual(Comment.objects.last().content, "Another User's Comment")
+
     def test_list_comments(self):
         # 댓글 목록 조회 테스트 (인증 없이 가능)
         self.client.logout()

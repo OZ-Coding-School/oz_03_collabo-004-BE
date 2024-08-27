@@ -40,6 +40,13 @@ class CommentSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         article_id = self.context["view"].kwargs["article_id"]
         article = Article.objects.get(id=article_id)
+
+        # 댓글 작성자가 게시글 작성자인지 확인
+        if article.user == self.context["request"].user:
+            raise serializers.ValidationError(
+                "게시글 작성자는 해당 게시글에 댓글을 달 수 없습니다."
+            )
+
         images_data = validated_data.pop("images", [])
         comment = Comment.objects.create(article=article, **validated_data)
         for image_data in images_data:
