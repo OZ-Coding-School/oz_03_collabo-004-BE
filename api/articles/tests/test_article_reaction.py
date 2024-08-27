@@ -71,3 +71,7 @@ class ArticleReactionTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.article.refresh_from_db()
         self.assertEqual(self.article.like_count, initial_like_count)
+
+    def tearDown(self):
+        self.user.delete()
+        self.article.delete()

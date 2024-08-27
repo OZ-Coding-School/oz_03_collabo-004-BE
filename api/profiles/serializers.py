@@ -6,6 +6,7 @@ from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from tags.models import Tag
 from tags.serializers import TagSerializer
+from users.models import User
 
 from .models import Profile
 
@@ -58,6 +59,12 @@ class ProfileSerializer(serializers.ModelSerializer):
     def validate_hunsoo_level(self, value):
         if value < 1 or value > 20:  # 훈수 레벨의 범위를 1에서 20으로 제한
             raise serializers.ValidationError("Invalid hunsoo level")
+        return value
+    
+    def validate_nickname(self, value):
+        user = self.context['request'].user
+        if User.objects.filter(nickname=value).exclude(id=user.id).exists():
+            raise serializers.ValidationError("이미 사용 중인 닉네임입니다.")
         return value
 
     def update(self, instance, validated_data):
