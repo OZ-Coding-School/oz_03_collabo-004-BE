@@ -33,14 +33,9 @@ class UserProfileUpdateView(APIView):
         profile, created = Profile.objects.get_or_create(user=request.user)
         user = request.user
 
-        # 닉네임 업데이트
-        new_nickname = request.data.get("nickname")
-        if new_nickname:
-            user.nickname = new_nickname
-            user.save()
-
-        # 프로필 업데이트
-        serializer = ProfileSerializer(profile, data=request.data, partial=True)
+        serializer = ProfileSerializer(
+            profile, data=request.data, partial=True, context={"request": request}
+        )
         if serializer.is_valid():
             serializer.save()
             # 수정된 필드만 응답으로 반환
