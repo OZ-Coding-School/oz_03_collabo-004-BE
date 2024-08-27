@@ -118,3 +118,52 @@ class AdminUserTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Article.objects.filter(user=self.user).exists())
         self.assertFalse(Comment.objects.filter(user=self.user).exists())
+
+
+class UserStatusTest(APITestCase):
+
+    def setUp(self):
+        # 일반 유저 생성
+        self.user = User.objects.create_user(
+            username="testuser",
+            email="testuser@example.com",
+            password="testpassword",
+            nickname="testnickname",
+        )
+
+        # 관리자 유저 생성
+        self.admin_user = User.objects.create_superuser(
+            username="adminuser",
+            email="adminuser@example.com",
+            password="adminpassword",
+            nickname="adminnickname",
+        )
+
+    def authenticate(self, user):
+        # JWT 토큰 생성 및 설정
+        refresh = RefreshToken.for_user(user)
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Bearer {str(refresh.access_token)}"
+        )
+
+    def test_user_status_for_normal_user(self):
+        # 일반 유저로 인증
+        self.authenticate(self.user)
+
+        # 요청 보내기
+        response = self.client.get("/api/auth/status/")
+
+        # 일반 유저는 0을 반환
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["status"], 0)
+
+    def test_user_status_for_admin_user(self):
+        # 관리자 유저로 인증
+        self.authenticate(self.admin_user)
+
+        # 요청 보내기
+        response = self.client.get("/api/auth/status/")
+
+        # 관리자 유저는 1을 반환
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["status"], 1)
