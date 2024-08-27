@@ -199,10 +199,6 @@ class UserStatusTest(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["status"], 1)
 
-    def tearDown(self):
-        self.user.delete()
-        self.admin_user.delete()
-
     def test_admin_can_update_article_report_status(self):
         url = reverse(
             "article-report-status-update",
@@ -242,3 +238,7 @@ class UserStatusTest(APITestCase):
 
         self.profile.refresh_from_db()
         self.assertEqual(self.profile.warning_count, 1)
+
+    def tearDown(self):
+        self.user.delete()
+        self.admin_user.delete()
