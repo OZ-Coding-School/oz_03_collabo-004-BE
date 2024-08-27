@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+from django.conf import settings
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -14,8 +15,20 @@ def load_prompt_template():
     """
     텍스트 파일로부터 프롬프트를 불러오는 함수.
     """
-    with open("api/ai_hunsoos/prompt.txt", "r") as file:
-        return file.read()
+    prompt_path = os.path.join(settings.BASE_DIR, "ai_hunsoos", "prompt.txt")
+    with open(prompt_path, "r") as file:
+        prompt_template = file.read()
+    return prompt_template
+
+
+# ai_test.py 실행용
+
+# def load_prompt_template():
+#     """
+#     텍스트 파일로부터 프롬프트를 불러오는 함수.
+#     """
+#     with open("api/ai_hunsoos/prompt.txt", "r") as file:
+#         return file.read()
 
 
 def generate_ai_response(question, answer):

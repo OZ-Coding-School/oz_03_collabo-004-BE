@@ -1,7 +1,7 @@
 from utils import generate_ai_response, load_prompt_template
 
-a = "정해인같은 남자친구를 만드려면 어디로 가야돼?"
-b = "방송국에 가봐"
+a = "하나는 모르고 둘만 아는 친구에 대해 어떻게 생각해?"
+b = "잘 모르겠는뎅"
 
 print(generate_ai_response(question=a, answer=b))
 
