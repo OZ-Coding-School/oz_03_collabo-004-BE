@@ -51,3 +51,13 @@ class CommentReportAllSerializer(serializers.ModelSerializer):
     class Meta:
         model = CommentReport
         fields = "__all__"
+
+
+class UserReportStatusSerializer(serializers.Serializer):
+    article_reports = ArticleReportAllSerializer(many=True)
+    comment_reports = CommentReportAllSerializer(many=True)
+
+
+class ReportStatusSerializer(serializers.Serializer):
+    article_reports = ArticleReportAllSerializer(many=True)
+    comment_reports = CommentReportAllSerializer(many=True)

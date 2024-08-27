@@ -170,13 +170,12 @@ class AdminUserTests(APITestCase):
         url = reverse("report-list")
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.access_token}")
         response = self.client.get(url)
-        expected_article_report_count = ArticleReport.objects.count()
-        expected_comment_report_count = CommentReport.objects.count()
-        total_reports_count = (
-            expected_article_report_count + expected_comment_report_count
-        )
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), total_reports_count)
+        self.assertIn("article_reports", response.data)
+        self.assertIn("comment_reports", response.data)
+        self.assertEqual(len(response.data["article_reports"]), 1)
+        self.assertEqual(len(response.data["comment_reports"]), 1)
 
     def test_warning_count_increase_on_resolved_report(self):
         self.article_report.status = "RS"

@@ -10,10 +10,13 @@ from reports.serializers import (
     ArticleReportStatusSerializer,
     CommentReportAllSerializer,
     CommentReportStatusSerializer,
+    ReportStatusSerializer,
+    UserReportStatusSerializer,
 )
 from rest_framework import status
 from rest_framework.generics import (
     DestroyAPIView,
+    GenericAPIView,
     ListAPIView,
     RetrieveDestroyAPIView,
     RetrieveUpdateAPIView,
@@ -210,24 +213,38 @@ class CommentReportStatusUpdateView(UpdateAPIView):
         )
 
 
-# 신고 내역 전체 확인
-class ReportListView(APIView):
+# 특정 유저 신고 내역 확인
+class UserReportStatusView(GenericAPIView):
     permission_classes = [IsAdminUser]
+    serializer_class = UserReportStatusSerializer
+
+    def get(self, request, *args, **kwargs):
+        user_id = kwargs.get("user_id")
+
+        # 특정 유저에 대한 신고 내역 조회
+        article_reports = ArticleReport.objects.filter(reported_user_id=user_id)
+        comment_reports = CommentReport.objects.filter(reported_user_id=user_id)
+
+        # 직렬화
+        serializer = self.get_serializer(
+            {"article_reports": article_reports, "comment_reports": comment_reports}
+        )
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# 신고 내역 전체 확인
+class ReportListView(GenericAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = ReportStatusSerializer
 
     def get(self, request, *args, **kwargs):
         article_reports = ArticleReport.objects.all()
         comment_reports = CommentReport.objects.all()
 
-        article_reports_data = ArticleReportAllSerializer(
-            article_reports, many=True
-        ).data
-        comment_reports_data = CommentReportAllSerializer(
-            comment_reports, many=True
-        ).data
-
-        return Response(
-            {
-                "article_reports": article_reports_data,
-                "comment_reports": comment_reports_data,
-            }
+        # 직렬화
+        serializer = self.get_serializer(
+            {"article_reports": article_reports, "comment_reports": comment_reports}
         )
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
