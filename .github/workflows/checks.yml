@@ -33,6 +33,18 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y docker-compose  
 
+    - name: Drop existing test database
+      env:
+        PGPASSWORD: ${{ secrets.RDS_PASSWORD }}
+      run: |
+        psql -h ${{ secrets.RDS_HOSTNAME }} -U ${{ secrets.RDS_USERNAME }} -d ${{ secrets.RDS_DB_NAME }} -p ${{ secrets.RDS_DB_PORT }} -c "DROP DATABASE IF EXISTS test_postgres;"
+
+    - name: Create new test database
+      env:
+        PGPASSWORD: ${{ secrets.RDS_PASSWORD }}
+      run: |
+        psql -h ${{ secrets.RDS_HOSTNAME }} -U ${{ secrets.RDS_USERNAME }} -d ${{ secrets.RDS_DB_NAME }} -p ${{ secrets.RDS_DB_PORT }} -c "CREATE DATABASE test_postgres;"
+
     - name: Build and run Docker containers
       run: |
         docker-compose build
