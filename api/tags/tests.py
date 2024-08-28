@@ -16,12 +16,14 @@ class TagListViewTest(APITestCase):
         Tag.objects.create(tag_id=4, name="상상 훈수")
         Tag.objects.create(tag_id=5, name="패션 훈수")
         Tag.objects.create(tag_id=6, name="게임 훈수")
-        Tag.objects.create(tag_id=7, name="교육 훈수")
+        Tag.objects.create(tag_id=7, name="모바일게임 훈수")
+        Tag.objects.create(tag_id=8, name="PC게임 훈수")
+        Tag.objects.create(tag_id=9, name="교육 훈수")
 
     def test_get_tag_list(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 8)  # 고정된 태그가 8개이므로
+        self.assertEqual(len(response.data), 10)  # 고정된 태그가 8개이므로
 
         expected_tags = [
             "연애 훈수",
@@ -31,6 +33,8 @@ class TagListViewTest(APITestCase):
             "상상 훈수",
             "패션 훈수",
             "게임 훈수",
+            "모바일게임 훈수",
+            "PC게임 훈수",
             "교육 훈수",
         ]
 
