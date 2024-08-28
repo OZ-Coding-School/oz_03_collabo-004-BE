@@ -11,7 +11,7 @@ from .views.profile_public_views import PublicUserProfileView
 urlpatterns = [
     path("profile/", UserProfileDetailView.as_view(), name="user-profile-detail"),
     path(
-        "profile/<int:user_id>/",
+        "profile/<str:username>/",
         UserProfileDetailView.as_view(),
         name="user-profile-detail-other",
     ),
