@@ -23,9 +23,9 @@ from ..serializers import ProfileSerializer
 class UserProfileDetailView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-    def get(self, request, username=None):
-        if username:
-            user = get_object_or_404(User, username=username)
+    def get(self, request, user_id=None):
+        if user_id:
+            user = User.objects.get(id=user_id)
         else:
             user = request.user
 

@@ -10,7 +10,7 @@ from .views.profile_image_views import DeleteProfileImageView, UpdateProfileImag
 urlpatterns = [
     path("profile/", UserProfileDetailView.as_view(), name="user-profile-detail"),
     path(
-        "profile/<str:username>/",
+        "profile/<int:user_id>/",
         UserProfileDetailView.as_view(),
         name="user-profile-detail-other",
     ),
