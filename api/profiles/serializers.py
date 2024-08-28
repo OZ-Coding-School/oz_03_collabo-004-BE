@@ -20,10 +20,12 @@ class ProfileSerializer(serializers.ModelSerializer):
     hunsoo_level = serializers.IntegerField(read_only=True)
     articles = serializers.SerializerMethodField()
     comments = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
         fields = [
+            "status",
             "bio",
             "profile_image",
             "nickname",
@@ -56,13 +58,17 @@ class ProfileSerializer(serializers.ModelSerializer):
         comments = Comment.objects.filter(user=obj.user)
         return CommentListSerializer(comments, many=True).data
 
+    def get_status(self, obj):
+        # `is_own_profile`이 컨텍스트에 있는지 확인하고, 없으면 기본값으로 False 설정
+        return self.context.get("is_own_profile", False)
+
     def validate_hunsoo_level(self, value):
-        if value < 1 or value > 20:  # 훈수 레벨의 범위를 1에서 20으로 제한
+        if value < 1 or value > 100:  # 훈수 레벨의 범위를 1에서 100으로 제한
             raise serializers.ValidationError("Invalid hunsoo level")
         return value
-    
+
     def validate_nickname(self, value):
-        user = self.context['request'].user
+        user = self.context["request"].user
         if User.objects.filter(nickname=value).exclude(id=user.id).exists():
             raise serializers.ValidationError("이미 사용 중인 닉네임입니다.")
         return value

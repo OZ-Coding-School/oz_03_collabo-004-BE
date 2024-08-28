@@ -9,7 +9,12 @@ from .views.profile_image_views import DeleteProfileImageView, UpdateProfileImag
 from .views.profile_public_views import PublicUserProfileView
 
 urlpatterns = [
-    path("profile/", UserProfileDetailView.as_view(), name="profile-detail"),
+    path("profile/", UserProfileDetailView.as_view(), name="user-profile-detail"),
+    path(
+        "profile/<int:user_id>/",
+        UserProfileDetailView.as_view(),
+        name="user-profile-detail-other",
+    ),
     path("profile/update/", UserProfileUpdateView.as_view(), name="profile-update"),
     path("level/<int:id>/", UserLevelUpdate.as_view(), name="update-hunsoo-level"),
     path(
@@ -19,10 +24,5 @@ urlpatterns = [
         "profile/image/delete/",
         DeleteProfileImageView.as_view(),
         name="profile-image-delete",
-    ),
-    path(
-        "profile/<str:username>/",
-        PublicUserProfileView.as_view(),
-        name="public-profile",
     ),
 ]

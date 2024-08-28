@@ -5,10 +5,15 @@ from comments.serializers import CommentListSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.exceptions import NotFound
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import (
+    IsAdminUser,
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from tags.serializers import TagSerializer
+from users.models import User
 
 from ..models import Profile
 from ..serializers import ProfileSerializer
@@ -16,13 +21,24 @@ from ..serializers import ProfileSerializer
 
 # 사용자 프로필 조회
 class UserProfileDetailView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
-    def get(self, request):
-        profile, created = Profile.objects.get_or_create(user=request.user)
+    def get(self, request, user_id=None):
+        if user_id:
+            user = User.objects.get(id=user_id)
+        else:
+            user = request.user
 
-        serializer = ProfileSerializer(profile)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        profile, created = Profile.objects.get_or_create(user=user)
+        is_own_profile = user == request.user
+
+        serializer = ProfileSerializer(
+            profile, context={"is_own_profile": is_own_profile}
+        )
+        response_data = serializer.data
+        response_data["status"] = is_own_profile
+
+        return Response(response_data, status=status.HTTP_200_OK)
 
 
 # 사용자 프로필 수정
