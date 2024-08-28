@@ -10,7 +10,9 @@ class Tag(models.Model):
         (4, "상상 훈수"),
         (5, "패션 훈수"),
         (6, "게임 훈수"),
-        (7, "교육 훈수"),
+        (7, "모바일게임 훈수"),
+        (8, "PC게임 훈수"),
+        (9, "교육 훈수"),
     ]
 
     tag_id = models.IntegerField(choices=TAG_CHOICES, unique=True, primary_key=True)

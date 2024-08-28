@@ -134,16 +134,6 @@ class AdminUserTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Comment.objects.filter(id=self.comment.id).exists())
 
-    def test_admin_can_delete_user_articles_comments(self):
-        url = reverse(
-            "user-delete-articles-comments-admin", kwargs={"id": self.user.id}
-        )
-        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.access_token}")
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertFalse(Article.objects.filter(user=self.user).exists())
-        self.assertFalse(Comment.objects.filter(user=self.user).exists())
-
     def test_admin_can_update_article_report_status(self):
         url = reverse(
             "article-report-status-update",

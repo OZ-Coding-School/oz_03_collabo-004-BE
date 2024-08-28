@@ -15,6 +15,15 @@ class ArticleReactionTests(APITestCase):
             password="testpassword",
             nickname="TestNickname",
         )
+
+        # 작성자가 아닌 다른 유저 생성
+        self.other_user = User.objects.create_user(
+            username="otheruser",
+            email="otheruser@example.com",
+            password="testpassword",
+            nickname="OtherNickname",
+        )
+
         # JWT 토큰 생성
         self.client.force_authenticate(user=self.user)
 
@@ -56,21 +65,29 @@ class ArticleReactionTests(APITestCase):
         self.article.refresh_from_db()
         self.assertEqual(self.article.view_count, initial_view_count + 2)
 
-    def test_like_toggle(self):
-        # 초기 좋아요 개수 확인
-        initial_like_count = self.article.like_count
+    def test_author_cannot_like_own_article(self):
+        # 게시글 작성자가 자신의 게시글에 좋아요를 시도하는 경우
+        response = self.client.post(self.like_url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data["message"], "게시글 작성자는 좋아요를 누를 수 없습니다."
+        )
+
+    def test_other_user_can_like_article(self):
+        # 작성자가 아닌 다른 사용자가 좋아요를 시도하는 경우
+        self.client.force_authenticate(user=self.other_user)
 
         # 첫 번째 좋아요 요청 (추가)
         response = self.client.post(self.like_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.article.refresh_from_db()
-        self.assertEqual(self.article.like_count, initial_like_count + 1)
+        self.assertEqual(self.article.like_count, 1)
 
         # 두 번째 좋아요 요청 (삭제)
         response = self.client.post(self.like_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.article.refresh_from_db()
-        self.assertEqual(self.article.like_count, initial_like_count)
+        self.assertEqual(self.article.like_count, 0)
 
     def tearDown(self):
         self.user.delete()

@@ -73,6 +73,11 @@ class ProfileSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("이미 사용 중인 닉네임입니다.")
         return value
 
+    def validate_selected_tags(self, value):
+        if len(value) > 3:
+            raise serializers.ValidationError("태그는 최대 3개까지 선택할 수 있습니다.")
+        return value
+
     def update(self, instance, validated_data):
         user_data = validated_data.pop("user", {})
         nickname = user_data.get("nickname")

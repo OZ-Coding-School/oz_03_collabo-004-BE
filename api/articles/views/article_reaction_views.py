@@ -17,6 +17,13 @@ class ArticleLikeToggleView(APIView):
         article = get_object_or_404(Article, id=article_id)
         user = request.user
 
+        # 작성자가 자신의 게시글에 좋아요를 할 수 없도록 함
+        if article.user == user:
+            return Response(
+                {"message": "게시글 작성자는 좋아요를 누를 수 없습니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         if user in article.likes.all():
             article.likes.remove(user)
             message = "Like removed"

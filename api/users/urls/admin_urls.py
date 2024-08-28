@@ -7,7 +7,6 @@ from ..views.user_crud_views import (
     CommentReportStatusUpdateView,
     ReportListView,
     SwitchUserAuthorizationView,
-    UserArticleCommentDeleteView,
     UserArticlesCommentsView,
     UserListForAdmin,
     UserReportStatusView,
@@ -40,11 +39,6 @@ urlpatterns = [
         "user/<int:id>/articles-comments/",
         UserArticlesCommentsView.as_view(),
         name="user-articles-comments-admin",
-    ),
-    path(
-        "user/<int:id>/articles-comments/delete/",
-        UserArticleCommentDeleteView.as_view(),
-        name="user-delete-articles-comments-admin",
     ),
     path(
         "report/article/<int:pk>/",
