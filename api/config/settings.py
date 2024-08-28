@@ -58,7 +58,7 @@ CORS_ALLOWED_ORIGINS = [
 # SSL을 사용하는 경우에만 X-Forwarded-Proto 헤더를 통해 SSL을 확인합니다.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-#https 세팅 개발 시에는 주석
+# https 세팅 개발 시에는 주석
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_SSL_REDIRECT = True
@@ -84,6 +84,13 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost",
+    "http://127.0.0.1",
+    "http://127.0.0.1:5173",
+    "http://localhost:5173" "https://hunsuking.yoyobar.xyz",
+]
 
 # Application definition
 
@@ -117,12 +124,6 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
 }
-
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost",
-    "http://127.0.0.1:5173",
-    "https://hunsuking.yoyobar.xyz",
-]
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -233,7 +234,6 @@ MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
 
 MEDIAFILES_LOCATION = "media"
 AWS_LOCATION = MEDIAFILES_LOCATION
-
 
 
 # Internationalization
