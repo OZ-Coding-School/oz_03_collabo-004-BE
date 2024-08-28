@@ -137,31 +137,6 @@ class AdminCommentDetailView(RetrieveDestroyAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-# 특정 사용자의 게시글, 댓글 조회
-class UserArticlesCommentsView(ListAPIView):
-    permission_classes = [IsAdminUser]
-
-    def get(self, request, *args, **kwargs):
-        user_id = kwargs.get("id")
-        user = get_object_or_404(User, id=user_id)
-
-        # 사용자 작성 게시글 조회
-        articles = Article.objects.filter(user=user)
-        articles_serializer = ArticleDetailSerializer(articles, many=True)
-
-        # 사용자 작성 댓글 조회
-        comments = Comment.objects.filter(user=user)
-        comments_serializer = CommentDetailSerializer(comments, many=True)
-
-        return Response(
-            {
-                "articles": articles_serializer.data,
-                "comments": comments_serializer.data,
-            },
-            status=status.HTTP_200_OK,
-        )
-
-
 # 특정 사용자의 게시글, 댓글 삭제
 class UserArticleCommentDeleteView(DestroyAPIView):
     permission_classes = [IsAdminUser]
