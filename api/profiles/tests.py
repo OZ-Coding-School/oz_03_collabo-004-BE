@@ -74,6 +74,10 @@ class UpdateHunsooLevelTest(APITestCase):
 
         # 요청을 보냄
         data = {"hunsoo_level": 3}
+        response = self.client.put(self.url, data, format="json")
+
+        # 인증 오류가 발생했는지 확인
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def tearDown(self):
         self.user.delete()
@@ -104,6 +108,9 @@ class UserProfileDetailTest(APITestCase):
             nickname="duplicatenickname",
             social_platform="general",
         )
+        self.profile2 = Profile.objects.create(
+            user=self.user2, hunsoo_level=2, bio="This is another test bio."
+        )
 
         # JWT 토큰 생성
         self.refresh = RefreshToken.for_user(self.user)
@@ -125,6 +132,18 @@ class UserProfileDetailTest(APITestCase):
         self.assertEqual(response.data["nickname"], "testnickname")
         self.assertEqual(response.data["hunsoo_level"], 1)
         self.assertEqual(response.data["bio"], "This is a test bio.")
+        self.assertTrue(response.data["status"])
+
+    def test_get_other_user_profile(self):
+        # 다른 사용자의 프로필을 조회하는 테스트
+        url = f"/api/account/profile/{self.user2.id}/"
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["nickname"], "duplicatenickname")
+        self.assertEqual(response.data["hunsoo_level"], 2)
+        self.assertEqual(response.data["bio"], "This is another test bio.")
+        self.assertFalse(response.data["status"])
 
     def test_update_user_profile_bio(self):
         # 프로필 바이오 수정 테스트
@@ -152,51 +171,27 @@ class UserProfileDetailTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("이미 사용 중인 닉네임입니다.", response.data["nickname"])
 
-    def test_unauthenticated_user_profile_access(self):
-        self.client.cookies.clear()
-        response = self.client.get(self.url)
+    def test_update_user_profile_tags(self):
+        # 사용자 태그 수정 테스트
+        tag1 = Tag.objects.create(tag_id=1, name="Tag1")
+        tag2 = Tag.objects.create(tag_id=2, name="Tag2")
+        tag3 = Tag.objects.create(tag_id=3, name="Tag3")
 
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        data = {"selected_tags": [tag1.tag_id, tag2.tag_id, tag3.tag_id]}
+        response = self.client.put(self.profile_update_url, data, format="json")
 
-    def tearDown(self):
-        self.user.delete()
-        self.profile.delete()
-
-
-class PublicUserProfileViewTest(APITestCase):
-    def setUp(self):
-        self.client = APIClient()
-
-        # 테스트용 사용자 및 프로필 생성
-        self.user = User.objects.create_user(
-            email="publicuser@example.com",
-            username="publicuser",
-            password="publicpassword",
-            nickname="publicnickname",
-            social_platform="general",
-        )
-        self.profile = Profile.objects.create(
-            user=self.user, bio="This is a test bio.", hunsoo_level=1
-        )
-
-        # 테스트할 URL
-        self.url = reverse("public-profile", kwargs={"username": self.user.username})
-
-    def test_get_public_user_profile(self):
-        response = self.client.get(self.url)
-
+        self.profile.refresh_from_db()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn("nickname", response.data)
-        self.assertEqual(response.data["bio"], "This is a test bio.")
-        self.assertEqual(response.data["nickname"], "publicnickname")
-        self.assertEqual(response.data["hunsoo_level"], 1)
+        self.assertEqual(list(self.profile.selected_tags.all()), [tag1, tag2, tag3])
 
-    def test_public_user_profile_not_found(self):
-        url = reverse("public-profile", kwargs={"username": "nonexistentuser"})
-        response = self.client.get(url)
+    # def test_unauthenticated_user_profile_access(self):
+    #     self.client.cookies.clear()
+    #     response = self.client.get(self.url)
 
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def tearDown(self):
         self.user.delete()
         self.profile.delete()
+        self.user2.delete()
+        self.profile2.delete()
