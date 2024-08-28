@@ -67,15 +67,11 @@ class CommentReactionToggleView(APIView):
         user = request.user
 
         # 댓글 작성자가 자신의 댓글에 반응하지 못하도록 함
-        if comment.author == user:
+        if comment.user == user:
             return Response(
                 {"detail": "You cannot react to your own comment."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
-        reaction, created = CommentReaction.objects.get_or_create(
-            user=user, comment=comment
-        )
 
         reaction, created = CommentReaction.objects.get_or_create(
             user=user, comment=comment

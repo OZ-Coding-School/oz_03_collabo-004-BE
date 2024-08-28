@@ -18,7 +18,7 @@ class ArticleLikeToggleView(APIView):
         user = request.user
 
         # 작성자가 자신의 게시글에 좋아요를 할 수 없도록 함
-        if article.author == user:
+        if article.user == user:
             return Response(
                 {"message": "게시글 작성자는 좋아요를 누를 수 없습니다."},
                 status=status.HTTP_400_BAD_REQUEST,
