@@ -39,6 +39,7 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "api.hunsuking.yoyobar.xyz",
+    "hunsuking.yoyobar.xyz",
     "52.78.179.207",
     "172.31.6.31",
     "hunsooking-ec2-alb-113517241.ap-northeast-2.elb.amazonaws.com",
@@ -56,6 +57,11 @@ CORS_ALLOWED_ORIGINS = [
 
 # SSL을 사용하는 경우에만 X-Forwarded-Proto 헤더를 통해 SSL을 확인합니다.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+#https 세팅 개발 시에는 주석
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = True
 
 CORS_ALLOW_CREDENTIALS = True  # 쿠키 등 credential 정보 허용
 CORS_ALLOW_METHODS = [
@@ -101,6 +107,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
+    "storages",
 ]
 
 REST_FRAMEWORK = {
@@ -223,6 +230,10 @@ AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
 # 미디어 파일 저장 설정
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
+
+MEDIAFILES_LOCATION = "media"
+AWS_LOCATION = MEDIAFILES_LOCATION
+
 
 
 # Internationalization
