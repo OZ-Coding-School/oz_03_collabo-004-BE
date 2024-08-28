@@ -6,7 +6,6 @@ from .views.profile_auth_views import (
     UserProfileUpdateView,
 )
 from .views.profile_image_views import DeleteProfileImageView, UpdateProfileImageView
-from .views.profile_public_views import PublicUserProfileView
 
 urlpatterns = [
     path("profile/", UserProfileDetailView.as_view(), name="user-profile-detail"),
