@@ -2,6 +2,7 @@ from articles.models import Article
 from articles.serializers import ArticleListSerializer
 from comments.models import Comment
 from comments.serializers import CommentListSerializer
+from profiles.s3instance import S3Instance
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from tags.models import Tag
@@ -37,15 +38,23 @@ class ProfileSerializer(serializers.ModelSerializer):
             "comments",
         ]
 
-    def __init__(self, *args, **kwargs):
-        fields = kwargs.pop("fields", None)
-        super(ProfileSerializer, self).__init__(*args, **kwargs)
+    def update(self, instance, validated_data):
+        profile_image_file = validated_data.pop("profile_image", None)
+        if profile_image_file:
+            s3instance = S3Instance().get_s3_instance()
+            profile_image_url = S3Instance.upload_file(
+                s3instance, profile_image_file, instance.user.id
+            )
+            validated_data["profile_image"] = profile_image_url
 
-        if fields is not None:
-            allowed = set(fields)
-            existing = set(self.fields)
-            for field_name in existing - allowed:
-                self.fields.pop(field_name)
+        # Update other profile fields
+        instance.bio = validated_data.get("bio", instance.bio)
+        selected_tags = validated_data.pop("selected_tags", None)
+        if selected_tags:
+            instance.selected_tags.set(selected_tags)
+
+        instance.save()
+        return instance
 
     def get_selected_comment_count(self, obj):
         return Comment.objects.filter(user=obj.user, is_selected=True).count()
@@ -59,13 +68,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         return CommentListSerializer(comments, many=True).data
 
     def get_status(self, obj):
-        # `is_own_profile`이 컨텍스트에 있는지 확인하고, 없으면 기본값으로 False 설정
         return self.context.get("is_own_profile", False)
-
-    def validate_hunsoo_level(self, value):
-        if value < 1 or value > 100:  # 훈수 레벨의 범위를 1에서 100으로 제한
-            raise serializers.ValidationError("Invalid hunsoo level")
-        return value
 
     def validate_nickname(self, value):
         user = self.context["request"].user
@@ -77,22 +80,3 @@ class ProfileSerializer(serializers.ModelSerializer):
         if len(value) > 3:
             raise serializers.ValidationError("태그는 최대 3개까지 선택할 수 있습니다.")
         return value
-
-    def update(self, instance, validated_data):
-        user_data = validated_data.pop("user", {})
-        nickname = user_data.get("nickname")
-
-        if nickname:
-            instance.user.nickname = nickname
-            instance.user.save()
-
-        instance.bio = validated_data.get("bio", instance.bio)
-        instance.profile_image = validated_data.get(
-            "profile_image", instance.profile_image
-        )
-
-        selected_tags = validated_data.pop("selected_tags", None)
-        if selected_tags:
-            instance.selected_tags.set(selected_tags)
-
-        return super().update(instance, validated_data)

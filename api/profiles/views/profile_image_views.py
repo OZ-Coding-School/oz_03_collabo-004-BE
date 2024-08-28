@@ -1,37 +1,33 @@
+from profiles.models import Profile
+from profiles.s3instance import S3Instance
+from profiles.serializers import ProfileSerializer
 from rest_framework import generics, status
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from ..models import Profile
-from ..serializers import ProfileSerializer
 
-
-# 프로필 이미지 업데이트
 class UpdateProfileImageView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser)
     serializer_class = ProfileSerializer
+    queryset = Profile.objects.all()
 
     def put(self, request, *args, **kwargs):
-        try:
-            profile = Profile.objects.get(user=request.user)
-        except Profile.DoesNotExist:
-            return Response(
-                {"error": "Profile not found"}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        # 기존 이미지를 삭제
-        if profile.profile_image:
-            profile.profile_image.delete()
-
-        # 새 이미지 업데이트
+        profile = Profile.objects.get(user=request.user)
         serializer = self.get_serializer(profile, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            {
+                "message": "Profile image updated successfully.",
+                "profile_image": serializer.data["profile_image"],
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
-# 프로필 이미지 삭제(기본 이미지로 대체)
 class DeleteProfileImageView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
 

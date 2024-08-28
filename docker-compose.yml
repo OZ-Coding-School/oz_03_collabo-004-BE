@@ -20,6 +20,10 @@ services:
       - DB_NAME=${RDS_DB_NAME}
       - DB_USER=${RDS_USERNAME}
       - DB_PASSWORD=${RDS_PASSWORD}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} 
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}  
+      - AWS_STORAGE_BUCKET_NAME=${AWS_STORAGE_BUCKET_NAME}  
+      - AWS_S3_REGION_NAME=${AWS_S3_REGION_NAME} 
     user: django-user  # 컨테이너 내부에서 django-user로 실행
     env_file:
       - .env
