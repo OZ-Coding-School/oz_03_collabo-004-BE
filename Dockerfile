@@ -17,6 +17,8 @@ RUN apk update && apk add --no-cache \
 # 설치된 패키지로 pip 설치
 WORKDIR /app
 RUN pip install poetry
+RUN pip install boto3
+RUN pip install django-storages
 
 # pyproject.toml 및 poetry.lock 파일 복사
 COPY pyproject.toml poetry.lock ./

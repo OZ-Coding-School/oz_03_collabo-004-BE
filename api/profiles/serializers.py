@@ -1,7 +1,12 @@
+import uuid
+
+import boto3
 from articles.models import Article
 from articles.serializers import ArticleListSerializer
 from comments.models import Comment
 from comments.serializers import CommentListSerializer
+from django.conf import settings
+from django.core.files.storage import default_storage
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from tags.models import Tag
@@ -21,6 +26,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     articles = serializers.SerializerMethodField()
     comments = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
+    profile_image = serializers.ImageField()
 
     class Meta:
         model = Profile
@@ -91,3 +97,43 @@ class ProfileSerializer(serializers.ModelSerializer):
             instance.selected_tags.set(selected_tags)
 
         return super().update(instance, validated_data)
+
+
+class ProfileImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ["profile_image"]
+
+    def update(self, instance, validated_data):
+        # 기존 이미지 삭제 (선택적)
+        if (
+            "profile_image" in validated_data
+            and instance.profile_image
+            and validated_data["profile_image"] != instance.profile_image
+        ):
+            instance.profile_image.delete()
+
+        # 업데이트된 데이터 저장
+        return super().update(instance, validated_data)
+
+    def validate_profile_image(self, value):
+        # S3 업로드 로직
+        s3 = boto3.client(
+            "s3",
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            region_name=settings.AWS_S3_REGION_NAME,
+        )
+
+        # 파일 확장자 검사 (선택적)
+        allowed_extensions = ["jpg", "jpeg", "png"]
+        extension = value.name.split(".")[-1].lower()
+        if extension not in allowed_extensions:
+            raise serializers.ValidationError("허용된 파일 형식이 아닙니다.")
+
+        # S3에 업로드
+        key = f"profile_images/{uuid.uuid4()}.{extension}"
+        s3.upload_fileobj(value, settings.AWS_STORAGE_BUCKET_NAME, key)
+
+        # 업로드된 파일의 URL 반환
+        return f"/{key}"
