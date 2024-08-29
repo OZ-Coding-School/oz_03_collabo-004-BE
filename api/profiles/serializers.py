@@ -38,6 +38,13 @@ class ProfileSerializer(serializers.ModelSerializer):
         ]
 
     def update(self, instance, validated_data):
+        user_data = validated_data.pop("user", {})
+        nickname = user_data.get("nickname")
+
+        if nickname:
+            instance.user.nickname = nickname
+            instance.user.save()
+
         instance.bio = validated_data.get("bio", instance.bio)
         selected_tags = validated_data.pop("selected_tags", None)
         if selected_tags:
@@ -70,3 +77,11 @@ class ProfileSerializer(serializers.ModelSerializer):
         if len(value) > 3:
             raise serializers.ValidationError("태그는 최대 3개까지 선택할 수 있습니다.")
         return value
+
+
+class AdminProfileSerializer(serializers.ModelSerializer):
+    hunsoo_level = serializers.IntegerField()
+
+    class Meta:
+        model = Profile
+        fields = ["hunsoo_level"]
