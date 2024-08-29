@@ -16,7 +16,7 @@ from tags.serializers import TagSerializer
 from users.models import User
 
 from ..models import Profile
-from ..serializers import ProfileSerializer
+from ..serializers import AdminProfileSerializer, ProfileSerializer
 
 
 # 사용자 프로필 조회
@@ -101,17 +101,15 @@ class UserLevelUpdate(APIView):
             )
 
         # 훈수레벨이 1에서 20 사이의 정수인지 검증
-        if new_level < 1 or new_level > 20:
+        if new_level < 1 or new_level > 100:
             return Response(
-                {"error": "1-20사이의 값을 입력해야합니다."},
+                {"error": "1-100사이의 값을 입력해야합니다."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # profile serializer의 훈수레벨 읽기 전용 필드를 해제하여, 수정 가능하게 함
-        serializer = ProfileSerializer(
+        serializer = AdminProfileSerializer(
             profile, data={"hunsoo_level": new_level}, partial=True
         )
-        serializer.fields["hunsoo_level"].read_only = False  # 읽기 전용 해제
 
         if serializer.is_valid():
             serializer.save()
