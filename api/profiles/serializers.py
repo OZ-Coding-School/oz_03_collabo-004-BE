@@ -1,7 +1,7 @@
 from articles.models import Article
 from articles.serializers import ArticleListSerializer
 from comments.models import Comment
-from comments.serializers import CommentListSerializer
+from comments.serializers import UserCommentListSerializer
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from tags.models import Tag
@@ -62,7 +62,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def get_comments(self, obj):
         comments = Comment.objects.filter(user=obj.user)
-        return CommentListSerializer(comments, many=True).data
+        return UserCommentListSerializer(comments, many=True).data
 
     def get_status(self, obj):
         return self.context.get("is_own_profile", False)

@@ -1,7 +1,7 @@
 from articles.models import Article
 from articles.serializers import ArticleListSerializer
 from comments.models import Comment
-from comments.serializers import CommentListSerializer
+from comments.serializers import UserCommentListSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.exceptions import NotFound
@@ -118,21 +118,3 @@ class UserLevelUpdate(APIView):
                 status=status.HTTP_200_OK,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-# 유저가 작성한 게시글 목록
-class UserArticleListView(generics.ListAPIView):
-    serializer_class = ArticleListSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return Article.objects.filter(user=self.request.user)
-
-
-# 유저가 작성한 댓글(훈수) 목록
-class UserCommentListView(generics.ListAPIView):
-    serializer_class = CommentListSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return Comment.objects.filter(user=self.request.user)

@@ -1,5 +1,6 @@
 from articles.models import Article
 from rest_framework import serializers
+from tags.serializers import TagSerializer
 
 from .models import Comment, CommentImage, CommentReaction
 
@@ -82,6 +83,36 @@ class CommentListSerializer(serializers.ModelSerializer):
             "is_selected",
             "helpful_count",
             "not_helpful_count",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class UserCommentListSerializer(serializers.ModelSerializer):
+    images = CommentImageSerializer(many=True, read_only=True)
+    user_nickname = serializers.CharField(source="user.nickname", read_only=True)
+    helpful_count = serializers.IntegerField(read_only=True)
+    not_helpful_count = serializers.IntegerField(read_only=True)
+
+    # 댓글이 달린 게시글의 추가 정보
+    article_title = serializers.CharField(source="article.title", read_only=True)
+    article_user_id = serializers.IntegerField(source="article.user.id", read_only=True)
+    article_tags = TagSerializer(source="article.tags", many=True, read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = [
+            "id",
+            "user",
+            "user_nickname",
+            "content",
+            "is_selected",
+            "helpful_count",
+            "not_helpful_count",
+            "images",
+            "article_title",
+            "article_user_id",
+            "article_tags",
             "created_at",
             "updated_at",
         ]
