@@ -16,21 +16,23 @@ class Article(TimeStampModel):
 
     def __str__(self):
         return self.title
-    
-    #좋아요 집계 동적 실시간 반영
+
+    # 좋아요 집계 동적 실시간 반영
     @property
     def like_count(self):
         return self.likes.count()
 
 
 class ArticleImage(TimeStampModel):
-    article = models.ForeignKey(Article, on_delete=models.CASCADE, null=False, related_name='images')
-    image = models.ImageField(upload_to="articles/", null=False)
+    article = models.ForeignKey(
+        Article, on_delete=models.CASCADE, null=False, related_name="images"
+    )
+    image = models.URLField(max_length=500, null=False)  # S3 URL을 직접 저장
     is_thumbnail = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.article.title} - {self.id}"
-    
+
     @property
     def image_url(self):
-        return self.image.url if self.image else None
+        return self.image if self.image else None  # 이미지를 반환할 때는 S3 URL 반환
