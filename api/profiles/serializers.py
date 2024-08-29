@@ -2,7 +2,6 @@ from articles.models import Article
 from articles.serializers import ArticleListSerializer
 from comments.models import Comment
 from comments.serializers import CommentListSerializer
-from profiles.s3instance import S3Instance
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from tags.models import Tag
@@ -39,15 +38,6 @@ class ProfileSerializer(serializers.ModelSerializer):
         ]
 
     def update(self, instance, validated_data):
-        profile_image_file = validated_data.pop("profile_image", None)
-        if profile_image_file:
-            s3instance = S3Instance().get_s3_instance()
-            profile_image_url = S3Instance.upload_file(
-                s3instance, profile_image_file, instance.user.id
-            )
-            validated_data["profile_image"] = profile_image_url
-
-        # Update other profile fields
         instance.bio = validated_data.get("bio", instance.bio)
         selected_tags = validated_data.pop("selected_tags", None)
         if selected_tags:

@@ -14,15 +14,39 @@ class UpdateProfileImageView(generics.UpdateAPIView):
     queryset = Profile.objects.all()
 
     def put(self, request, *args, **kwargs):
-        profile = Profile.objects.get(user=request.user)
-        serializer = self.get_serializer(profile, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        try:
+            profile = Profile.objects.get(user=request.user)
+        except Profile.DoesNotExist:
+            return Response(
+                {"error": "Profile not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
+        profile_image_file = request.FILES.get("profile_image")
+        if not profile_image_file:
+            return Response(
+                {"error": "No profile image provided."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # S3에 이미지 업로드
+        s3instance = S3Instance().get_s3_instance()
+        profile_image_url = S3Instance.upload_file(
+            s3instance, profile_image_file, profile.user.id
+        )
+
+        # 기존 이미지 삭제 (선택 사항: S3에서도 삭제하려면 추가 구현 필요)
+        if profile.profile_image:
+            profile.profile_image.delete()
+
+        # 새 이미지 URL로 프로필 업데이트
+        profile.profile_image = profile_image_url
+        profile.save()
+
+        # 응답에서 S3 URL 반환
         return Response(
             {
                 "message": "Profile image updated successfully.",
-                "profile_image": serializer.data["profile_image"],
+                "profile_image": profile_image_url,  # S3 URL을 직접 반환
             },
             status=status.HTTP_200_OK,
         )
