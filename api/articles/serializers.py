@@ -26,6 +26,7 @@ class ArticleImageSerializer(serializers.ModelSerializer):
 # 전체 게시글조회를 위한 시리얼라이저
 class ArticleListSerializer(serializers.ModelSerializer):
     article_id = serializers.ReadOnlyField(source="id")
+    images = ArticleImageSerializer(many=True, required=False)
     tag_ids = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True, write_only=True
     )
@@ -40,6 +41,7 @@ class ArticleListSerializer(serializers.ModelSerializer):
             "article_id",
             "title",
             "content",
+            "images",
             "user",
             "tag_ids",
             "tags",
