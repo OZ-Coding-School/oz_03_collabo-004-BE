@@ -46,3 +46,18 @@ class S3Instance:
             return profile_image_url
         except (NoCredentialsError, PartialCredentialsError) as e:
             raise Exception("Could not upload file to S3: " + str(e))
+
+    @staticmethod
+    def delete_file(s3_client, file_url):
+        try:
+            # S3 URL에서 파일 경로 추출
+            file_key = file_url.split(
+                f"https://{os.getenv('AWS_STORAGE_BUCKET_NAME')}.s3.{os.getenv('AWS_S3_REGION_NAME')}.amazonaws.com/"
+            )[-1]
+            s3_client.delete_object(
+                Bucket=os.getenv("AWS_STORAGE_BUCKET_NAME"), Key=file_key
+            )
+            return True
+        except Exception as e:
+            print(f"Failed to delete file from S3: {str(e)}")
+            return False
