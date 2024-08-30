@@ -8,13 +8,14 @@ services:
         - DEV=true
     ports:
       - "8000:8000"
+      - "6600:6600"
     volumes:
       - ./api:/app
       # - ./.coverage:/app/.coverage  # .coverage 파일 마운트 추가
     command: >
       sh -c "python manage.py makemigrations &&
              python manage.py migrate &&
-             python manage.py runserver --noreload 0.0.0.0:8000"
+             whatap-start-agent python manage.py runserver --noreload 0.0.0.0:8000"
     environment:
       - DB_HOST=${RDS_HOSTNAME} 
       - DB_NAME=${RDS_DB_NAME}

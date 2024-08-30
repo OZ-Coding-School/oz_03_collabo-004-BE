@@ -937,7 +937,17 @@ h2 = ["h2 (>=4,<5)"]
 socks = ["pysocks (>=1.5.6,!=1.5.7,<2.0)"]
 zstd = ["zstandard (>=0.18.0)"]
 
+[[package]]
+name = "whatap-python"
+version = "1.6.8"
+description = "Monitoring and Profiling Service"
+optional = false
+python-versions = "*"
+files = [
+    {file = "whatap_python-1.6.8.tar.gz", hash = "sha256:3f2d19373996028c434350921ac29b3336db1f2ce8893686d379e5acc1e5b873"},
+]
+
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "abf87148ad01459c6c7b3c72aa77394c514e11cbfde6b3666ea860ddd6184a99"
+content-hash = "0e5be25a0853a9eb35d45e85a6217978dc94e006f786af17f748e04bc19eb685"
