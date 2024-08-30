@@ -47,17 +47,17 @@ tests = ["mypy (>=0.800)", "pytest", "pytest-asyncio"]
 
 [[package]]
 name = "boto3"
-version = "1.35.5"
+version = "1.35.9"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "boto3-1.35.5-py3-none-any.whl", hash = "sha256:2cef3aa476181395c260f4b6e6c5565e5a3022a874fb6b579d8e6b169f94e0b3"},
-    {file = "boto3-1.35.5.tar.gz", hash = "sha256:5724ddeda8e18c7614c20a09c20159ed87ff7439755cf5e250a1a3feaf9afb7e"},
+    {file = "boto3-1.35.9-py3-none-any.whl", hash = "sha256:1ee9c52d83e8f4902300e985d62688cf31ca8fc47a80534b4295350ebc418e46"},
+    {file = "boto3-1.35.9.tar.gz", hash = "sha256:07e0f335d801765999da67325455ea8219c1a6d7f06bdaad0975ee505276bcbe"},
 ]
 
 [package.dependencies]
-botocore = ">=1.35.5,<1.36.0"
+botocore = ">=1.35.9,<1.36.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.10.0,<0.11.0"
 
@@ -66,13 +66,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.35.5"
+version = "1.35.9"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "botocore-1.35.5-py3-none-any.whl", hash = "sha256:8116b72c7ae845c195146e437e2afd9d17538a37b3f3548dcf67c12c86ba0742"},
-    {file = "botocore-1.35.5.tar.gz", hash = "sha256:3a0086c7124cb3b0d9f98563d00ffd14a942c3f9e731d8d1ccf0d3a1ac7ed884"},
+    {file = "botocore-1.35.9-py3-none-any.whl", hash = "sha256:92962460e4f35d139a23bca28149722030143257ee2916de442243c2464a7434"},
+    {file = "botocore-1.35.9.tar.gz", hash = "sha256:9e44572fd2401b89dd58bf8b71ac2c36d5b0437f8cbf40de83302c499965fb54"},
 ]
 
 [package.dependencies]
@@ -85,13 +85,13 @@ crt = ["awscrt (==0.21.2)"]
 
 [[package]]
 name = "certifi"
-version = "2024.7.4"
+version = "2024.8.30"
 description = "Python package for providing Mozilla's CA Bundle."
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "certifi-2024.7.4-py3-none-any.whl", hash = "sha256:c198e21b1289c2ab85ee4e67bb4b4ef3ead0892059901a8d5b622f24a1101e90"},
-    {file = "certifi-2024.7.4.tar.gz", hash = "sha256:5a1e7645bc0ec61a09e26c36f6106dd4cf40c6db3a1fb6352b0244e7fb057c7b"},
+    {file = "certifi-2024.8.30-py3-none-any.whl", hash = "sha256:922820b53db7a7257ffbda3f597266d435245903d80737e34f8a45ff3e3230d8"},
+    {file = "certifi-2024.8.30.tar.gz", hash = "sha256:bec941d2aa8195e248a60b31ff9f0558284cf01a52591ceda73ea9afffd69fd9"},
 ]
 
 [[package]]
@@ -329,13 +329,13 @@ trio = ["trio (>=0.22.0,<0.26.0)"]
 
 [[package]]
 name = "httpx"
-version = "0.27.0"
+version = "0.27.2"
 description = "The next generation HTTP client."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "httpx-0.27.0-py3-none-any.whl", hash = "sha256:71d5465162c13681bff01ad59b2cc68dd838ea1f10e51574bac27103f00c91a5"},
-    {file = "httpx-0.27.0.tar.gz", hash = "sha256:a0cb88a46f32dc874e04ee956e4c2764aba2aa228f650b06788ba6bda2962ab5"},
+    {file = "httpx-0.27.2-py3-none-any.whl", hash = "sha256:7bb2708e112d8fdd7829cd4243970f0c223274051cb35ee80c03301ee29a3df0"},
+    {file = "httpx-0.27.2.tar.gz", hash = "sha256:f7c2be1d2f3c3c3160d441802406b206c2b76f5947b11115e6df10c6c65e66c2"},
 ]
 
 [package.dependencies]
@@ -350,6 +350,7 @@ brotli = ["brotli", "brotlicffi"]
 cli = ["click (==8.*)", "pygments (==2.*)", "rich (>=10,<14)"]
 http2 = ["h2 (>=3,<5)"]
 socks = ["socksio (==1.*)"]
+zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
 name = "idna"
@@ -445,13 +446,13 @@ files = [
 
 [[package]]
 name = "openai"
-version = "1.42.0"
+version = "1.43.0"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.7.1"
 files = [
-    {file = "openai-1.42.0-py3-none-any.whl", hash = "sha256:dc91e0307033a4f94931e5d03cc3b29b9717014ad5e73f9f2051b6cb5eda4d80"},
-    {file = "openai-1.42.0.tar.gz", hash = "sha256:c9d31853b4e0bc2dc8bd08003b462a006035655a701471695d0bfdc08529cde3"},
+    {file = "openai-1.43.0-py3-none-any.whl", hash = "sha256:1a748c2728edd3a738a72a0212ba866f4fdbe39c9ae03813508b267d45104abe"},
+    {file = "openai-1.43.0.tar.gz", hash = "sha256:e607aff9fc3e28eade107e5edd8ca95a910a4b12589336d3cbb6bfe2ac306b3c"},
 ]
 
 [package.dependencies]
@@ -937,17 +938,7 @@ h2 = ["h2 (>=4,<5)"]
 socks = ["pysocks (>=1.5.6,!=1.5.7,<2.0)"]
 zstd = ["zstandard (>=0.18.0)"]
 
-[[package]]
-name = "whatap-python"
-version = "1.6.8"
-description = "Monitoring and Profiling Service"
-optional = false
-python-versions = "*"
-files = [
-    {file = "whatap_python-1.6.8.tar.gz", hash = "sha256:3f2d19373996028c434350921ac29b3336db1f2ce8893686d379e5acc1e5b873"},
-]
-
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "0e5be25a0853a9eb35d45e85a6217978dc94e006f786af17f748e04bc19eb685"
+content-hash = "abf87148ad01459c6c7b3c72aa77394c514e11cbfde6b3666ea860ddd6184a99"

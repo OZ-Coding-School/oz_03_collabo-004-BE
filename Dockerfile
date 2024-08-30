@@ -18,16 +18,6 @@ RUN apk update && apk add --no-cache \
 WORKDIR /app
 RUN pip install poetry
 
-ENV WHATAP_HOME /whatap
-RUN mkdir -p /whatap
-RUN pip install whatap-python
-
-RUN touch /whatap/whatap.conf
-RUN echo "license=[ ACCESS_KEY ]" > /whatap/whatap.conf
-RUN echo "whatap.server.host=[ COLLECTION_SERVER_IP ]" >> /whatap/whatap.conf
-RUN echo "app_name=[ AGENT_NAME ]" >> /whatap/whatap.conf
-RUN echo "app_process_name=[ APPLICATION_PROCESS_NAME(uwsgi, gunicorn etc..) ]" >> /whatap/whatap.conf
-
 # pyproject.toml 및 poetry.lock 파일 복사
 COPY pyproject.toml poetry.lock ./
 
@@ -39,7 +29,6 @@ RUN poetry config virtualenvs.create false \
 COPY . .
 
 RUN chmod -R 777 /app
-RUN chmod -R 777 $WHATAP_HOME
 
 # 사용자 추가 및 /app 디렉토리 소유권 변경
 RUN adduser \
@@ -53,7 +42,7 @@ EXPOSE 8000
 ARG DEV=false
 
 # Poetry를 통해 실행
-CMD ["poetry", "run", "whatap-start-agent", "python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["poetry", "run", "python", "manage.py", "runserver", "0.0.0.0:8000"]
 
 USER django-user
 
