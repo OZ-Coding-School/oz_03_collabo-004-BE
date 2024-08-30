@@ -49,8 +49,12 @@ class CommentCRUDTests(APITestCase):
         )
         self.client.force_authenticate(user=new_user)
 
-        data = {"content": "New Comment", "article": self.article.id}
-        response = self.client.post(self.create_url, data, format="json")
+        data = {
+            "content": "New Comment",
+            "article": self.article.id,
+            "images": [],  # 이미지 필드는 비어 있음
+        }
+        response = self.client.post(self.create_url, data, format="multipart")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Comment.objects.count(), 2)
         self.assertEqual(Comment.objects.last().content, "New Comment")
@@ -58,8 +62,8 @@ class CommentCRUDTests(APITestCase):
 
     def test_create_comment_by_article_owner(self):
         # 게시글 작성자가 댓글을 달려고 할 때 실패하는지 테스트
-        data = {"content": "Owner's Comment"}
-        response = self.client.post(self.create_url, data, format="json")
+        data = {"content": "Owner's Comment", "images": []}  # 이미지 필드는 비어 있음
+        response = self.client.post(self.create_url, data, format="multipart")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Comment.objects.count(), 1)  # 기존 댓글 1개 그대로
 
@@ -73,8 +77,11 @@ class CommentCRUDTests(APITestCase):
         )
         self.client.force_authenticate(user=new_user)
 
-        data = {"content": "Another User's Comment"}
-        response = self.client.post(self.create_url, data, format="json")
+        data = {
+            "content": "Another User's Comment",
+            "images": [],  # 이미지 필드는 비어 있음
+        }
+        response = self.client.post(self.create_url, data, format="multipart")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Comment.objects.count(), 2)
         self.assertEqual(Comment.objects.last().content, "Another User's Comment")
@@ -96,8 +103,12 @@ class CommentCRUDTests(APITestCase):
 
     def test_update_comment(self):
         # 댓글 수정 테스트
-        data = {"content": "Updated Comment", "article": self.article.id}
-        response = self.client.put(self.update_url, data, format="json")
+        data = {
+            "content": "Updated Comment",
+            "article": self.article.id,
+            "images": [],  # 이미지 필드는 비어 있음
+        }
+        response = self.client.put(self.update_url, data, format="multipart")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.comment.refresh_from_db()
         self.assertEqual(self.comment.content, "Updated Comment")
@@ -109,30 +120,14 @@ class CommentCRUDTests(APITestCase):
         self.article.save()
 
         # 댓글 수정 시도
-        data = {"content": "Updated Comment"}
-        response = self.client.put(self.update_url, data, format="json")
+        data = {"content": "Updated Comment", "images": []}  # 이미지 필드는 비어 있음
+        response = self.client.put(self.update_url, data, format="multipart")
 
         # 403 Forbidden 응답이 반환되어야 함
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertIn(
             "이미 마감이 된 게시글에 대하여 수정할 수 없습니다.", str(response.data)
         )
-
-    # ai 시그널이랑 연결되어 있어 요금 부과
-    # def test_update_comment_when_other_comment_is_selected(self):
-    #     # 기존 댓글을 선택된 상태로 만듦
-    #     self.comment.is_selected = True
-    #     self.comment.save()
-
-    #     # 댓글 수정 시도
-    #     data = {"content": "Updated Comment"}
-    #     response = self.client.put(self.update_url, data, format="json")
-
-    #     # 403 Forbidden 응답이 반환되어야 함
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    #     self.assertIn(
-    #         "이 게시글의 다른 댓글이 이미 채택되었습니다.", str(response.data)
-    #     )
 
     def test_update_comment_when_not_owner(self):
         # 다른 유저 생성
@@ -145,8 +140,8 @@ class CommentCRUDTests(APITestCase):
         self.client.force_authenticate(user=another_user)
 
         # 댓글 수정 시도
-        data = {"content": "Updated Comment"}
-        response = self.client.put(self.update_url, data, format="json")
+        data = {"content": "Updated Comment", "images": []}  # 이미지 필드는 비어 있음
+        response = self.client.put(self.update_url, data, format="multipart")
 
         # 403 Forbidden 응답이 반환되어야 함
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
