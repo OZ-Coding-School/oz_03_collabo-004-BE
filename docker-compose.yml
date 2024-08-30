@@ -15,7 +15,8 @@ services:
     command: >
       sh -c "python manage.py makemigrations &&
              python manage.py migrate &&
-             whatap-start-agent python manage.py runserver --noreload 0.0.0.0:8000"
+             python manage.py runserver --noreload 0.0.0.0:8000 &&
+             whatap-start-agent docker-compose run --rm app python manage.py runserver"
     environment:
       - DB_HOST=${RDS_HOSTNAME} 
       - DB_NAME=${RDS_DB_NAME}
