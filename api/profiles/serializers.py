@@ -12,6 +12,7 @@ from .models import Profile
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    profile_image = serializers.SerializerMethodField()
     selected_tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True
     )
@@ -36,6 +37,12 @@ class ProfileSerializer(serializers.ModelSerializer):
             "articles",
             "comments",
         ]
+
+    def get_profile_image(self, obj):
+        # URL을 직접 반환하여 올바르게 처리되도록 함
+        if obj.profile_image:
+            return obj.profile_image  # 혹은 obj.profile_image.url, 필요에 따라 조정
+        return None
 
     def update(self, instance, validated_data):
         user_data = validated_data.pop("user", {})

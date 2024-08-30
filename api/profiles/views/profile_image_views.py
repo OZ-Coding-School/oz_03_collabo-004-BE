@@ -34,9 +34,9 @@ class UpdateProfileImageView(generics.UpdateAPIView):
             s3instance, profile_image_file, profile.user.id
         )
 
-        # 기존 이미지 삭제 (선택 사항: S3에서도 삭제하려면 추가 구현 필요)
+        # 기존 이미지 삭제
         if profile.profile_image:
-            profile.profile_image.delete()
+            S3Instance.delete_file(s3instance, profile.profile_image)
 
         # 새 이미지 URL로 프로필 업데이트
         profile.profile_image = profile_image_url
@@ -64,7 +64,11 @@ class DeleteProfileImageView(generics.UpdateAPIView):
             )
 
         if profile.profile_image:
-            profile.profile_image.delete()
+            # S3에서 이미지 삭제
+            s3instance = S3Instance().get_s3_instance()
+            S3Instance.delete_file(s3instance, profile.profile_image)
+
+            # 프로필 이미지 필드를 비웁니다.
             profile.profile_image = None
             profile.save()
 
