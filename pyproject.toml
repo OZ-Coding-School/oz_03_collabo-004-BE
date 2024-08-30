@@ -19,6 +19,7 @@ coverage = "^7.6.1"
 django-cors-headers = "^3.14.0"
 pillow = "^10.4.0"
 openai = "^1.42.0"
+whatap-python = "^1.6.8"
 
 
 
