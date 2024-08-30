@@ -39,6 +39,7 @@ class S3Instance:
                     random.choices(string.ascii_letters + string.digits, k=16)
                 )
                 image_uri = f"articles/{article_id}/{random_string}.png"
+
                 s3_client.upload_fileobj(
                     file,
                     os.getenv("AWS_STORAGE_BUCKET_NAME"),

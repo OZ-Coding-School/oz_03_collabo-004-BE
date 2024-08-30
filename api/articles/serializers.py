@@ -140,28 +140,6 @@ class ArticleSerializer(serializers.ModelSerializer):
         instance.tags.set(tag_ids)
         instance.save()
 
-        images_data = self.context["request"].FILES.getlist("images")
-        images_to_delete = self.context["request"].data.get("images_to_delete", [])
-
-        # 기존 이미지 삭제 처리
-        if images_to_delete or images_data:
-            s3instance = S3Instance().get_s3_instance()
-            # 삭제할 이미지가 명시되었거나, 새로운 이미지가 업로드되면 모든 기존 이미지 삭제
-            for image in instance.images.all():
-                S3Instance.delete_file(s3instance, image.image)
-                image.delete()
-
-        # 새로운 이미지 추가
-        if images_data:
-            s3instance = S3Instance().get_s3_instance()
-            image_urls = S3Instance.upload_files(s3instance, images_data, instance.id)
-
-            for index, image_url in enumerate(image_urls):
-                is_thumbnail = index == 0  # 첫 번째 이미지를 썸네일로 설정
-                ArticleImage.objects.create(
-                    article=instance, image=image_url, is_thumbnail=is_thumbnail
-                )
-
         return instance
 
 

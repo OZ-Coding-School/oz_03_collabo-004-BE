@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from ..models import Article, ArticleImage
+from ..s3instance import S3Instance
 from ..serializers import ArticleImageSerializer, ArticleSerializer
 
 
@@ -52,18 +53,25 @@ class ArticleUpdateView(generics.UpdateAPIView):
         return article
 
     def perform_update(self, serializer):
-        # tag_ids를 쉼표로 구분된 문자열로 받았을 때 리스트로 변환
-        tag_ids = self.request.data.get("tag_ids", "")
-        if isinstance(tag_ids, str):
-            tag_ids = [
-                int(tag_id.strip()) for tag_id in tag_ids.split(",") if tag_id.strip()
-            ]
-        elif isinstance(tag_ids, list):
-            tag_ids = [int(tag_id) for tag_id in tag_ids]
+        article = serializer.save()
 
-        article = serializer.save(tag_ids=tag_ids)
+        images_data = self.request.FILES.getlist("images")
+        if images_data:
+            s3instance = S3Instance().get_s3_instance()
+            # 기존 이미지 삭제
+            for image in article.images.all():
+                S3Instance.delete_file(s3instance, image.image)
+                image.delete()
 
-        return Response(serializer.data)
+            # 새로운 이미지 업로드
+            image_urls = S3Instance.upload_files(s3instance, images_data, article.id)
+            for index, image_url in enumerate(image_urls):
+                is_thumbnail = index == 0  # 첫 번째 이미지를 썸네일로 설정
+                ArticleImage.objects.create(
+                    article=article, image=image_url, is_thumbnail=is_thumbnail
+                )
+
+        return article
 
 
 # 게시글 삭제
