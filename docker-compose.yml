@@ -45,8 +45,22 @@ services:
     networks:
       - app_network
 
+  elasticsearch:
+    image: elasticsearch:8.9.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.monitoring.collection.enabled=true
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    networks:
+      - app_network
+
 volumes:
   jenkins_home:
+  es_data:
 
 networks:
   app_network:
