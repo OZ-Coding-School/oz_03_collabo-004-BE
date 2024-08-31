@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status
 from rest_framework.exceptions import PermissionDenied
@@ -23,30 +24,33 @@ class CommentSelectView(generics.UpdateAPIView):
         return comment
 
     def perform_update(self, serializer):
-        # 댓글 채택 로직
-        comment = self.get_object()
+        with transaction.atomic():
+            # 댓글 채택 로직
+            comment = self.get_object()
 
-        # 게시글이 이미 마감되었는지 확인
-        if comment.article.is_closed:
-            raise PermissionDenied("이미 마감된 게시글입니다.")
+            # 게시글이 이미 마감되었는지 확인
+            if comment.article.is_closed:
+                raise PermissionDenied("이미 마감된 게시글입니다.")
 
-        # 이미 다른 댓글이 채택되었는지 확인
-        if Comment.objects.filter(article=comment.article, is_selected=True).exists():
-            raise PermissionDenied("이미 다른 댓글이 채택되었습니다.")
+            # 이미 다른 댓글이 채택되었는지 확인
+            if Comment.objects.filter(
+                article=comment.article, is_selected=True
+            ).exists():
+                raise PermissionDenied("이미 다른 댓글이 채택되었습니다.")
 
-        # 댓글을 채택하고 게시글을 마감
-        comment.is_selected = True
-        comment.article.is_closed = True
-        comment.save()
-        comment.article.save()
+            # 댓글을 채택하고 게시글을 마감
+            comment.is_selected = True
+            comment.article.is_closed = True
+            comment.save()
+            comment.article.save()
 
-        serializer.instance = comment
-        return Response(
-            {
-                "message": "댓글이 채택되었고, 게시글이 마감되었습니다.",
-                "data": serializer.data,
-            }
-        )
+            serializer.instance = comment
+            return Response(
+                {
+                    "message": "댓글이 채택되었고, 게시글이 마감되었습니다.",
+                    "data": serializer.data,
+                }
+            )
 
 
 class CommentReactionToggleView(APIView):

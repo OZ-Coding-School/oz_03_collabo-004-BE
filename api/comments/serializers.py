@@ -39,6 +39,7 @@ class CommentSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
+        request = self.context["request"]
         article_id = self.context["view"].kwargs["article_id"]
         article = Article.objects.get(id=article_id)
 
@@ -46,6 +47,15 @@ class CommentSerializer(serializers.ModelSerializer):
         if article.user == self.context["request"].user:
             raise serializers.ValidationError(
                 "게시글 작성자는 해당 게시글에 댓글을 달 수 없습니다."
+            )
+
+        # 동일한 사용자가 동일한 게시글에 댓글을 다시 작성하려는지 확인
+
+        if Comment.objects.filter(
+            user=self.context["request"].user, article=article
+        ).exists():
+            raise serializers.ValidationError(
+                "해당 게시글에 이미 댓글을 작성하셨습니다."
             )
 
         # 이미지는 뷰에서 처리되므로 시리얼라이저에서는 생성된 댓글만 반환
