@@ -17,6 +17,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         queryset=Tag.objects.all(), many=True
     )
     nickname = serializers.CharField(source="user.nickname", required=False)
+    user_id = serializers.IntegerField(source="user.id", read_only=True)
     selected_comment_count = serializers.SerializerMethodField()
     hunsoo_level = serializers.IntegerField(read_only=True)
     articles = serializers.SerializerMethodField()
@@ -27,6 +28,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = [
             "status",
+            "user_id",
             "bio",
             "profile_image",
             "nickname",
