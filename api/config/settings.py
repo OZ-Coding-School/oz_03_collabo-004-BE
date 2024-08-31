@@ -258,7 +258,7 @@ LOGGING = {
     "handlers": {
         "file": {
             "class": "logging.FileHandler",
-            "filename": "general.log",
+            "filename": os.path.join(os.getenv("LOG_DIR", "/app/logs/"), "general.log"),
             "level": "DEBUG",
         },
     },
