@@ -19,6 +19,8 @@ coverage = "^7.6.1"
 django-cors-headers = "^3.14.0"
 pillow = "^10.4.0"
 openai = "^1.42.0"
+elasticsearch = "^8.0.0"
+elasticsearch-dsl = "^8.0.0"
 
 
 
