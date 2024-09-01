@@ -1,6 +1,7 @@
 from articles.models import Article
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
+from elasticsearch import NotFoundError
 
 from .search_indexes import ArticleDocument
 
@@ -16,5 +17,5 @@ def delete_article_from_index(sender, instance, **kwargs):
     try:
         article_doc = ArticleDocument.get(id=instance.id)
         article_doc.delete()
-    except ArticleDocument.DoesNotExist:
+    except NotFoundError:
         pass
