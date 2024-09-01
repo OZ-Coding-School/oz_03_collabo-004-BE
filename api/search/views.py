@@ -1,3 +1,5 @@
+from articles.models import Article
+from articles.serializers import ArticleListSerializer
 from elasticsearch_dsl import Search
 from rest_framework import status
 from rest_framework.permissions import AllowAny
@@ -5,7 +7,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .search_indexes import ArticleDocument
-from .serializers import ArticleSearchSerializer
 
 
 class ArticleSearchView(APIView):
@@ -19,13 +20,21 @@ class ArticleSearchView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Elasticsearch에서 검색
         search = Search(index=ArticleDocument.Index.name).query(
             "multi_match", query=query, fields=["title", "content"]
         )
         response = search.execute()
 
-        results = [
-            {"title": hit.title, "content": hit.content, "created_at": hit.created_at}
-            for hit in response
-        ]
-        return Response(results)
+        # Elasticsearch에서 반환된 결과의 ID를 가져옴
+        article_ids = [hit.meta.id for hit in response]
+
+        # Django ORM을 통해 Article 객체를 가져옴
+        articles = Article.objects.filter(id__in=article_ids)
+
+        # ArticleListSerializer를 사용하여 직렬화
+        serializer = ArticleListSerializer(
+            articles, many=True, context={"request": request}
+        )
+
+        return Response(serializer.data)
