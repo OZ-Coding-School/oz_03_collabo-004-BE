@@ -59,7 +59,7 @@ class ArticleListSerializer(serializers.ModelSerializer):
         return {
             "user_id": obj.user.id,
             "nickname": obj.user.nickname,
-            "profile_image": profile.image_url,
+            "profile_image": profile.profile_image,
             "hunsoo_level": profile.hunsoo_level,
         }
 
@@ -191,7 +191,7 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
         return {
             "user_id": obj.user.id,
             "nickname": obj.user.nickname,
-            "profile_image": profile.image_url,
+            "profile_image": profile.profile_image,
             "hunsoo_level": profile.hunsoo_level,
         }
 
