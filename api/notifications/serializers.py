@@ -4,6 +4,7 @@ from .models import Notification
 
 
 class NotificationSerializer(serializers.ModelSerializer):
+    actor_nickname = serializers.CharField(source="actor.nickname", read_only=True)
     actor_username = serializers.CharField(source="actor.username", read_only=True)
     target_object = serializers.SerializerMethodField()
 
@@ -12,6 +13,7 @@ class NotificationSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "recipient",
+            "actor_nickname",
             "actor_username",
             "verb",
             "target_object",
