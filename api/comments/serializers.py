@@ -73,6 +73,8 @@ class CommentListSerializer(serializers.ModelSerializer):
     user_nickname = serializers.CharField(source="user.nickname", read_only=True)
     helpful_count = serializers.IntegerField(read_only=True)
     not_helpful_count = serializers.IntegerField(read_only=True)
+    user_profile_image = serializers.SerializerMethodField()
+    user_hunsoo_level = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
@@ -80,6 +82,8 @@ class CommentListSerializer(serializers.ModelSerializer):
             "id",
             "user",
             "user_nickname",
+            "user_profile_image",
+            "user_hunsoo_level",
             "content",
             "is_selected",
             "helpful_count",
@@ -92,12 +96,26 @@ class CommentListSerializer(serializers.ModelSerializer):
             "id",
             "user",
             "user_nickname",
+            "user_profile_image",
+            "user_hunsoo_level",
             "is_selected",
             "helpful_count",
             "not_helpful_count",
             "created_at",
             "updated_at",
         ]
+
+    def get_user_profile_image(self, obj):
+        profile = obj.user.profile
+        if profile:
+            return profile.image_url
+        return None
+
+    def get_user_hunsoo_level(self, obj):
+        profile = obj.user.profile
+        if profile:
+            return profile.hunsoo_level
+        return None
 
 
 class UserCommentListSerializer(serializers.ModelSerializer):
@@ -142,6 +160,8 @@ class CommentDetailSerializer(serializers.ModelSerializer):
     user_nickname = serializers.CharField(source="user.nickname", read_only=True)
     helpful_count = serializers.IntegerField(read_only=True)
     not_helpful_count = serializers.IntegerField(read_only=True)
+    user_profile_image = serializers.SerializerMethodField()
+    user_hunsoo_level = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
@@ -149,6 +169,8 @@ class CommentDetailSerializer(serializers.ModelSerializer):
             "id",
             "user",
             "user_nickname",
+            "user_profile_image",
+            "user_hunsoo_level",
             "content",
             "is_selected",
             "helpful_count",
@@ -161,12 +183,26 @@ class CommentDetailSerializer(serializers.ModelSerializer):
             "id",
             "user",
             "user_nickname",
+            "user_profile_image",
+            "user_hunsoo_level",
             "is_selected",
             "helpful_count",
             "not_helpful_count",
             "created_at",
             "updated_at",
         ]
+
+    def get_user_profile_image(self, obj):
+        profile = obj.user.profile
+        if profile:
+            return profile.image_url
+        return None
+
+    def get_user_hunsoo_level(self, obj):
+        profile = obj.user.profile
+        if profile:
+            return profile.hunsoo_level
+        return None
 
 
 # 도움이 돼요/안돼요 시리얼 라이저
