@@ -23,12 +23,14 @@ class ProfileSerializer(serializers.ModelSerializer):
     articles = serializers.SerializerMethodField()
     comments = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
+    email = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
         fields = [
             "status",
             "user_id",
+            "email",
             "bio",
             "profile_image",
             "nickname",
@@ -61,6 +63,9 @@ class ProfileSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
+    def get_email(self, obj):
+        return obj.user.email
 
     def get_selected_comment_count(self, obj):
         return Comment.objects.filter(user=obj.user, is_selected=True).count()
