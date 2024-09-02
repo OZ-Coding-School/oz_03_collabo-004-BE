@@ -1,3 +1,4 @@
+from articles.s3instance import S3Instance
 from comments.serializers import CommentListSerializer
 from django.core.files.storage import default_storage
 from rest_framework import serializers
@@ -9,16 +10,23 @@ from .models import Article, ArticleImage
 
 # 게시글 작성시 이미지 삽입 시리얼라이저
 class ArticleImageSerializer(serializers.ModelSerializer):
-    image_url = serializers.ReadOnlyField(source="image.url")
+    image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = ArticleImage
         fields = ["id", "image_url", "is_thumbnail"]
 
+    def get_image_url(self, obj):
+        # S3에 저장된 이미지의 URL 반환
+        if obj.image:
+            return obj.image  # image는 S3 URL을 직접 저장한 필드
+        return None
+
 
 # 전체 게시글조회를 위한 시리얼라이저
 class ArticleListSerializer(serializers.ModelSerializer):
     article_id = serializers.ReadOnlyField(source="id")
+    images = ArticleImageSerializer(many=True, required=False)
     tag_ids = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True, write_only=True
     )
@@ -33,6 +41,7 @@ class ArticleListSerializer(serializers.ModelSerializer):
             "article_id",
             "title",
             "content",
+            "images",
             "user",
             "tag_ids",
             "tags",
@@ -61,9 +70,7 @@ class ArticleListSerializer(serializers.ModelSerializer):
 class ArticleSerializer(serializers.ModelSerializer):
     article_id = serializers.ReadOnlyField(source="id")
     images = ArticleImageSerializer(many=True, required=False)
-    tag_ids = serializers.PrimaryKeyRelatedField(
-        queryset=Tag.objects.all(), many=True, write_only=True
-    )
+    tag_ids = serializers.CharField(write_only=True)
     tags = TagSerializer(many=True, read_only=True)
     user = serializers.SerializerMethodField()
     comments_count = serializers.SerializerMethodField()
@@ -92,49 +99,46 @@ class ArticleSerializer(serializers.ModelSerializer):
     def get_comments_count(self, obj):
         return obj.comments.count()
 
+    def parse_tag_ids(self, tag_ids):
+        if isinstance(tag_ids, str):
+            # 문자열로 전달된 경우 쉼표로 구분하여 리스트로 변환
+            return [
+                int(tag_id.strip()) for tag_id in tag_ids.split(",") if tag_id.strip()
+            ]
+        elif isinstance(tag_ids, list):
+            # 이미 리스트로 전달된 경우, 각 요소를 정수로 변환
+            return [int(tag_id) for tag_id in tag_ids]
+        return []
+
     def create(self, validated_data):
-        tags = validated_data.pop("tag_ids", [])
-        images_data = validated_data.pop("images", [])
+        tag_ids_str = validated_data.pop("tag_ids", "")
+        tag_ids = self.parse_tag_ids(tag_ids_str)
 
         article = Article.objects.create(**validated_data)
-        article.tags.add(*tags)
+        article.tags.add(*tag_ids)
 
-        for index, image_data in enumerate(images_data):
-            image_file = image_data["image"]  # 업로드된 파일 가져오기
-            image = default_storage.save(image_file.name, image_file)  # S3에 업로드
-            is_thumbnail = image_data.get("is_thumbnail", False)
-            if index == 0:  # 첫 번째 이미지를 썸네일로 설정
-                is_thumbnail = True
-            ArticleImage.objects.create(
-                article=article, image=image, is_thumbnail=is_thumbnail
-            )
+        images_data = self.context["request"].FILES.getlist("images")
+        if images_data:
+            s3instance = S3Instance().get_s3_instance()
+            image_urls = S3Instance.upload_files(s3instance, images_data, article.id)
+
+            for index, image_url in enumerate(image_urls):
+                is_thumbnail = index == 0  # 첫 번째 이미지를 썸네일로 설정
+                ArticleImage.objects.create(
+                    article=article, image=image_url, is_thumbnail=is_thumbnail
+                )
 
         return article
 
     def update(self, instance, validated_data):
-        tags = validated_data.pop("tag_ids", [])
-        images_data = validated_data.pop("images", [])
+        tag_ids_str = validated_data.pop("tag_ids", "")
+        tag_ids = self.parse_tag_ids(tag_ids_str)
 
+        # 제목과 내용을 업데이트
         instance.title = validated_data.get("title", instance.title)
         instance.content = validated_data.get("content", instance.content)
+        instance.tags.set(tag_ids)
         instance.save()
-
-        if tags:
-            instance.tags.set(tags)
-
-        if images_data:
-            # 기존 이미지를 삭제
-            instance.images.all().delete()
-            # 새로운 이미지 추가
-            for index, image_data in enumerate(images_data):
-                image_file = image_data["image"]
-                image = default_storage.save(image_file.name, image_file)  # S3에 업로드
-                is_thumbnail = image_data.get("is_thumbnail", False)
-                if index == 0:  # 첫 번째 이미지를 썸네일로 설정
-                    is_thumbnail = True
-                ArticleImage.objects.create(
-                    article=instance, image=image, is_thumbnail=is_thumbnail
-                )
 
         return instance
 

@@ -1,5 +1,6 @@
 from articles.models import Article
 from rest_framework import serializers
+from tags.serializers import TagSerializer
 
 from .models import Comment, CommentImage, CommentReaction
 
@@ -8,7 +9,7 @@ from .models import Comment, CommentImage, CommentReaction
 class CommentImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = CommentImage
-        fields = ["id", "image_url"]
+        fields = ["id", "image"]
 
 
 # 댓글 작성 및 수정 시리얼라이저
@@ -38,6 +39,7 @@ class CommentSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
+        request = self.context["request"]
         article_id = self.context["view"].kwargs["article_id"]
         article = Article.objects.get(id=article_id)
 
@@ -47,11 +49,22 @@ class CommentSerializer(serializers.ModelSerializer):
                 "게시글 작성자는 해당 게시글에 댓글을 달 수 없습니다."
             )
 
-        images_data = validated_data.pop("images", [])
+        # 동일한 사용자가 동일한 게시글에 댓글을 다시 작성하려는지 확인
+
+        if Comment.objects.filter(
+            user=self.context["request"].user, article=article
+        ).exists():
+            raise serializers.ValidationError(
+                "해당 게시글에 이미 댓글을 작성하셨습니다."
+            )
+
+        # 이미지는 뷰에서 처리되므로 시리얼라이저에서는 생성된 댓글만 반환
         comment = Comment.objects.create(article=article, **validated_data)
-        for image_data in images_data:
-            CommentImage.objects.create(comment=comment, **image_data)
         return comment
+
+    def update(self, instance, validated_data):
+        # 이미지는 뷰에서 처리되므로 시리얼라이저에서는 댓글만 업데이트
+        return super().update(instance, validated_data)
 
 
 # 댓글 목록 조회 시리얼라이저
@@ -82,6 +95,42 @@ class CommentListSerializer(serializers.ModelSerializer):
             "is_selected",
             "helpful_count",
             "not_helpful_count",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class UserCommentListSerializer(serializers.ModelSerializer):
+    images = CommentImageSerializer(many=True, read_only=True)
+    user_nickname = serializers.CharField(source="user.nickname", read_only=True)
+    helpful_count = serializers.IntegerField(read_only=True)
+    not_helpful_count = serializers.IntegerField(read_only=True)
+
+    # 댓글이 달린 게시글의 추가 정보
+    article_title = serializers.CharField(source="article.title", read_only=True)
+    article_id = serializers.CharField(source="article.id", read_only=True)
+    article_user_id = serializers.IntegerField(source="article.user.id", read_only=True)
+    article_user_nickname = serializers.CharField(
+        source="article.user.nickname", read_only=True
+    )
+    article_tags = TagSerializer(source="article.tags", many=True, read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = [
+            "id",
+            "user",
+            "user_nickname",
+            "content",
+            "is_selected",
+            "helpful_count",
+            "not_helpful_count",
+            "images",
+            "article_id",
+            "article_title",
+            "article_user_id",
+            "article_user_nickname",
+            "article_tags",
             "created_at",
             "updated_at",
         ]

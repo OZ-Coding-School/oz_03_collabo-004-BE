@@ -1,7 +1,8 @@
 from articles.models import Article, ArticleImage
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITestCase
+from rest_framework.test import APIClient, APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
 from tags.models import Tag
 from users.models import User
@@ -35,15 +36,18 @@ class ArticleCRUDTests(APITestCase):
         self.article_data = {
             "title": "Test Article",
             "content": "This is a test article.",
-            "tag_ids": [self.tag1.tag_id, self.tag2.tag_id],
+            "tag_ids": f"{self.tag1.tag_id},{self.tag2.tag_id}",
+            # 이미지 필드는 폼데이터로 보내지 않음
         }
 
         # 게시글 생성 URL
         self.create_url = reverse("article-create")
 
     def test_create_article(self):
-        # 게시글 생성 테스트
-        response = self.client.post(self.create_url, self.article_data, format="json")
+        # 폼데이터 형식으로 요청 보내기
+        response = self.client.post(
+            self.create_url, data=self.article_data, format="multipart"
+        )
         print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Article.objects.count(), 1)
@@ -60,11 +64,12 @@ class ArticleCRUDTests(APITestCase):
         update_data = {
             "title": "Updated Title",
             "content": "Updated content",
-            "tag_ids": [self.tag1.tag_id, self.tag3.tag_id],
+            "tag_ids": f"{self.tag1.tag_id},{self.tag3.tag_id}",
+            # 이미지 필드는 폼데이터로 보내지 않음
         }
 
-        # 게시글 수정 테스트
-        response = self.client.put(update_url, update_data, format="json")
+        # 폼데이터 형식으로 요청 보내기
+        response = self.client.put(update_url, data=update_data, format="multipart")
         print(response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 

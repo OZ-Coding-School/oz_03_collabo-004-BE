@@ -36,14 +36,14 @@ class S3Instance:
             random_string = "".join(
                 random.choices(string.ascii_letters + string.digits, k=16)
             )
-            profile_image_uri = f"profile_images/{user_id}/{random_string}.png"
+            file_uri = f"comments/{user_id}/{random_string}.png"
             s3_client.upload_fileobj(
                 file,
                 os.getenv("AWS_STORAGE_BUCKET_NAME"),
-                profile_image_uri,
+                file_uri,
             )
-            profile_image_url = f"https://{os.getenv('AWS_STORAGE_BUCKET_NAME')}.s3.{os.getenv('AWS_S3_REGION_NAME')}.amazonaws.com/{profile_image_uri}"
-            return profile_image_url
+            file_url = f"https://{os.getenv('AWS_STORAGE_BUCKET_NAME')}.s3.{os.getenv('AWS_S3_REGION_NAME')}.amazonaws.com/{file_uri}"
+            return file_url
         except (NoCredentialsError, PartialCredentialsError) as e:
             raise Exception("Could not upload file to S3: " + str(e))
 
