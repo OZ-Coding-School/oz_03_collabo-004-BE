@@ -108,7 +108,7 @@ class CommentListSerializer(serializers.ModelSerializer):
     def get_user_profile_image(self, obj):
         profile = obj.user.profile
         if profile:
-            return profile.image_url
+            return profile.profile_image
         return None
 
     def get_user_hunsoo_level(self, obj):
@@ -195,7 +195,7 @@ class CommentDetailSerializer(serializers.ModelSerializer):
     def get_user_profile_image(self, obj):
         profile = obj.user.profile
         if profile:
-            return profile.image_url
+            return profile.profile_image
         return None
 
     def get_user_hunsoo_level(self, obj):
