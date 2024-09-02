@@ -15,8 +15,7 @@ from datetime import timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
-from elasticsearch import Elasticsearch
-from elasticsearch.exceptions import ConnectionError
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -99,7 +98,6 @@ INSTALLED_APPS = [
     "tags.apps.TagsConfig",
     "users.apps.UsersConfig",
     "notifications.apps.NotificationsConfig",
-    "search.apps.SearchConfig",
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
@@ -255,9 +253,7 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-ELASTICSEARCH_DSL = {
-    "default": {"hosts": "http://elasticsearch:9200"},
-}
+
 
 LOGGING = {
     "version": 1,
