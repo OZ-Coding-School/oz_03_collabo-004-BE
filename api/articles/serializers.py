@@ -54,7 +54,14 @@ class ArticleListSerializer(serializers.ModelSerializer):
         ]
 
     def get_user(self, obj):
-        return {"user_id": obj.user.id, "nickname": obj.user.nickname}
+        user = obj.user
+        profile = user.profile
+        return {
+            "user_id": obj.user.id,
+            "nickname": obj.user.nickname,
+            "profile_image": profile.image_url,
+            "hunsoo_level": profile.hunsoo_level,
+        }
 
     def get_thumbnail_image(self, obj):
         thumbnail_image = obj.images.filter(is_thumbnail=True).first()
@@ -179,7 +186,14 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
         ]
 
     def get_user(self, obj):
-        return {"user_id": obj.user.id, "nickname": obj.user.nickname}
+        user = obj.user
+        profile = user.profile
+        return {
+            "user_id": obj.user.id,
+            "nickname": obj.user.nickname,
+            "profile_image": profile.image_url,
+            "hunsoo_level": profile.hunsoo_level,
+        }
 
     def get_thumbnail_image(self, obj):
         thumbnail_image = obj.images.filter(is_thumbnail=True).first()
