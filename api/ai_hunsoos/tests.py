@@ -28,10 +28,14 @@ class AiHunsooDetailViewTest(TestCase):
             view_count=0,
         )
 
-        # AiHunsoo 객체 생성
-        self.ai_hunsoo = AiHunsoo.objects.create(
-            article=self.article, content="This is an AI generated response."
-        )
+        # # AiHunsoo 객체 생성
+        # self.ai_hunsoo = AiHunsoo.objects.create(
+        #     article=self.article, content="This is an AI generated response."
+        # )
+
+        # article 생성 시 AiHunsoo 객체 생성 되는 signal 추가
+
+        self.ai_hunsoo = AiHunsoo.objects.get(article=self.article)
 
         self.client = APIClient()
 
@@ -45,3 +49,9 @@ class AiHunsooDetailViewTest(TestCase):
         url = f"/api/ai_hunsu/9999/"
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
+
+    def tearDown(self):
+        # 테스트 데이터 삭제
+        AiHunsoo.objects.all().delete()
+        Article.objects.all().delete()
+        User.objects.all().delete()
