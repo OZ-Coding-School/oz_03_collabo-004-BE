@@ -60,6 +60,7 @@ class CommentSelectView(generics.UpdateAPIView):
         ai_hunsoo_data = self.perform_update(self.get_serializer())
         return Response(
             {
+                "message": "댓글이 채택되었고, 게시글이 마감되었습니다.",
                 "ai_hunsoo_data": ai_hunsoo_data,
             }
         )
