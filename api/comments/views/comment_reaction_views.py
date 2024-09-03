@@ -58,12 +58,7 @@ class CommentSelectView(generics.UpdateAPIView):
     def update(self, request, *args, **kwargs):
         # perform_update 메서드에서 원하는 데이터를 반환받음
         ai_hunsoo_data = self.perform_update(self.get_serializer())
-        return Response(
-            {
-                "message": "댓글이 채택되었고, 게시글이 마감되었습니다.",
-                "ai_hunsoo_data": ai_hunsoo_data,
-            }
-        )
+        return Response(ai_hunsoo_data)
 
 
 class CommentReactionToggleView(APIView):
