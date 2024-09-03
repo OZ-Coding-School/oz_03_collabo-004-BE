@@ -1,3 +1,5 @@
+from ai_hunsoos.models import AiHunsoo
+from ai_hunsoos.serializers import AiHunsooSerializer
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status
@@ -44,13 +46,24 @@ class CommentSelectView(generics.UpdateAPIView):
             comment.save()
             comment.article.save()
 
-            serializer.instance = comment
-            return Response(
-                {
-                    "message": "댓글이 채택되었고, 게시글이 마감되었습니다.",
-                    "data": serializer.data,
-                }
-            )
+            # 댓글이 속한 게시글과 연결된 AiHunsoo 인스턴스를 가져오기
+            try:
+                ai_hunsoo = AiHunsoo.objects.get(article=comment.article)
+                ai_hunsoo_data = AiHunsooSerializer(ai_hunsoo).data
+            except AiHunsoo.DoesNotExist:
+                ai_hunsoo_data = None
+
+            return ai_hunsoo_data
+
+    def update(self, request, *args, **kwargs):
+        # perform_update 메서드에서 원하는 데이터를 반환받음
+        ai_hunsoo_data = self.perform_update(self.get_serializer())
+        return Response(
+            {
+                "message": "댓글이 채택되었고, 게시글이 마감되었습니다.",
+                "ai_hunsoo_data": ai_hunsoo_data,
+            }
+        )
 
 
 class CommentReactionToggleView(APIView):
