@@ -118,6 +118,69 @@ class CommentListSerializer(serializers.ModelSerializer):
         return None
 
 
+# 게시글 조회 시 필요한 댓글 목록 조회 시리얼라이저
+class CommentArticleListSerializer(serializers.ModelSerializer):
+    images = CommentImageSerializer(many=True, read_only=True)
+    user_nickname = serializers.CharField(source="user.nickname", read_only=True)
+    helpful_count = serializers.IntegerField(read_only=True)
+    not_helpful_count = serializers.IntegerField(read_only=True)
+    user_profile_image = serializers.SerializerMethodField()
+    user_hunsoo_level = serializers.SerializerMethodField()
+    reaction = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Comment
+        fields = [
+            "id",
+            "user",
+            "user_nickname",
+            "user_profile_image",
+            "user_hunsoo_level",
+            "content",
+            "is_selected",
+            "reaction",
+            "helpful_count",
+            "not_helpful_count",
+            "images",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = [
+            "id",
+            "user",
+            "user_nickname",
+            "user_profile_image",
+            "user_hunsoo_level",
+            "is_selected",
+            "helpful_count",
+            "not_helpful_count",
+            "created_at",
+            "updated_at",
+        ]
+
+    def get_user_profile_image(self, obj):
+        profile = obj.user.profile
+        if profile:
+            return profile.profile_image
+        return None
+
+    def get_user_hunsoo_level(self, obj):
+        profile = obj.user.profile
+        if profile:
+            return profile.hunsoo_level
+        return None
+
+    def get_reaction(self, obj):
+        request = self.context.get("request")
+        if request.user.is_authenticated:
+            user_reaction = CommentReaction.objects.filter(
+                user=request.user, comment=obj
+            ).first()
+            if user_reaction:
+                return user_reaction.reaction_type
+        return "none"
+
+
 class UserCommentListSerializer(serializers.ModelSerializer):
     images = CommentImageSerializer(many=True, read_only=True)
     user_nickname = serializers.CharField(source="user.nickname", read_only=True)

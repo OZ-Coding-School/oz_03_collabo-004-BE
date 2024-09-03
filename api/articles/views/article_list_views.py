@@ -1,5 +1,5 @@
 from rest_framework import generics
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 
 from ..models import Article
 from ..serializers import (
@@ -13,7 +13,7 @@ from ..serializers import (
 class ArticleDetailView(generics.RetrieveAPIView):
     queryset = Article.objects.all()
     serializer_class = ArticleDetailSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     lookup_field = "id"
 
 

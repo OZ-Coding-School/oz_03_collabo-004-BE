@@ -1,5 +1,5 @@
 from articles.s3instance import S3Instance
-from comments.serializers import CommentListSerializer
+from comments.serializers import CommentArticleListSerializer, CommentListSerializer
 from django.core.files.storage import default_storage
 from rest_framework import serializers
 from tags.models import Tag
@@ -160,14 +160,17 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
     )
     tags = TagSerializer(many=True, read_only=True)
     user = serializers.SerializerMethodField()
-    comments = CommentListSerializer(many=True, read_only=True)  # 댓글 목록을 포함
-    comments_count = serializers.IntegerField(
-        source="comments.count", read_only=True
-    )  # 댓글 수
+    comments = CommentArticleListSerializer(
+        many=True, read_only=True
+    )  # 댓글 목록을 포함
+    comments_count = serializers.IntegerField(source="comments.count", read_only=True)
+    # 댓글 수
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = Article
         fields = [
+            "status",
             "article_id",
             "user",
             "thumbnail_image",
@@ -200,3 +203,7 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
         if thumbnail_image:
             return thumbnail_image.image_url
         return None  # 썸네일 이미지가 없는경우(이미지가 아예없는 게시글)
+
+    def get_status(self, obj):
+        request = self.context.get("request")
+        return request.user.is_authenticated
