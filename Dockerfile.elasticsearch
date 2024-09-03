@@ -1,7 +1,0 @@
-FROM elasticsearch:8.9.0
-
-# nori 플러그인 설치
-RUN bin/elasticsearch-plugin install analysis-nori
-
-# Elasticsearch를 기본 모드로 실행
-CMD ["elasticsearch"]

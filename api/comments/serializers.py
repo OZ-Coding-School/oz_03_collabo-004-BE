@@ -107,7 +107,7 @@ class CommentListSerializer(serializers.ModelSerializer):
 
     def get_user_profile_image(self, obj):
         profile = obj.user.profile
-        if profile:
+        if profile and profile.profile_image:
             return profile.profile_image
         return None
 
@@ -257,7 +257,7 @@ class CommentDetailSerializer(serializers.ModelSerializer):
 
     def get_user_profile_image(self, obj):
         profile = obj.user.profile
-        if profile:
+        if profile and profile.profile_image:
             return profile.profile_image
         return None
 

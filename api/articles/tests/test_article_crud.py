@@ -1,6 +1,7 @@
 from articles.models import Article, ArticleImage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
+from profiles.models import Profile
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -18,6 +19,8 @@ class ArticleCRUDTests(APITestCase):
             password="testpassword",
             nickname="TestNickname",
         )
+        # 프로필 생성
+        self.profile = Profile.objects.create(user=self.user)
         # JWT 토큰 생성
         self.refresh = RefreshToken.for_user(self.user)
         self.access_token = str(self.refresh.access_token)
@@ -48,7 +51,6 @@ class ArticleCRUDTests(APITestCase):
         response = self.client.post(
             self.create_url, data=self.article_data, format="multipart"
         )
-        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Article.objects.count(), 1)
         self.assertEqual(Article.objects.first().title, "Test Article")
@@ -70,7 +72,6 @@ class ArticleCRUDTests(APITestCase):
 
         # 폼데이터 형식으로 요청 보내기
         response = self.client.put(update_url, data=update_data, format="multipart")
-        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # 수정 결과 확인
@@ -105,8 +106,19 @@ class ArticleCRUDTests(APITestCase):
         self.assertEqual(response.data["title"], article.title)
         self.assertEqual(response.data["content"], article.content)
 
+        # 프로필 정보 확인
+        self.assertEqual(response.data["user"]["user_id"], self.user.id)
+        self.assertEqual(response.data["user"]["nickname"], self.user.nickname)
+        self.assertEqual(
+            response.data["user"]["profile_image"], self.user.profile.profile_image
+        )
+        self.assertEqual(
+            response.data["user"]["hunsoo_level"], self.user.profile.hunsoo_level
+        )
+
     def tearDown(self):
         self.user.delete()
+        self.profile.delete()
         Tag.objects.all().delete()
         Article.objects.all().delete()
 
@@ -121,6 +133,9 @@ class ArticleListTests(APITestCase):
             password="testpassword",
             nickname="TestNickname",
         )
+
+        self.profile = Profile.objects.create(user=self.user)
+
         # JWT 토큰 생성
         self.refresh = RefreshToken.for_user(self.user)
         self.access_token = str(self.refresh.access_token)
@@ -158,6 +173,7 @@ class ArticleListTests(APITestCase):
 
     def tearDown(self):
         self.user.delete()
+        self.profile.delete()
         Tag.objects.all().delete()
         Article.objects.all().delete()
 
@@ -172,6 +188,9 @@ class ArticleByTagTests(APITestCase):
             password="testpassword",
             nickname="TestNickname",
         )
+
+        self.profile = Profile.objects.create(user=self.user)
+
         # JWT 토큰 생성
         self.refresh = RefreshToken.for_user(self.user)
         self.access_token = str(self.refresh.access_token)
@@ -224,5 +243,6 @@ class ArticleByTagTests(APITestCase):
 
     def tearDown(self):
         self.user.delete()
+        self.profile.delete()
         Tag.objects.all().delete()
         Article.objects.all().delete()

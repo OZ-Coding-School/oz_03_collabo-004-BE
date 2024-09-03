@@ -4,6 +4,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from users.models import User
+from profiles.models import Profile 
 
 
 class CommentCRUDTests(APITestCase):
@@ -16,6 +17,8 @@ class CommentCRUDTests(APITestCase):
             password="testpassword",
             nickname="TestNickname",
         )
+        # 프로필 생성
+        self.profile = Profile.objects.create(user=self.user)
 
         # JWT 토큰 생성 및 설정
         self.client.force_authenticate(user=self.user)
@@ -47,6 +50,8 @@ class CommentCRUDTests(APITestCase):
             password="newpassword",
             nickname="NewUserNickname",
         )
+        Profile.objects.create(user=new_user)
+
         self.client.force_authenticate(user=new_user)
 
         data = {
@@ -75,6 +80,9 @@ class CommentCRUDTests(APITestCase):
             password="anotherpassword",
             nickname="AnotherNickname",
         )
+
+        Profile.objects.create(user=new_user)
+
         self.client.force_authenticate(user=new_user)
 
         data = {
@@ -137,6 +145,8 @@ class CommentCRUDTests(APITestCase):
             password="anotherpassword",
             nickname="AnotherUserNickname",
         )
+        Profile.objects.create(user=another_user)
+        
         self.client.force_authenticate(user=another_user)
 
         # 댓글 수정 시도
@@ -149,5 +159,6 @@ class CommentCRUDTests(APITestCase):
 
     def tearDown(self):
         self.user.delete()
+        self.profile.delete()
         self.article.delete()
         self.comment.delete()

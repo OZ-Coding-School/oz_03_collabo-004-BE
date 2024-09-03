@@ -296,67 +296,6 @@ python-jose = ["python-jose (==3.3.0)"]
 test = ["cryptography", "freezegun", "pytest", "pytest-cov", "pytest-django", "pytest-xdist", "tox"]
 
 [[package]]
-name = "elastic-transport"
-version = "8.15.0"
-description = "Transport classes and utilities shared among Python Elastic client libraries"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "elastic_transport-8.15.0-py3-none-any.whl", hash = "sha256:d7080d1dada2b4eee69e7574f9c17a76b42f2895eff428e562f94b0360e158c0"},
-    {file = "elastic_transport-8.15.0.tar.gz", hash = "sha256:85d62558f9baafb0868c801233a59b235e61d7b4804c28c2fadaa866b6766233"},
-]
-
-[package.dependencies]
-certifi = "*"
-urllib3 = ">=1.26.2,<3"
-
-[package.extras]
-develop = ["aiohttp", "furo", "httpx", "opentelemetry-api", "opentelemetry-sdk", "orjson", "pytest", "pytest-asyncio", "pytest-cov", "pytest-httpserver", "pytest-mock", "requests", "respx", "sphinx (>2)", "sphinx-autodoc-typehints", "trustme"]
-
-[[package]]
-name = "elasticsearch"
-version = "8.15.0"
-description = "Python client for Elasticsearch"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "elasticsearch-8.15.0-py3-none-any.whl", hash = "sha256:7ec4d0771b8f6f76c6331e61b408261f9307264735ec7f2539f580824faaafe3"},
-    {file = "elasticsearch-8.15.0.tar.gz", hash = "sha256:d4702b4fa698ef154c6f1187988192343fb5505aee97fc4450a6d20df1683f35"},
-]
-
-[package.dependencies]
-elastic-transport = ">=8.13,<9"
-
-[package.extras]
-async = ["aiohttp (>=3,<4)"]
-dev = ["aiohttp", "black", "build", "coverage", "isort", "jinja2", "mapbox-vector-tile", "nox", "numpy", "orjson", "pandas", "pyarrow", "pytest", "pytest-asyncio", "pytest-cov", "python-dateutil", "pyyaml (>=5.4)", "requests (>=2,<3)", "simsimd", "twine", "unasync"]
-docs = ["sphinx", "sphinx-autodoc-typehints", "sphinx-rtd-theme"]
-orjson = ["orjson (>=3)"]
-pyarrow = ["pyarrow (>=1)"]
-requests = ["requests (>=2.4.0,!=2.32.2,<3.0.0)"]
-vectorstore-mmr = ["numpy (>=1)", "simsimd (>=3)"]
-
-[[package]]
-name = "elasticsearch-dsl"
-version = "8.15.1"
-description = "Python client for Elasticsearch"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "elasticsearch_dsl-8.15.1-py3-none-any.whl", hash = "sha256:318dbad085670e2f474cc3d19977ba2379cc3e78cb6ba544ff82b8b370227db1"},
-    {file = "elasticsearch_dsl-8.15.1.tar.gz", hash = "sha256:2f89a9465f34507540894ceafba1fa8472db4a91596dbf25ea59be37791cf16d"},
-]
-
-[package.dependencies]
-elasticsearch = ">=8.0.0,<9.0.0"
-python-dateutil = "*"
-typing-extensions = "*"
-
-[package.extras]
-async = ["elasticsearch[async] (>=8.0.0,<9.0.0)"]
-develop = ["coverage", "elasticsearch[async]", "mypy", "nltk", "pyright", "pytest", "pytest-asyncio", "pytest-cov", "pytest-mock", "pytz", "sentence-transformers", "sphinx (>2)", "sphinx-rtd-theme (>0.5)", "tqdm", "types-python-dateutil", "types-pytz", "types-tqdm", "unasync"]
-
-[[package]]
 name = "h11"
 version = "0.14.0"
 description = "A pure-Python, bring-your-own-I/O implementation of HTTP/1.1"
@@ -1002,4 +941,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "4ff356b2fd8c1165d879f3ee6008a191d64658a791785234dc4660135f447bf2"
+content-hash = "abf87148ad01459c6c7b3c72aa77394c514e11cbfde6b3666ea860ddd6184a99"
