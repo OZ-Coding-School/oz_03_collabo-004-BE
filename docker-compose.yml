@@ -45,6 +45,16 @@ services:
     networks:
       - app_network
 
+  locust:
+    image: locustio/locust
+    ports:
+      - "8089:8089"
+    volumes:
+      - ./locust:/mnt/locust
+    command: -f /mnt/locust/locustfile.py --host=http://app:8000
+    networks:
+      - app_network
+
 volumes:
   jenkins_home:
 
