@@ -8,9 +8,6 @@ services:
         - DEV=true
     ports:
       - "8000:8000"
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
     volumes:
       - ./api:/app
       # - ./.coverage:/app/.coverage  # .coverage 파일 마운트 추가
@@ -48,30 +45,8 @@ services:
     networks:
       - app_network
 
-  elasticsearch:
-    build:
-      context: .
-      dockerfile: Dockerfile.elasticsearch
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - xpack.monitoring.collection.enabled=true
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
-    ports:
-      - "9200:9200"
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    volumes:
-      - es_data:/usr/share/elasticsearch/data
-    networks:
-      - app_network
-
 volumes:
   jenkins_home:
-  es_data:
 
 networks:
   app_network:

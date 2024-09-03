@@ -11,6 +11,7 @@ from .views.article_list_views import (
     ArticleListView,
 )
 from .views.article_reaction_views import ArticleLikeToggleView, ArticleViewCountView
+from .views.article_search_views import article_search_view
 
 urlpatterns = [
     # CRUD 관련 URL
@@ -24,4 +25,6 @@ urlpatterns = [
     # 반응 (조회수, 좋아요) 관련 URL
     path("<int:id>/view/", ArticleViewCountView.as_view(), name="article-view-count"),
     path("<int:id>/like/", ArticleLikeToggleView.as_view(), name="article-like"),
+    # 검색 관련 URL
+    path('search/', article_search_view, name='article_search'),
 ]
