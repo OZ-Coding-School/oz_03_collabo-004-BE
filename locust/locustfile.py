@@ -20,11 +20,31 @@ class WebsiteUser(HttpUser):
         self.article_id = None
         self.create_article()
 
+        self.article_id = None
+        self.create_article()
+
     def generate_random_username(self):
         return "user_" + "".join(random.choices(string.ascii_letters, k=8))
 
     def generate_random_nickname(self):
         return "nickname_" + "".join(random.choices(string.ascii_letters, k=8))
+
+    def generate_random_tags(self):
+        """태그를 최대 3개까지 랜덤으로 선택"""
+        available_tags = [
+            {"tag_id": 2, "name": "연애 훈수"},
+            {"tag_id": 3, "name": "집안일 훈수"},
+            {"tag_id": 4, "name": "고민 훈수"},
+            {"tag_id": 5, "name": "소소 훈수"},
+            {"tag_id": 6, "name": "상상 훈수"},
+            {"tag_id": 7, "name": "패션 훈수"},
+            {"tag_id": 9, "name": "모바일 게임 훈수"},
+            {"tag_id": 10, "name": "PC 게임 훈수"},
+            {"tag_id": 11, "name": "교육 훈수"},
+        ]
+
+        selected_tags = random.sample(available_tags, k=random.randint(0, 3))
+        return selected_tags
 
     def generate_random_tags(self):
         """태그를 최대 3개까지 랜덤으로 선택"""
