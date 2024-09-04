@@ -32,6 +32,15 @@ class ArticleReportCreateView(APIView):
         # Article의 작성자를 reported_user로 설정
         reported_user = article.user
 
+        # 동일한 사용자가 같은 article을 이미 신고했는지 확인
+        if ArticleReport.objects.filter(
+            reporter=reporter, reported_article=article
+        ).exists():
+            return Response(
+                {"detail": "이미 신고한 게시글입니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         # 요청 데이터에 추가 정보를 삽입하여 serializer 초기화
         data = {
             "report_detail": request.data.get("report_detail"),
@@ -68,6 +77,15 @@ class CommentReportCreateView(APIView):
 
         # Comment의 작성자를 reported_user로 설정
         reported_user = comment.user
+
+        # 동일한 사용자가 같은 comment를 이미 신고했는지 확인
+        if CommentReport.objects.filter(
+            reporter=reporter, reported_comment=comment
+        ).exists():
+            return Response(
+                {"detail": "이미 신고한 댓글입니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         # 요청 데이터에 추가 정보를 삽입하여 serializer 초기화
         data = {
