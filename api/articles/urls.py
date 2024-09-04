@@ -11,11 +11,7 @@ from .views.article_list_views import (
     ArticleDetailView,
     ArticleListView,
 )
-from .views.article_reaction_views import (
-    ArticleLikeToggleView,
-    ArticleViewCountView,
-    TopLikedArticlesView,
-)
+from .views.article_reaction_views import ArticleLikeToggleView, ArticleViewCountView
 from .views.article_search_views import article_search_view
 
 urlpatterns = [
@@ -37,9 +33,4 @@ urlpatterns = [
     path("<int:id>/like/", ArticleLikeToggleView.as_view(), name="article-like"),
     # 검색 관련 URL
     path("search/", article_search_view, name="article_search"),
-    path(
-        "top/",
-        TopLikedArticlesView.as_view(),
-        name="top-liked-articles",
-    ),
 ]
