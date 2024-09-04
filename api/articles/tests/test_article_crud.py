@@ -31,14 +31,13 @@ class ArticleCRUDTests(APITestCase):
         self.client.cookies["refresh"] = self.refresh_token
 
         # 테스트 태그 생성
-        self.tag1 = Tag.objects.create(tag_id=0, name="연애 훈수")
-        self.tag2 = Tag.objects.create(tag_id=1, name="집안일 훈수")
+        self.tag1 = Tag.objects.create(tag_id=2, name="연애 훈수")
 
         # 게시글 작성에 사용할 데이터
         self.article_data = {
             "title": "Test Article",
             "content": "This is a test article.",
-            "tag_id": [self.tag1.tag_id],
+            "tag_id": self.tag1.tag_id,
             # 이미지 필드는 폼데이터로 보내지 않음
         }
 
@@ -46,10 +45,12 @@ class ArticleCRUDTests(APITestCase):
         self.create_url = reverse("article-create")
 
     def test_create_article(self):
-        # 폼데이터 형식으로 요청 보내기
+
         response = self.client.post(
             self.create_url, data=self.article_data, format="json"
         )
+        print(response.data)
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Article.objects.count(), 1)
         self.assertEqual(Article.objects.first().title, "Test Article")
@@ -65,11 +66,13 @@ class ArticleCRUDTests(APITestCase):
         update_data = {
             "title": "Updated Title",
             "content": "Updated content",
-            "tag_id": [self.tag1.tag_id],
+            "tag_id": self.tag1.tag_id,
         }
 
-        # 폼데이터 형식으로 요청 보내기
         response = self.client.put(update_url, data=update_data, format="json")
+
+        print(response.data)
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # 수정 결과 확인
@@ -78,7 +81,7 @@ class ArticleCRUDTests(APITestCase):
         self.assertEqual(article.content, "Updated content")
 
     def test_delete_article(self):
-        # 게시글 생성
+        # 게시글 삭제
         article = Article.objects.create(
             user=self.user, title="Title to be deleted", content="Content to be deleted"
         )
