@@ -16,6 +16,7 @@ class CommentImageSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     images = CommentImageSerializer(many=True, required=False)
     user_nickname = serializers.CharField(source="user.nickname", read_only=True)
+    user_profile_image = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
@@ -23,6 +24,7 @@ class CommentSerializer(serializers.ModelSerializer):
             "id",
             "user",
             "user_nickname",
+            "user_profile_image",
             "content",
             "is_selected",
             "images",
@@ -33,6 +35,7 @@ class CommentSerializer(serializers.ModelSerializer):
             "id",
             "user",
             "user_nickname",
+            "user_profile_image",
             "is_selected",
             "created_at",
             "updated_at",
@@ -65,6 +68,12 @@ class CommentSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         # 이미지는 뷰에서 처리되므로 시리얼라이저에서는 댓글만 업데이트
         return super().update(instance, validated_data)
+
+    def get_user_profile_image(self, obj):
+        profile = obj.user.profile
+        if profile:
+            return profile.profile_image
+        return None
 
 
 # 댓글 목록 조회 시리얼라이저
