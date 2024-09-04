@@ -19,7 +19,7 @@ class ArticleDetailView(generics.RetrieveAPIView):
 
 # 전체 게시글 조회 리스트
 class ArticleListView(generics.ListAPIView):
-    queryset = Article.objects.all()
+    queryset = Article.objects.all().order_by("-created_at")
     serializer_class = ArticleListSerializer
     permission_classes = [AllowAny]
 
@@ -31,4 +31,4 @@ class ArticleByTagView(generics.ListAPIView):
 
     def get_queryset(self):
         tag_id = self.kwargs["tag_id"]
-        return Article.objects.filter(tags__tag_id=tag_id)
+        return Article.objects.filter(tags__tag_id=tag_id).order_by("-created_at")
