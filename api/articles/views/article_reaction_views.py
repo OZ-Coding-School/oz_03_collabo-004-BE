@@ -59,15 +59,17 @@ class ArticleViewCountView(APIView):
 
 class TopLikedArticlesView(APIView):
     """
-    like_count 기준 상위 5개의 게시글을 반환하는 API
+    좋아요 수가 많은 상위 5개의 게시글을 반환하는 API
     """
 
     def get(self, request, *args, **kwargs):
-        # likes 필드를 Count로 집계하여 like_count를 생성하고 이를 기준으로 정렬
-        top_articles = Article.objects.annotate(like_count=Count("likes")).order_by(
-            "-like_count"
-        )[:5]
-        # 시리얼라이저로 직렬화
+        # Article 모델에서 좋아요 수를 Count하여 상위 5개의 게시글을 가져옵니다.
+        top_articles = Article.objects.annotate(
+            annotate_liked_count=Count("likes")
+        ).order_by("-annotate_liked_count")[:5]
+
+        # ArticleListSerializer를 사용하여 직렬화
         serializer = ArticleListSerializer(top_articles, many=True)
-        # 응답 반환
-        return Response(serializer.data, status=status.HTTP_200_OK)
+
+        # 응답으로 반환
+        return Response(serializer.data)

@@ -211,6 +211,7 @@ class UserCommentListSerializer(serializers.ModelSerializer):
             "id",
             "user",
             "user_nickname",
+            "user_profile_image",
             "content",
             "is_selected",
             "helpful_count",
