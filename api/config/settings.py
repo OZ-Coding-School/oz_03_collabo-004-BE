@@ -131,8 +131,8 @@ MIDDLEWARE = [
 ]
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=7),  # 액세스 토큰 만료 시간
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),  # 리프레시 토큰 만료 시간
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),  # 액세스 토큰 만료 시간
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # 리프레시 토큰 만료 시간
     "ROTATE_REFRESH_TOKENS": False,  # 리프레시 토큰 순환 사용 여부
     "BLACKLIST_AFTER_ROTATION": False,  # 순환 사용 시 이전 리프레시 토큰 블랙리스트 등록 여부
     "AUTH_HEADER_TYPES": ("Bearer",),  # 인증 헤더 타입
