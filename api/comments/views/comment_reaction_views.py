@@ -4,7 +4,7 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -136,6 +136,8 @@ class TopHelpfulCommentsView(APIView):
     """
     helpful_count 기준 상위 5개의 댓글을 반환하는 API
     """
+
+    permission_classes = [AllowAny]
 
     def get(self, request, *args, **kwargs):
         # helpful_count 필드 기준으로 내림차순 정렬하여 상위 5개의 댓글을 가져옴
