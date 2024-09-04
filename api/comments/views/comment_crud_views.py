@@ -2,6 +2,7 @@ from rest_framework import generics, permissions
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.parsers import FormParser, MultiPartParser
 
+
 from ..models import Comment, CommentImage
 from ..s3instance import S3Instance
 from ..serializers import (
@@ -100,3 +101,6 @@ class CommentDetailView(generics.RetrieveAPIView):
     def get_object(self):
         comment = super().get_object()
         return comment
+
+
+

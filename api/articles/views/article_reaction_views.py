@@ -1,3 +1,4 @@
+from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -5,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from ..models import Article
-from ..serializers import ArticleSerializer
+from ..serializers import ArticleListSerializer, ArticleSerializer
 
 
 # 게시글 좋아요(두번 누르면 삭제)
@@ -53,4 +54,20 @@ class ArticleViewCountView(APIView):
             request.session[session_key] = True
 
         serializer = ArticleSerializer(article)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class TopLikedArticlesView(APIView):
+    """
+    like_count 기준 상위 5개의 게시글을 반환하는 API
+    """
+
+    def get(self, request, *args, **kwargs):
+        # likes 필드를 Count로 집계하여 like_count를 생성하고 이를 기준으로 정렬
+        top_articles = Article.objects.annotate(like_count=Count("likes")).order_by(
+            "-like_count"
+        )[:5]
+        # 시리얼라이저로 직렬화
+        serializer = ArticleListSerializer(top_articles, many=True)
+        # 응답 반환
         return Response(serializer.data, status=status.HTTP_200_OK)
