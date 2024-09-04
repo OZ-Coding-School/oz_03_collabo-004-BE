@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from ..models import Comment, CommentReaction
-from ..serializers import CommentSerializer
+from ..serializers import CommentListSerializer, CommentSerializer
 
 
 # 댓글 채택 뷰
@@ -141,6 +141,6 @@ class TopHelpfulCommentsView(APIView):
         # helpful_count 필드 기준으로 내림차순 정렬하여 상위 5개의 댓글을 가져옴
         top_comments = Comment.objects.order_by("-helpful_count")[:5]
         # 시리얼라이저로 직렬화
-        serializer = CommentSerializer(top_comments, many=True)
+        serializer = CommentListSerializer(top_comments, many=True)
         # 응답 반환
         return Response(serializer.data, status=status.HTTP_200_OK)
