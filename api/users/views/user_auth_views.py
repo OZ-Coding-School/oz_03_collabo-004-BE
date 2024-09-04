@@ -251,4 +251,4 @@ class LoginStatusView(GenericAPIView):
 
     def get(self, request):
         is_authenticated = request.user.is_authenticated
-        return Response({"status": is_authenticated})
+        return Response({"login": is_authenticated})
