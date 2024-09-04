@@ -72,11 +72,11 @@ class ProfileSerializer(serializers.ModelSerializer):
         return Comment.objects.filter(user=obj.user, is_selected=True).count()
 
     def get_articles(self, obj):
-        articles = Article.objects.filter(user=obj.user)
+        articles = Article.objects.filter(user=obj.user).order_by("-created_at")
         return ArticleListSerializer(articles, many=True).data
 
     def get_comments(self, obj):
-        comments = Comment.objects.filter(user=obj.user)
+        comments = Comment.objects.filter(user=obj.user).order_by("-created_at")
         return UserCommentListSerializer(comments, many=True).data
 
     def get_status(self, obj):
