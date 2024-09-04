@@ -5,7 +5,12 @@ from django.contrib.auth import authenticate, get_user_model
 from django.db import transaction
 from rest_framework import generics, status
 from rest_framework.authentication import BasicAuthentication
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.generics import GenericAPIView
+from rest_framework.permissions import (
+    AllowAny,
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
@@ -228,6 +233,8 @@ class UserDeleteView(generics.GenericAPIView):
             return Response(
                 {"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
 # 특정유저의 관리자와 일반유저 판단
 class UserStatusView(APIView):
     permission_classes = [IsAuthenticated]
@@ -236,3 +243,12 @@ class UserStatusView(APIView):
         user = request.user
         status = 1 if user.is_superuser or user.is_staff else 0
         return Response({"status": status})
+
+
+# 로그인 상태 확인
+class LoginStatusView(GenericAPIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get(self, request):
+        is_authenticated = request.user.is_authenticated
+        return Response({"status": is_authenticated})
