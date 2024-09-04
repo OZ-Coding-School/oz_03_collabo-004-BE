@@ -23,7 +23,7 @@ class CommentReportSerializer(serializers.ModelSerializer):
             "id",
             "reporter",
             "reported_user",
-            "reported_article",
+            "reported_comment",
             "report_detail",
             "status",
         ]
