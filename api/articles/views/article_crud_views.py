@@ -23,8 +23,8 @@ class ArticleCreateView(generics.CreateAPIView):
                 int(tag_id.strip()) for tag_id in tag_ids.split(",") if tag_id.strip()
             ]
 
-        if len(tag_ids) > 3:
-            raise serializers.ValidationError("태그는 최대 3개까지만 가능합니다.")
+        if len(tag_ids) > 1:
+            raise serializers.ValidationError("태그는 최대 1개까지만 가능합니다.")
 
         article = serializer.save(user=self.request.user, tag_ids=tag_ids)
 
@@ -64,8 +64,8 @@ class ArticleImageUploadView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser)
 
-    def post(self, request, article_id):
-        article = Article.objects.get(id=article_id)
+    def post(self, request, id):
+        article = Article.objects.get(id=id)
 
         # 권한 확인
         if article.user != request.user:

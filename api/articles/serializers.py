@@ -27,7 +27,7 @@ class ArticleImageSerializer(serializers.ModelSerializer):
 class ArticleSerializer(serializers.ModelSerializer):
     article_id = serializers.ReadOnlyField(source="id")
     images = ArticleImageSerializer(many=True, required=False, read_only=True)
-    tag_ids = serializers.CharField(write_only=True)
+    tag_ids = serializers.ListField(child=serializers.IntegerField(), write_only=True)
     tags = TagSerializer(many=True, read_only=True)
     user = serializers.SerializerMethodField()
     comments_count = serializers.SerializerMethodField()
@@ -56,20 +56,8 @@ class ArticleSerializer(serializers.ModelSerializer):
     def get_comments_count(self, obj):
         return obj.comments.count()
 
-    def parse_tag_ids(self, tag_ids):
-        if isinstance(tag_ids, str):
-            # 문자열로 전달된 경우 쉼표로 구분하여 리스트로 변환
-            return [
-                int(tag_id.strip()) for tag_id in tag_ids.split(",") if tag_id.strip()
-            ]
-        elif isinstance(tag_ids, list):
-            # 이미 리스트로 전달된 경우, 각 요소를 정수로 변환
-            return [int(tag_id) for tag_id in tag_ids]
-        return []
-
     def create(self, validated_data):
-        tag_ids_str = validated_data.pop("tag_ids", "")
-        tag_ids = self.parse_tag_ids(tag_ids_str)
+        tag_ids = validated_data.pop("tag_ids", [])
 
         article = Article.objects.create(**validated_data)
         article.tags.add(*tag_ids)
@@ -88,8 +76,7 @@ class ArticleSerializer(serializers.ModelSerializer):
         return article
 
     def update(self, instance, validated_data):
-        tag_ids_str = validated_data.pop("tag_ids", "")
-        tag_ids = self.parse_tag_ids(tag_ids_str)
+        tag_ids = validated_data.pop("tag_ids", [])  # 배열로 받은 tag_ids
 
         # 제목과 내용을 업데이트
         instance.title = validated_data.get("title", instance.title)
