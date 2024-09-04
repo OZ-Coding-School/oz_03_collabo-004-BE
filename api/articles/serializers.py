@@ -34,7 +34,7 @@ class ArticleListSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
     thumbnail_image = serializers.SerializerMethodField()
     comments_count = serializers.SerializerMethodField()
-    # annotate_liked_count = serializers.IntegerField(read_only=True)
+    
 
     class Meta:
         model = Article
@@ -48,7 +48,6 @@ class ArticleListSerializer(serializers.ModelSerializer):
             "tags",
             "view_count",
             "like_count",
-            # "annotate_liked_count",
             "comments_count",
             "created_at",
             "updated_at",
