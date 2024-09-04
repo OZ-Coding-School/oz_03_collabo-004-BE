@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from ..models import Comment, CommentReaction
-from ..serializers import CommentSerializer
+from ..serializers import CommentSerializer, UserCommentListSerializer
 
 
 # 댓글 채택 뷰
@@ -129,3 +129,18 @@ class CommentReactionToggleView(APIView):
                     {"detail": f"Reaction changed to {reaction_type}."},
                     status=status.HTTP_200_OK,
                 )
+
+
+# helpful 기반으로한 상위 5개의 댓글 반환
+class TopHelpfulCommentsView(APIView):
+    """
+    helpful_count 기준 상위 5개의 댓글을 반환하는 API
+    """
+
+    def get(self, request, *args, **kwargs):
+        # helpful_count 필드 기준으로 내림차순 정렬하여 상위 5개의 댓글을 가져옴
+        top_comments = Comment.objects.order_by("-helpful_count")[:5]
+        # 시리얼라이저로 직렬화
+        serializer = UserCommentListSerializer(top_comments, many=True)
+        # 응답 반환
+        return Response(serializer.data, status=status.HTTP_200_OK)

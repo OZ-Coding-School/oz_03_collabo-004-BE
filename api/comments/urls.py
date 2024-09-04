@@ -6,7 +6,11 @@ from .views.comment_crud_views import (
     CommentListView,
     CommentUpdateView,
 )
-from .views.comment_reaction_views import CommentReactionToggleView, CommentSelectView
+from .views.comment_reaction_views import (
+    CommentReactionToggleView,
+    CommentSelectView,
+    TopHelpfulCommentsView,
+)
 
 urlpatterns = [
     path(
@@ -31,4 +35,5 @@ urlpatterns = [
         CommentSelectView.as_view(),
         name="comment-select",
     ),
+    path("top/", TopHelpfulCommentsView.as_view(), name="top-helpful-comments"),
 ]
