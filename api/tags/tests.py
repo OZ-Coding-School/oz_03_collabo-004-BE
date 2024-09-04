@@ -41,3 +41,5 @@ class TagListViewTest(APITestCase):
             "PC 게임 훈수",
             "교육 훈수",
         ]
+        for tag_data, expected_name in zip(response.data, expected_tags):
+            self.assertEqual(tag_data["name"], expected_name)
