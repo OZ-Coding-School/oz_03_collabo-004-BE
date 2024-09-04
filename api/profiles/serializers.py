@@ -57,8 +57,9 @@ class ProfileSerializer(serializers.ModelSerializer):
             instance.user.save()
 
         instance.bio = validated_data.get("bio", instance.bio)
-        selected_tags = validated_data.pop("selected_tags", None)
-        if selected_tags:
+
+        if "selected_tags" in validated_data:
+            selected_tags = validated_data.pop("selected_tags")
             instance.selected_tags.set(selected_tags)
 
         instance.save()
