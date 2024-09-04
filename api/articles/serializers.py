@@ -22,12 +22,13 @@ class ArticleImageSerializer(serializers.ModelSerializer):
             return obj.image  # image는 S3 URL을 직접 저장한 필드
         return None
 
+
 # 전체 게시글조회를 위한 시리얼라이저
 class ArticleListSerializer(serializers.ModelSerializer):
     article_id = serializers.ReadOnlyField(source="id")
     images = ArticleImageSerializer(many=True, required=False)
-    tag_ids = serializers.PrimaryKeyRelatedField(
-        queryset=Tag.objects.all(), many=True, write_only=True
+    tag_id = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(), write_only=True  
     )
     tags = TagSerializer(many=True, read_only=True)
     user = serializers.SerializerMethodField()
@@ -43,7 +44,7 @@ class ArticleListSerializer(serializers.ModelSerializer):
             "content",
             "images",
             "user",
-            "tag_ids",
+            "tag_id",
             "tags",
             "view_count",
             "like_count",
@@ -78,7 +79,7 @@ class ArticleListSerializer(serializers.ModelSerializer):
 class ArticleSerializer(serializers.ModelSerializer):
     article_id = serializers.ReadOnlyField(source="id")
     images = ArticleImageSerializer(many=True, required=False, read_only=True)
-    tag_ids = serializers.ListField(child=serializers.IntegerField(), write_only=True)
+    tag_id = serializers.IntegerField(write_only=True)
     tags = TagSerializer(many=True, read_only=True)
     user = serializers.SerializerMethodField()
     comments_count = serializers.SerializerMethodField()
@@ -91,7 +92,7 @@ class ArticleSerializer(serializers.ModelSerializer):
             "title",
             "content",
             "images",
-            "tag_ids",
+            "tag_id",
             "tags",
             "is_closed",
             "view_count",
@@ -108,10 +109,9 @@ class ArticleSerializer(serializers.ModelSerializer):
         return obj.comments.count()
 
     def create(self, validated_data):
-        tag_ids = validated_data.pop("tag_ids", [])
-
+        tag_id = validated_data.pop("tag_id")
         article = Article.objects.create(**validated_data)
-        article.tags.add(*tag_ids)
+        article.tags.add(tag_id)
 
         images_data = self.context["request"].FILES.getlist("images")
         if images_data:
@@ -127,12 +127,14 @@ class ArticleSerializer(serializers.ModelSerializer):
         return article
 
     def update(self, instance, validated_data):
-        tag_ids = validated_data.pop("tag_ids", [])  # 배열로 받은 tag_ids
+        tag_id = validated_data.pop("tag_id", None)
 
         # 제목과 내용을 업데이트
         instance.title = validated_data.get("title", instance.title)
         instance.content = validated_data.get("content", instance.content)
-        instance.tags.set(tag_ids)
+
+        if tag_id:
+            instance.tags.set([tag_id])
         instance.save()
 
         return instance
@@ -142,8 +144,8 @@ class ArticleSerializer(serializers.ModelSerializer):
 class ArticleListSerializer(serializers.ModelSerializer):
     article_id = serializers.ReadOnlyField(source="id")
     images = ArticleImageSerializer(many=True, required=False)
-    tag_ids = serializers.PrimaryKeyRelatedField(
-        queryset=Tag.objects.all(), many=True, write_only=True
+    tag_id = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(), write_only=True  
     )
     tags = TagSerializer(many=True, read_only=True)
     user = serializers.SerializerMethodField()
@@ -158,7 +160,7 @@ class ArticleListSerializer(serializers.ModelSerializer):
             "content",
             "images",
             "user",
-            "tag_ids",
+            "tag_id",
             "tags",
             "view_count",
             "like_count",
@@ -194,8 +196,8 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
     article_id = serializers.ReadOnlyField(source="id")
     thumbnail_image = serializers.SerializerMethodField()
     images = ArticleImageSerializer(many=True, required=False)
-    tag_ids = serializers.PrimaryKeyRelatedField(
-        queryset=Tag.objects.all(), many=True, write_only=True
+    tag_id = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(), write_only=True  
     )
     tags = TagSerializer(many=True, read_only=True)
     user = serializers.SerializerMethodField()
@@ -216,7 +218,7 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
             "title",
             "content",
             "images",
-            "tag_ids",
+            "tag_id",
             "tags",
             "is_closed",
             "view_count",

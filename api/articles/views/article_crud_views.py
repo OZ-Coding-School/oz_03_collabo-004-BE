@@ -17,22 +17,19 @@ class ArticleCreateView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        tag_ids = self.request.data.get("tag_ids", "")
-        if isinstance(tag_ids, str):
-            tag_ids = [
-                int(tag_id.strip()) for tag_id in tag_ids.split(",") if tag_id.strip()
-            ]
+        tag_id = self.request.data.get("tag_id")
 
-        if len(tag_ids) > 1:
-            raise serializers.ValidationError("태그는 최대 1개까지만 가능합니다.")
+        # 태그가 1개 이상일 수 없으므로 검증 로직은 불필요
+        if not tag_id:
+            raise serializers.ValidationError("태그는 반드시 1개여야 합니다.")
 
-        article = serializer.save(user=self.request.user, tag_ids=tag_ids)
+        article = serializer.save(user=self.request.user, tag_id=tag_id)
 
         # 생성된 객체를 직렬화하여 응답으로 반환
-        return Response(
-            ArticleSerializer(article, context={"request": self.request}).data,
-            status=status.HTTP_201_CREATED,
-        )
+        response_data = ArticleSerializer(
+            article, context={"request": self.request}
+        ).data
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
 
 # 게시글 수정
@@ -51,7 +48,12 @@ class ArticleUpdateView(generics.UpdateAPIView):
         return article
 
     def perform_update(self, serializer):
-        article = serializer.save()
+        tag_id = self.request.data.get("tag_id")
+
+        if not tag_id:
+            raise serializers.ValidationError("태그는 반드시 1개여야 합니다.")
+
+        article = serializer.save(tag_id=tag_id)
 
         response_data = ArticleSerializer(
             article, context={"request": self.request}

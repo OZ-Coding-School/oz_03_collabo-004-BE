@@ -38,7 +38,7 @@ class ArticleCRUDTests(APITestCase):
         self.article_data = {
             "title": "Test Article",
             "content": "This is a test article.",
-            "tag_ids": [self.tag1.tag_id],
+            "tag_id": [self.tag1.tag_id],
             # 이미지 필드는 폼데이터로 보내지 않음
         }
 
@@ -65,7 +65,7 @@ class ArticleCRUDTests(APITestCase):
         update_data = {
             "title": "Updated Title",
             "content": "Updated content",
-            "tag_ids": [self.tag1.tag_id],
+            "tag_id": [self.tag1.tag_id],
         }
 
         # 폼데이터 형식으로 요청 보내기
