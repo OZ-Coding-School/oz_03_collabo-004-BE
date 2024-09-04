@@ -89,6 +89,7 @@ class CommentListSerializer(serializers.ModelSerializer):
         model = Comment
         fields = [
             "id",
+            "article_id",
             "user",
             "user_nickname",
             "user_profile_image",
@@ -103,6 +104,7 @@ class CommentListSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [
             "id",
+            "article_id",
             "user",
             "user_nickname",
             "user_profile_image",
@@ -136,6 +138,7 @@ class CommentArticleListSerializer(serializers.ModelSerializer):
     user_profile_image = serializers.SerializerMethodField()
     user_hunsoo_level = serializers.SerializerMethodField()
     reaction = serializers.SerializerMethodField()
+    article_id = serializers.CharField(source="article.id", read_only=True)
 
     class Meta:
         model = Comment
