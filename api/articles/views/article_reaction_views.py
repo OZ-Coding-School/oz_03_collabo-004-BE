@@ -42,6 +42,7 @@ class ArticleLikeToggleView(APIView):
 
 # 조회수 로직: 세션 기반으로 중복 방지
 class ArticleViewCountView(APIView):
+    permission_classes = [AllowAny]
 
     def get(self, request, *args, **kwargs):
         article_id = kwargs.get("id")
