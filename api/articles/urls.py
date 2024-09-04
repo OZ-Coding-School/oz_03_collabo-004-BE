@@ -32,7 +32,7 @@ urlpatterns = [
     # 검색 관련 URL
     path("search/", article_search_view, name="article_search"),
     path(
-        "top-liked/",
+        "top/",
         TopLikedArticlesView.as_view(),
         name="top-liked-articles",
     ),
