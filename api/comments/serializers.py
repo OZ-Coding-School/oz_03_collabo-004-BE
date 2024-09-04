@@ -224,7 +224,7 @@ class UserCommentListSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-        ordering = ["created_at"]
+        ordering = ["-created_at"]
 
 
 # 특정 댓글 조회 시리얼라이저
