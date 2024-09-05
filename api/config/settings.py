@@ -38,6 +38,7 @@ ALLOWED_HOSTS = [
     "0.0.0.0",
     "localhost",
     "127.0.0.1",
+    ".yoyobar.xyz",
     "api.hunsuking.yoyobar.xyz",
     "52.78.179.207",
     "172.31.6.31",
