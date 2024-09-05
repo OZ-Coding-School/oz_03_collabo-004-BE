@@ -10,7 +10,7 @@ from ..s3instance import S3Instance
 from ..serializers import ArticleImageSerializer, ArticleSerializer
 
 
-# 게시글 작성
+# 게시글 작성 뷰
 class ArticleCreateView(generics.CreateAPIView):
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
@@ -18,21 +18,29 @@ class ArticleCreateView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         tag_id = self.request.data.get("tag_id")
+        temp_image_ids = self.request.data.get("temp_image_ids", [])  # 리스트로 받음
 
-        # 태그가 1개 이상일 수 없으므로 검증 로직은 불필요
         if not tag_id:
             raise serializers.ValidationError("태그는 반드시 1개여야 합니다.")
 
+        # 게시글 생성
         article = serializer.save(user=self.request.user, tag_id=tag_id)
 
-        # 생성된 객체를 직렬화하여 응답으로 반환
+        # S3 인스턴스 생성
+        s3instance = S3Instance().get_s3_instance()
+
+        # 임시 이미지들을 게시글과 연결 및 경로 변경
+        # temp_image_ids는 이미 리스트이므로, split() 필요 없음
+        S3Instance.move_temp_images_to_article(s3instance, temp_image_ids, article)
+
+        # 생성된 게시글을 직렬화하여 응답으로 반환
         response_data = ArticleSerializer(
             article, context={"request": self.request}
         ).data
         return Response(response_data, status=status.HTTP_201_CREATED)
 
 
-# 게시글 수정
+# 게시글 수정 뷰
 class ArticleUpdateView(generics.UpdateAPIView):
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
@@ -44,65 +52,65 @@ class ArticleUpdateView(generics.UpdateAPIView):
         if article.is_closed:
             raise PermissionDenied("채택이 이루어진 게시글은 수정할 수 없습니다.")
         if article.user != self.request.user:
-            raise PermissionDenied("게시글 수정권한이 없는 유저입니다.")
+            raise PermissionDenied("게시글 수정 권한이 없습니다.")
         return article
 
     def perform_update(self, serializer):
         tag_id = self.request.data.get("tag_id")
+        temp_image_ids_str = self.request.data.get("temp_image_ids", "")
 
         if not tag_id:
             raise serializers.ValidationError("태그는 반드시 1개여야 합니다.")
 
+        # 게시글 수정
         article = serializer.save(tag_id=tag_id)
 
+        # S3 인스턴스 생성
+        s3instance = S3Instance().get_s3_instance()
+
+        # 임시 이미지들을 게시글과 연결 및 경로 변경
+        temp_image_ids = (
+            list(map(int, temp_image_ids_str.split(","))) if temp_image_ids_str else []
+        )
+        S3Instance.move_temp_images_to_article(s3instance, temp_image_ids, article)
+
+        # 수정된 게시글을 직렬화하여 응답으로 반환
         response_data = ArticleSerializer(
             article, context={"request": self.request}
         ).data
         return Response(response_data, status=status.HTTP_200_OK)
 
 
-# 게시글 이미지 생성, 수정
+# 이미지 업로드 뷰
 class ArticleImageUploadView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser)
 
-    def post(self, request, id):
-        article = Article.objects.get(id=id)
-
-        # 권한 확인
-        if article.user != request.user:
+    def post(self, request):
+        images_data = request.FILES.getlist("images")
+        if not images_data:
             return Response(
-                {"message": "이미지 업로드 권한이 없습니다."},
-                status=status.HTTP_403_FORBIDDEN,
+                {"error": "No images provided"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        images_data = request.FILES.getlist("images")
-        if images_data:
-            s3instance = S3Instance().get_s3_instance()
+        s3instance = S3Instance().get_s3_instance()
+        uploaded_images = []
+        image_urls = S3Instance.upload_files(s3instance, images_data, "temporary")
 
-            # 기존 이미지 삭제 (필요한 경우)
-            for image in article.images.all():
-                S3Instance.delete_file(s3instance, image.image)
-                image.delete()
+        for image_url in image_urls:
+            # 이미지 객체를 임시로 생성 (게시글과 연결되지 않음)
+            image_instance = ArticleImage.objects.create(
+                image=image_url, is_temporary=True
+            )
+            uploaded_images.append(image_instance)
 
-            # 새로운 이미지 업로드
-            uploaded_images = []
-            image_urls = S3Instance.upload_files(s3instance, images_data, article.id)
-
-            for index, image_url in enumerate(image_urls):
-                is_thumbnail = index == 0  # 첫 번째 이미지를 썸네일로 설정
-                article_image = ArticleImage.objects.create(
-                    article=article, image=image_url, is_thumbnail=is_thumbnail
-                )
-                uploaded_images.append(article_image)
-
-            # 업로드된 이미지 정보를 직렬화하여 반환
-            serialized_images = ArticleImageSerializer(uploaded_images, many=True)
-            return Response(serialized_images.data, status=status.HTTP_200_OK)
+        # 업로드된 이미지의 임시 ID를 반환
+        serialized_images = ArticleImageSerializer(uploaded_images, many=True)
+        temp_image_ids = [image.id for image in uploaded_images]
 
         return Response(
-            {"message": "업로드된 이미지가 없습니다."},
-            status=status.HTTP_400_BAD_REQUEST,
+            {"temp_image_ids": temp_image_ids, "images": serialized_images.data},
+            status=status.HTTP_201_CREATED,
         )
 
 
@@ -118,4 +126,13 @@ class ArticleDeleteView(generics.DestroyAPIView):
             raise PermissionDenied("본인의 게시글만 삭제할 수 있습니다.")
         if instance.is_closed:
             raise PermissionDenied("채택이 이루어진 게시글은 삭제할 수 없습니다.")
+
+        # S3 인스턴스 생성
+        s3instance = S3Instance().get_s3_instance()
+
+        # 게시글에 연결된 이미지들을 삭제
+        for image in instance.images.all():
+            S3Instance.delete_file(s3instance, image.image)  # S3에서 이미지 삭제
+            image.delete()  # DB에서 이미지 객체 삭제
+
         super().perform_destroy(instance)
