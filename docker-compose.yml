@@ -1,0 +1,62 @@
+# # version: "3.11"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - DEV=true
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./api:/app
+      # - ./.coverage:/app/.coverage  # .coverage 파일 마운트 추가
+    command: >
+      sh -c "python manage.py makemigrations &&
+             python manage.py migrate &&
+             python manage.py runserver --noreload 0.0.0.0:8000"
+    environment:
+      - DB_HOST=${RDS_HOSTNAME} 
+      - DB_NAME=${RDS_DB_NAME}
+      - DB_USER=${RDS_USERNAME}
+      - DB_PASSWORD=${RDS_PASSWORD}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} 
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}  
+      - AWS_STORAGE_BUCKET_NAME=${AWS_STORAGE_BUCKET_NAME}  
+      - AWS_S3_REGION_NAME=${AWS_S3_REGION_NAME} 
+    user: django-user  # 컨테이너 내부에서 django-user로 실행
+    env_file:
+      - .env
+    networks:
+      - app_network
+
+  jenkins:
+    build:
+      context: .
+      dockerfile: Dockerfile.jenkins
+    image: jenkins/jenkins:lts
+    user: root  # Docker 소켓 접근을 위해 root 사용자로 실행
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # Docker 소켓 공유
+      - jenkins_home:/var/jenkins_home  
+    networks:
+      - app_network
+
+  locust:
+    image: locustio/locust
+    ports:
+      - "8089:8089"
+    volumes:
+      - ./locust:/mnt/locust
+    command: -f /mnt/locust/locustfile.py --host=http://app:8000
+    networks:
+      - app_network
+
+volumes:
+  jenkins_home:
+
+networks:
+  app_network:
