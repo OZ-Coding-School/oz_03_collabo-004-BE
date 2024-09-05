@@ -106,9 +106,8 @@ class HunsooKingAuthClass:
             value=token,
             httponly=True,
             samesite="Lax",
-            secure=False,
+            secure=True,
             expires=expires_at,
-            domain=os.getenv("COOKIE_DOMAIN"),
             path="/",
         )
 
@@ -204,9 +203,8 @@ class GeneralAuthClass:
             value=token,
             httponly=True,
             samesite="Lax",
-            secure=False,
+            secure=True,
             expires=expires_at,
-            domain=os.getenv("COOKIE_DOMAIN"),
             path="/",
         )
         return response
