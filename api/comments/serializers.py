@@ -84,6 +84,7 @@ class CommentListSerializer(serializers.ModelSerializer):
     not_helpful_count = serializers.IntegerField(read_only=True)
     user_profile_image = serializers.SerializerMethodField()
     user_hunsoo_level = serializers.SerializerMethodField()
+    article_id = serializers.CharField(source="article.id", read_only=True)
 
     class Meta:
         model = Comment
@@ -138,7 +139,6 @@ class CommentArticleListSerializer(serializers.ModelSerializer):
     user_profile_image = serializers.SerializerMethodField()
     user_hunsoo_level = serializers.SerializerMethodField()
     reaction = serializers.SerializerMethodField()
-    article_id = serializers.CharField(source="article.id", read_only=True)
 
     class Meta:
         model = Comment
