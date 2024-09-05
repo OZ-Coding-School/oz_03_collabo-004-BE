@@ -249,14 +249,13 @@ class WebsiteUser(HttpUser):
     @task
     def get_ai_hunsoo(self):
         """ai 답변 조회 요청을 보냅니다."""
-        article_id = self.article_id
-        response = self.client.get(
-            "/api/ai_hunsu/{article_id}",
-            cookies=self.cookies,
-        )
-        if response.status_code == 200:
-            print(f"Ai_hunsoo for {self.article} gotten successfully.")
-        else:
-            print(
-                f"Failed to get ai_hunsoo for {self.article}. Status code: {response.status_code}"
+        if self.article_id:
+            response = self.client.get(
+                "/api/ai_hunsu/{self.article_id}",
             )
+            if response.status_code == 200:
+                print(f"Ai_hunsoo for {self.article} gotten successfully.")
+            else:
+                print(
+                    f"Failed to get ai_hunsoo for {self.article}. Status code: {response.status_code}"
+                )
