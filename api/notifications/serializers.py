@@ -49,13 +49,13 @@ class NotificationSerializer(serializers.ModelSerializer):
         """content_type과 verb에 따라 description을 생성"""
         if obj.content_type.model == "article":
             if obj.verb == "like":
-                return f"{obj.actor.nickname}님이 회원님의 게시글을 좋아합니다"
+                return f"님이 회원님의 게시글을 좋아합니다"
         elif obj.content_type.model == "aihunsoo":
             if obj.verb == "ai_response":
                 return f"회원님의 게시글에 AI 훈수가 답변을 남겼습니다"
         elif obj.content_type.model == "comment":
             if obj.verb == "comment":
-                return f"{obj.actor.nickname}님이 회원님의 게시글에 댓글을 남겼습니다"
+                return f"님이 회원님의 게시글에 댓글을 남겼습니다"
             elif obj.verb == "select":
                 return f"회원님의 댓글이 채택되었습니다"
         return "Unknown notification"
@@ -109,9 +109,9 @@ class AdminNotificationSerializer(serializers.ModelSerializer):
     def get_description(self, obj):
         """content_type에 따라 description을 생성"""
         if obj.content_type.model == "articlereport":
-            return f"{obj.actor.nickname}님의 게시글이 신고 접수 되었습니다"
+            return f"님의 게시글이 신고 접수 되었습니다"
         elif obj.content_type.model == "commentreport":
-            return f"{obj.actor.nickname}님의 댓글이 신고 접수 되었습니다"
+            return f"님의 댓글이 신고 접수 되었습니다"
         return "Unknown notification"
 
     def get_comment_content(self, obj):
