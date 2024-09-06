@@ -13,11 +13,12 @@ NOTIFICATION_TYPES = (
     ("like", "Liked your post"),
     ("select", "Selected your comment"),
     ("ai_response", "AI responded to your post"),
+    ("report", "A report has been received"),
 )
 
 
 class Notification(models.Model):
-    recipient = models.ForeignKey(User, on_delete=models.CASCADE)
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     actor = models.ForeignKey(
         User, related_name="actor", on_delete=models.CASCADE, null=True, blank=True
     )
@@ -31,5 +32,10 @@ class Notification(models.Model):
     read = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)
 
+    # 어드민 알림은 recipient null로 하고 is_admin=True
+    is_admin = models.BooleanField(default=False)
+
     def __str__(self):
+        if self.is_common:
+            return f"Common Notification - {self.get_verb_display()}"
         return f"Notification for {self.recipient.username} - {self.get_verb_display()}"
