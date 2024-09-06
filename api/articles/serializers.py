@@ -22,11 +22,15 @@ class ArticleImageSerializer(serializers.ModelSerializer):
             return obj.image  # image는 S3 URL을 직접 저장한 필드
         return None
 
+
 # 유저의 게시글 작성과 수정을 위한 시리얼라이저
 class ArticleSerializer(serializers.ModelSerializer):
     article_id = serializers.ReadOnlyField(source="id")
     images = ArticleImageSerializer(many=True, required=False, read_only=True)
     tag_id = serializers.IntegerField(write_only=True)
+    temp_image_ids = serializers.ListField(
+        child=serializers.IntegerField(), write_only=True, required=False
+    )
     tags = TagSerializer(many=True, read_only=True)
     user = serializers.SerializerMethodField()
     comments_count = serializers.SerializerMethodField()
@@ -40,6 +44,7 @@ class ArticleSerializer(serializers.ModelSerializer):
             "content",
             "images",
             "tag_id",
+            "temp_image_ids",
             "tags",
             "is_closed",
             "view_count",
@@ -57,24 +62,20 @@ class ArticleSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         tag_id = validated_data.pop("tag_id")
+        temp_image_ids = validated_data.pop("temp_image_ids", [])
         article = Article.objects.create(**validated_data)
         article.tags.add(tag_id)
 
-        images_data = self.context["request"].FILES.getlist("images")
-        if images_data:
+        # 임시 이미지들을 게시글에 연결하고 경로 변경
+        if temp_image_ids:
             s3instance = S3Instance().get_s3_instance()
-            image_urls = S3Instance.upload_files(s3instance, images_data, article.id)
-
-            for index, image_url in enumerate(image_urls):
-                is_thumbnail = index == 0  # 첫 번째 이미지를 썸네일로 설정
-                ArticleImage.objects.create(
-                    article=article, image=image_url, is_thumbnail=is_thumbnail
-                )
+            S3Instance.move_temp_images_to_article(s3instance, temp_image_ids, article)
 
         return article
 
     def update(self, instance, validated_data):
         tag_id = validated_data.pop("tag_id", None)
+        temp_image_ids = validated_data.pop("temp_image_ids", [])
 
         # 제목과 내용을 업데이트
         instance.title = validated_data.get("title", instance.title)
@@ -84,6 +85,11 @@ class ArticleSerializer(serializers.ModelSerializer):
             instance.tags.set([tag_id])
         instance.save()
 
+        # 임시 이미지들을 게시글에 연결하고 경로 변경
+        if temp_image_ids:
+            s3instance = S3Instance().get_s3_instance()
+            S3Instance.move_temp_images_to_article(s3instance, temp_image_ids, instance)
+
         return instance
 
 
@@ -92,7 +98,7 @@ class ArticleListSerializer(serializers.ModelSerializer):
     article_id = serializers.ReadOnlyField(source="id")
     images = ArticleImageSerializer(many=True, required=False)
     tag_id = serializers.PrimaryKeyRelatedField(
-        queryset=Tag.objects.all(), write_only=True  
+        queryset=Tag.objects.all(), write_only=True
     )
     tags = TagSerializer(many=True, read_only=True)
     user = serializers.SerializerMethodField()
@@ -144,7 +150,7 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
     thumbnail_image = serializers.SerializerMethodField()
     images = ArticleImageSerializer(many=True, required=False)
     tag_id = serializers.PrimaryKeyRelatedField(
-        queryset=Tag.objects.all(), write_only=True  
+        queryset=Tag.objects.all(), write_only=True
     )
     tags = TagSerializer(many=True, read_only=True)
     user = serializers.SerializerMethodField()

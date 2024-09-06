@@ -9,6 +9,8 @@ from rest_framework.permissions import BasePermission
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
+
+
 @dataclass
 class GoogleEnvironments:
     """
@@ -106,7 +108,7 @@ class HunsooKingAuthClass:
             value=token,
             httponly=True,
             samesite="Lax",
-            secure=True,
+            secure=False,
             expires=expires_at,
             path="/",
         )
@@ -203,7 +205,7 @@ class GeneralAuthClass:
             value=token,
             httponly=True,
             samesite="Lax",
-            secure=True,
+            secure=False,
             expires=expires_at,
             path="/",
         )

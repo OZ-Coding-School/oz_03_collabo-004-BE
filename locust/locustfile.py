@@ -19,32 +19,13 @@ class WebsiteUser(HttpUser):
 
         self.article_id = None
         self.create_article()
-
-        self.article_id = None
-        self.create_article()
+        self.comment_id = None
 
     def generate_random_username(self):
         return "user_" + "".join(random.choices(string.ascii_letters, k=8))
 
     def generate_random_nickname(self):
         return "nickname_" + "".join(random.choices(string.ascii_letters, k=8))
-
-    def generate_random_tags(self):
-        """태그를 최대 3개까지 랜덤으로 선택"""
-        available_tags = [
-            {"tag_id": 2, "name": "연애 훈수"},
-            {"tag_id": 3, "name": "집안일 훈수"},
-            {"tag_id": 4, "name": "고민 훈수"},
-            {"tag_id": 5, "name": "소소 훈수"},
-            {"tag_id": 6, "name": "상상 훈수"},
-            {"tag_id": 7, "name": "패션 훈수"},
-            {"tag_id": 9, "name": "모바일 게임 훈수"},
-            {"tag_id": 10, "name": "PC 게임 훈수"},
-            {"tag_id": 11, "name": "교육 훈수"},
-        ]
-
-        selected_tags = random.sample(available_tags, k=random.randint(0, 3))
-        return selected_tags
 
     def generate_random_tags(self):
         """태그를 최대 3개까지 랜덤으로 선택"""
@@ -154,9 +135,83 @@ class WebsiteUser(HttpUser):
                 print(f"Failed to create article. Status code: {response.status_code}")
 
     @task
+    def create_comment(self):
+        """게시글에 댓글을 작성합니다."""
+        if self.article_id and self.cookies:
+            # 먼저 게시글 정보를 가져와 작성자가 본인인지 확인합니다.
+            article_response = self.client.get(f"/api/article/{self.article_id}/", cookies=self.cookies)
+            if article_response.status_code == 200:
+                article_author = article_response.json().get("author")
+                if article_author == self.username:
+                    print(f"User {self.username} cannot comment on their own article.")
+                    return  # 자신의 게시글에 댓글을 작성하지 않음
+
+            # 자신이 작성하지 않은 게시글에 대해서만 댓글 작성
+            response = self.client.post(
+                f"/comments/create/articles/{self.article_id}/",
+                json={"content": "This is a test comment created by Locust."},
+                cookies=self.cookies,
+            )
+            if response.status_code == 201:
+                self.comment_id = response.json().get("id")
+                print(f"Comment {self.comment_id} created successfully.")
+            else:
+                print(f"Failed to create comment. Status code: {response.status_code}")
+
+    @task
+    def update_comment(self):
+        """댓글을 수정합니다."""
+        if self.comment_id and self.cookies:
+            response = self.client.put(
+                f"/comments/edit/{self.comment_id}/",
+                json={"content": "This is an updated comment."},
+                cookies=self.cookies,
+            )
+            if response.status_code == 200:
+                print(f"Comment {self.comment_id} updated successfully.")
+            else:
+                print(f"Failed to update comment. Status code: {response.status_code}")
+
+    @task
+    def delete_comment(self):
+        """댓글을 삭제합니다."""
+        if self.comment_id and self.cookies:
+            response = self.client.delete(f"/comments/edit/{self.comment_id}/", cookies=self.cookies)
+            if response.status_code == 204:
+                print(f"Comment {self.comment_id} deleted successfully.")
+                self.comment_id = None  # 댓글 삭제 후 comment_id 초기화
+            else:
+                print(f"Failed to delete comment. Status code: {response.status_code}")
+
+    @task
+    def react_to_comment(self):
+        """댓글에 도움이 돼요/안 돼요 반응을 추가하거나 삭제합니다."""
+        if self.comment_id and self.cookies:
+
+            if self.comment_author == self.username:
+                print(f"User {self.username} cannot react to their own comment.")
+                return
+            
+            reaction_type = random.choice(["helpful", "not_helpful"])
+            response = self.client.post(
+                f"/comments/{self.comment_id}/react/",
+                json={"reaction_type": reaction_type},
+                cookies=self.cookies,
+            )
+            if response.status_code in [200, 201]:
+                print(f"Comment {self.comment_id} reaction {reaction_type} toggled successfully.")
+            else:
+                print(f"Failed to react to comment. Status code: {response.status_code}")
+
+    @task
     def like_article(self):
         """게시글에 좋아요를 누르거나 취소합니다."""
         if self.article_id and self.cookies:
+
+            if self.article_author == self.username:
+                print(f"User {self.username} cannot like their own article.")
+                return
+            
             response = self.client.post(
                 f"/api/article/{self.article_id}/like/", cookies=self.cookies
             )
