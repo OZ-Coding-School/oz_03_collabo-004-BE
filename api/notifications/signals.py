@@ -79,7 +79,7 @@ def notify_admin_on_article_report(sender, instance, created, **kwargs):
             content_type=ContentType.objects.get_for_model(instance),
             object_id=instance.id,
             article=instance.reported_article,
-            is_common=True,
+            is_admin=True,
         )
 
 
@@ -93,5 +93,5 @@ def notify_admin_on_comment_report(sender, instance, created, **kwargs):
             content_type=ContentType.objects.get_for_model(instance),
             object_id=instance.id,
             article=instance.reported_comment.article,
-            is_common=True,
+            is_admin=True,
         )

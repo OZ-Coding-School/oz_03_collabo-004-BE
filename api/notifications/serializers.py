@@ -1,7 +1,7 @@
 from ai_hunsoos.models import AiHunsoo
 from articles.models import Article
 from comments.models import Comment
-from reports.models import Report
+from reports.models import ArticleReport, CommentReport
 from rest_framework import serializers
 
 from .models import Notification
@@ -10,7 +10,6 @@ from .models import Notification
 class NotificationSerializer(serializers.ModelSerializer):
     actor_nickname = serializers.CharField(source="actor.nickname", read_only=True)
     actor_username = serializers.CharField(source="actor.username", read_only=True)
-    target_object = serializers.SerializerMethodField()
     content_type = serializers.SerializerMethodField()
     object_id = serializers.IntegerField(read_only=True)
     article_id = serializers.IntegerField(source="article.id", read_only=True)
@@ -76,7 +75,6 @@ class AdminNotificationSerializer(serializers.ModelSerializer):
     reported_user_username = serializers.CharField(
         source="actor.username", read_only=True
     )
-    target_object = serializers.SerializerMethodField()
     content_type = serializers.SerializerMethodField()
     report_id = serializers.IntegerField(source="object.id", read_only=True)
     article_id = serializers.IntegerField(source="article.id", read_only=True)
@@ -111,15 +109,15 @@ class AdminNotificationSerializer(serializers.ModelSerializer):
     def get_description(self, obj):
         """content_type에 따라 description을 생성"""
         if obj.content_type.model == "articlereport":
-            return f"{obj.reported_user_nickname}님의 게시글이 신고 접수 되었습니다"
+            return f"{obj.actor.nickname}님의 게시글이 신고 접수 되었습니다"
         elif obj.content_type.model == "commentreport":
-            return f"{obj.reported_user_nickname}님의 댓글이 신고 접수 되었습니다"
+            return f"{obj.actor.nickname}님의 댓글이 신고 접수 되었습니다"
         return "Unknown notification"
 
     def get_comment_content(self, obj):
         """content_type이 comment_report일 경우에만 필요"""
         if obj.content_type.model == "commentreport":
-            report = Report.objects.get(id=obj.object_id)
-            comment = Comment.objects.get(id=report.reported_comment)
+            report = CommentReport.objects.get(id=obj.object_id)
+            comment = Comment.objects.get(id=report.reported_comment.id)
             return comment.content
         return "None"

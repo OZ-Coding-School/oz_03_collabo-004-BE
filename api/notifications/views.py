@@ -3,7 +3,7 @@ from rest_framework import generics, status
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
-from .serializers import NotificationSerializer
+from .serializers import AdminNotificationSerializer, NotificationSerializer
 
 
 # 특정 사용자가 받은 모든 알림을 조회
@@ -54,7 +54,7 @@ class NotificationDeleteView(generics.DestroyAPIView):
 
 # 어드민 유저가 받은 모든 알림을 조회
 class AdminNotificationListView(generics.ListAPIView):
-    serializer_class = NotificationSerializer
+    serializer_class = AdminNotificationSerializer
     permission_classes = [IsAdminUser]
 
     def get_queryset(self):
@@ -64,7 +64,7 @@ class AdminNotificationListView(generics.ListAPIView):
 # 어드민 특정 알림의 세부정보를 조회
 class AdminNotificationDetailView(generics.RetrieveAPIView):
     queryset = Notification.objects.all()
-    serializer_class = NotificationSerializer
+    serializer_class = AdminNotificationSerializer
     permission_classes = [IsAdminUser]
 
     def get_queryset(self):
@@ -74,7 +74,7 @@ class AdminNotificationDetailView(generics.RetrieveAPIView):
 # 어드민 특정 알림을 읽음 상태로 변경
 class AdminNotificationMarkAsReadView(generics.UpdateAPIView):
     queryset = Notification.objects.all()
-    serializer_class = NotificationSerializer
+    serializer_class = AdminNotificationSerializer
     permission_classes = [IsAdminUser]
 
     def update(self, request, *args, **kwargs):
@@ -89,7 +89,7 @@ class AdminNotificationMarkAsReadView(generics.UpdateAPIView):
 # 어드민 특정알림 삭제
 class AdminNotificationDeleteView(generics.DestroyAPIView):
     queryset = Notification.objects.all()
-    serializer_class = NotificationSerializer
+    serializer_class = AdminNotificationSerializer
     permission_classes = [IsAdminUser]
 
     def get_queryset(self):
