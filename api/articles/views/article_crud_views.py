@@ -103,6 +103,7 @@ class ArticleUpdateView(generics.UpdateAPIView):
         ).data
         return Response(response_data, status=status.HTTP_200_OK)
 
+
 # 이미지 업로드 뷰
 class ArticleImageUploadView(APIView):
     permission_classes = [IsAuthenticated]
@@ -128,37 +129,32 @@ class ArticleImageUploadView(APIView):
         # 업로드된 이미지 URL을 사용해 ArticleImage 객체 생성 및 저장
         article_image = ArticleImage.objects.create(
             image=image_urls[0],  # S3에서 반환된 URL 사용
-            article=None  # article 연결은 나중에
+            article=None,  # article 연결은 나중에
         )
 
         # 직렬화된 이미지 응답 반환 (배열 없이 단일 객체)
         image_data = ArticleImageSerializer(article_image).data
         return Response(image_data, status=status.HTTP_201_CREATED)
 
+
 # 이미지 삭제 뷰
 class ArticleImageDeleteView(APIView):
     permission_classes = [AllowAny]
-    permission_classes = [IsAuthenticated]
 
-    def delete(self, request):
-        image_ids = request.data.get("images", [])
-        if not image_ids:
-            return Response(
-                {"error": "No image IDs provided"}, status=status.HTTP_400_BAD_REQUEST
-            )
-
+    def delete(self, request, image_id):
         # S3 인스턴스 생성
         s3instance = S3Instance().get_s3_instance()
 
         # S3Instance를 통해 이미지 삭제
         try:
-            deleted_images = S3Instance.delete_images(s3instance, image_ids)
+            # 이미지 ID에 해당하는 이미지를 S3에서 삭제하고 DB에서도 삭제
+            deleted_images = S3Instance.delete_images(s3instance, [image_id])
         except Exception as e:
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-        return Response({"deleted_images": deleted_images}, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_200_OK)
 
 
 # 게시글 삭제
