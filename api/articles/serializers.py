@@ -71,6 +71,12 @@ class ArticleSerializer(serializers.ModelSerializer):
             s3instance = S3Instance().get_s3_instance()
             S3Instance.move_temp_images_to_article(s3instance, temp_image_ids, article)
 
+            # 첫 번째 이미지를 썸네일로 설정
+            first_image = article.images.first()
+            if first_image:
+                first_image.is_thumbnail = True
+                first_image.save()
+
         return article
 
     def update(self, instance, validated_data):
@@ -89,6 +95,15 @@ class ArticleSerializer(serializers.ModelSerializer):
         if temp_image_ids:
             s3instance = S3Instance().get_s3_instance()
             S3Instance.move_temp_images_to_article(s3instance, temp_image_ids, instance)
+
+            # 기존 썸네일이 있으면 초기화
+            instance.images.update(is_thumbnail=False)
+
+            # 첫 번째 이미지를 썸네일로 설정
+            first_image = instance.images.first()
+            if first_image:
+                first_image.is_thumbnail = True
+                first_image.save()
 
         return instance
 
