@@ -65,9 +65,10 @@ class ArticleUpdateView(generics.UpdateAPIView):
 
     def perform_update(self, serializer):
         tag_id = self.request.data.get("tag_id")
-        temp_image_ids = self.request.data.get(
-            "temp_image_ids", []
-        )  # 새로 추가된 이미지 ID 리스트
+        temp_image_ids = self.request.data.get("temp_image_ids", [])
+        content = self.request.data.get(
+            "content", ""
+        )  # 클라이언트에서 전달받은 content
 
         if not tag_id:
             raise serializers.ValidationError("태그는 반드시 1개여야 합니다.")
@@ -106,6 +107,12 @@ class ArticleUpdateView(generics.UpdateAPIView):
         # 임시 이미지들을 게시글과 연결 및 경로 변경
         if temp_image_ids:
             S3Instance.move_temp_images_to_article(s3instance, temp_image_ids, article)
+
+        # content에 포함된 이미지 경로 업데이트 (S3Instance 내 메서드 사용)
+        s3 = S3Instance()  # S3Instance 객체 생성
+        updated_content = s3.update_image_urls(content, article.id)
+        article.content = updated_content
+        article.save()
 
         # 수정된 게시글을 직렬화하여 응답으로 반환
         response_data = ArticleSerializer(
