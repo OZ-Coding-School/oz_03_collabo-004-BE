@@ -3,6 +3,7 @@ from django.urls import path
 from .views.article_crud_views import (
     ArticleCreateView,
     ArticleDeleteView,
+    ArticleImageDeleteView,
     ArticleImageUploadView,
     ArticleUpdateView,
 )
@@ -27,6 +28,9 @@ urlpatterns = [
         "images/",
         ArticleImageUploadView.as_view(),
         name="article-image-upload",
+    ),
+    path(
+        "images/delete/", ArticleImageDeleteView.as_view(), name="article-image-delete"
     ),
     # 게시글 리스트 및 상세 조회 관련 URL
     path("", ArticleListView.as_view(), name="article-list"),
