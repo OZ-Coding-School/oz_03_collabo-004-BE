@@ -38,7 +38,7 @@ class ArticleReportCreateView(APIView):
         ).exists():
             return Response(
                 {"detail": "이미 신고한 게시글입니다."},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_409_CONFLICT,
             )
 
         # 요청 데이터에 추가 정보를 삽입하여 serializer 초기화
@@ -69,7 +69,7 @@ class CommentReportCreateView(APIView):
             # Comment 객체가 존재하지 않을 경우
             return Response(
                 {"detail": "해당 댓글을 찾을 수 없습니다."},
-                status=status.HTTP_404_NOT_FOUND,
+                status=status.HTTP_409_CONFLICT,
             )
 
         # 요청한 사용자를 reporter로 설정
