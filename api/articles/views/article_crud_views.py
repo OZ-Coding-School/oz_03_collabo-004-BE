@@ -55,7 +55,9 @@ class ArticleUpdateView(generics.UpdateAPIView):
 
     def perform_update(self, serializer):
         tag_id = self.request.data.get("tag_id")
-        temp_image_ids_str = self.request.data.get("temp_image_ids", "")
+        temp_image_ids = self.request.data.get(
+            "temp_image_ids", []
+        )  # 새로 추가된 이미지 ID 리스트
 
         if not tag_id:
             raise serializers.ValidationError("태그는 반드시 1개여야 합니다.")
@@ -66,11 +68,34 @@ class ArticleUpdateView(generics.UpdateAPIView):
         # S3 인스턴스 생성
         s3instance = S3Instance().get_s3_instance()
 
+        # 기존 이미지 처리 로직
+        existing_images = list(
+            article.images.values_list("id", flat=True)
+        )  # 기존 이미지 ID 목록
+
+        # 새로 들어온 이미지와 기존 이미지 비교하여 삭제할 이미지 선정
+        images_to_delete = set(existing_images) - set(temp_image_ids)
+
+        # S3에서 삭제하고 DB에서도 삭제
+        for image_id in images_to_delete:
+            try:
+                image = ArticleImage.objects.get(id=image_id)
+                # S3에서 이미지 삭제
+                S3Instance.delete_file(s3instance, image.image)
+                # DB에서 이미지 객체 삭제
+                image.delete()
+            except ArticleImage.DoesNotExist:
+                # 이미 DB에 없는 이미지 처리
+                pass
+            except Exception as e:
+                # S3에서 삭제 중 오류 처리
+                raise serializers.ValidationError(
+                    f"S3 이미지 삭제 중 오류가 발생했습니다: {str(e)}"
+                )
+
         # 임시 이미지들을 게시글과 연결 및 경로 변경
-        temp_image_ids = (
-            list(map(int, temp_image_ids_str.split(","))) if temp_image_ids_str else []
-        )
-        S3Instance.move_temp_images_to_article(s3instance, temp_image_ids, article)
+        if temp_image_ids:
+            S3Instance.move_temp_images_to_article(s3instance, temp_image_ids, article)
 
         # 수정된 게시글을 직렬화하여 응답으로 반환
         response_data = ArticleSerializer(
