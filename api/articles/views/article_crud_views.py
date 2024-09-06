@@ -70,15 +70,17 @@ class ArticleUpdateView(generics.UpdateAPIView):
     def perform_update(self, serializer):
         tag_id = self.request.data.get("tag_id")
         temp_image_ids = self.request.data.get("temp_image_ids", [])
-        content = self.request.data.get(
-            "content", ""
-        )  # 클라이언트에서 전달받은 content
+        content = self.request.data.get("content", "")
 
         if not tag_id:
             raise serializers.ValidationError("태그는 반드시 1개여야 합니다.")
 
-        # 게시글 수정
+        # 게시글 수정 및 저장 (ID는 저장 후 확정됨)
         article = serializer.save(tag_id=tag_id)
+
+        # ID가 제대로 생성되었는지 확인
+        if not article.id:
+            raise serializers.ValidationError("게시글 ID가 존재하지 않습니다.")
 
         # S3 인스턴스 생성
         s3instance = S3Instance().get_s3_instance()
@@ -103,7 +105,6 @@ class ArticleUpdateView(generics.UpdateAPIView):
                 # 이미 DB에 없는 이미지 처리
                 pass
             except Exception as e:
-                # S3에서 삭제 중 오류 처리
                 raise serializers.ValidationError(
                     f"S3 이미지 삭제 중 오류가 발생했습니다: {str(e)}"
                 )
@@ -116,7 +117,7 @@ class ArticleUpdateView(generics.UpdateAPIView):
         s3 = S3Instance()  # S3Instance 객체 생성
         updated_content = s3.update_image_urls(content, article.id)
         article.content = updated_content
-        article.save()
+        article.save()  # 변경된 content와 함께 다시 저장
 
         # 수정된 게시글을 직렬화하여 응답으로 반환
         response_data = ArticleSerializer(
