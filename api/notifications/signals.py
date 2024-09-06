@@ -57,7 +57,7 @@ def notify_user_on_comment_selection(sender, instance, **kwargs):
 # AI 댓글이 생성될 때 알림
 @receiver(post_save, sender=AiHunsoo)
 def notify_user_on_ai_hunsoo(sender, instance, created, **kwargs):
-    if created:
+    if not created and instance.status:
         Notification.objects.create(
             recipient=instance.article.user,
             actor=None,  # AI는 사용자 대신 자동으로 생성되므로 actor가 없을 수 있음
