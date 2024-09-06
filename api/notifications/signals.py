@@ -73,6 +73,36 @@ def notify_user_on_ai_hunsoo(sender, instance, created, **kwargs):
         )
 
 
+# 게시글 신고가 처리 완료되었을 때 알림
+@receiver(post_save, sender=ArticleReport)
+def update_warning_article(sender, instance, created, **kwargs):
+    # article_report가 업데이트되었고 status가 RS(resolved)로 변경된 경우
+    if not created and instance.status == "RS":
+        Notification.objects.create(
+            actor=instance.reported_user,
+            verb="report",
+            content_type=ContentType.objects.get_for_model(instance),
+            object_id=instance.id,
+            article=instance.reported_article,
+            is_admin=False,
+        )
+
+
+# 댓글 신고가 처리 완료되었을 때 알림
+@receiver(post_save, sender=CommentReport)
+def update_warning_article(sender, instance, created, **kwargs):
+    # comment_report가 업데이트되었고 status가 RS(resolved)로 변경된 경우
+    if not created and instance.status == "RS":
+        Notification.objects.create(
+            actor=instance.reported_user,
+            verb="report",
+            content_type=ContentType.objects.get_for_model(instance),
+            object_id=instance.id,
+            article=instance.reported_article,
+            is_admin=False,
+        )
+
+
 # 게시글 신고가 접수될 때 알림
 @receiver(post_save, sender=ArticleReport)
 def notify_admin_on_article_report(sender, instance, created, **kwargs):

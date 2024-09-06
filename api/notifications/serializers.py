@@ -37,9 +37,13 @@ class NotificationSerializer(serializers.ModelSerializer):
 
     def get_content_type(self, obj):
         """알림 대상 객체의 타입(article, comment)을 반환"""
-        if obj.content_type.model == "comment":
+        if (obj.content_type.model == "comment") or (
+            obj.content_type.model == "commentreport"
+        ):
             return "comment"
-        elif obj.content_type.model == "article":
+        elif (obj.content_type.model == "article") or (
+            obj.content_type.model == "articlereport"
+        ):
             return "article"
         elif obj.content_type.model == "aihunsoo":
             return "ai_hunsoo"
@@ -52,18 +56,26 @@ class NotificationSerializer(serializers.ModelSerializer):
                 return f"님이 회원님의 게시글을 좋아합니다"
         elif obj.content_type.model == "aihunsoo":
             if obj.verb == "ai_response":
-                return f"회원님의 게시글에 AI 훈수가 답변을 남겼습니다"
+                return f"회원님의 게시글에 훈수봇이 훈수를 남겼습니다"
         elif obj.content_type.model == "comment":
             if obj.verb == "comment":
-                return f"님이 회원님의 게시글에 댓글을 남겼습니다"
+                return f"님이 회원님의 게시글에 훈수를 남겼습니다"
             elif obj.verb == "select":
-                return f"회원님의 댓글이 채택되었습니다"
+                return f"회원님의 훈수가 채택되었습니다"
+        elif obj.content_type.model == "articlereport":
+            return f"회원님의 게시글이 신고되었습니다"
+        elif obj.content_type.model == "commentreport":
+            return f"회원님의 훈수가 신고되었습니다"
         return "Unknown notification"
 
     def get_comment_content(self, obj):
         """content_type이 comment일 경우에만 필요"""
         if obj.content_type.model == "comment":
             comment = Comment.objects.get(id=obj.object_id)
+            return comment.content
+        elif obj.content_type.model == "commentreport":
+            report = CommentReport.objects.get(id=obj.object_id)
+            comment = Comment.objects.get(id=report.reported_comment.id)
             return comment.content
         return "None"
 
@@ -111,7 +123,7 @@ class AdminNotificationSerializer(serializers.ModelSerializer):
         if obj.content_type.model == "articlereport":
             return f"님의 게시글이 신고 접수 되었습니다"
         elif obj.content_type.model == "commentreport":
-            return f"님의 댓글이 신고 접수 되었습니다"
+            return f"님의 훈수가 신고 접수 되었습니다"
         return "Unknown notification"
 
     def get_comment_content(self, obj):
