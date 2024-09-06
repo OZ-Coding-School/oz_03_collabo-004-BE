@@ -32,20 +32,9 @@ class NotificationSerializer(serializers.ModelSerializer):
             "description",
             "article_title",
             "comment_content",
-            "target_object",
             "read",
             "timestamp",
         ]
-
-    def get_target_object(self, obj):
-        if isinstance(obj.target, Comment):
-            return f"Comment by {obj.actor.nickname} on {obj.target.article.title}"
-        elif isinstance(obj.target, Article):
-            return f"Article: {obj.target.title}"
-        elif isinstance(obj.target, AiHunsoo):
-            return f"AI Hunsoo Response to {obj.target.article.title}"
-        else:
-            return "Unknown target"
 
     def get_content_type(self, obj):
         """알림 대상 객체의 타입(article, comment)을 반환"""
