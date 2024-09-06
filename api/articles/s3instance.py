@@ -1,5 +1,6 @@
 import os
 import random
+import re
 import string
 from dataclasses import dataclass
 from pathlib import Path
@@ -30,6 +31,25 @@ class S3Instance:
             aws_secret_access_key=self.aws_secret_access_key,
             region_name=self.aws_region_name,
         )
+
+    def update_image_urls(self, content, article_id):
+        """
+        임시 이미지 URL을 최종 게시글 이미지 URL로 변환합니다.
+        """
+        # 정규 표현식을 사용하여 모든 임시 이미지 URL을 찾음
+        temp_url_pattern = re.compile(
+            rf"https://{self.aws_s3_bucket_name}.s3.{self.aws_region_name}.amazonaws.com/temporary/([a-zA-Z0-9]+.png)"
+        )
+
+        # 최종 URL로 변경
+        def replace_temp_url(match):
+            file_name = match.group(1)
+            new_url = f"https://{self.aws_s3_bucket_name}.s3.{self.aws_region_name}.amazonaws.com/articles/{article_id}/{file_name}"
+            return new_url
+
+        # content에서 임시 URL을 최종 URL로 변경
+        updated_content = re.sub(temp_url_pattern, replace_temp_url, content)
+        return updated_content
 
     @staticmethod
     def upload_files(s3_client, files, article_id=None):
