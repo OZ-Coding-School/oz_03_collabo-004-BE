@@ -61,7 +61,7 @@ class NotificationSerializer(serializers.ModelSerializer):
             if obj.verb == "comment":
                 return f"님이 회원님의 게시글에 훈수를 남겼습니다"
             elif obj.verb == "select":
-                return f"회원님의 훈수를 채택했습니다"
+                return f"회원님의 훈수가 채택되었습니다"
         elif obj.content_type.model == "articlereport":
             return f"회원님의 게시글이 신고되었습니다"
         elif obj.content_type.model == "commentreport":
