@@ -1,3 +1,5 @@
+import re
+
 from rest_framework import generics, permissions, serializers, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -14,11 +16,12 @@ from ..serializers import ArticleImageSerializer, ArticleSerializer
 class ArticleCreateView(generics.CreateAPIView):
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         tag_id = self.request.data.get("tag_id")
         temp_image_ids = self.request.data.get("temp_image_ids", [])
+        content = self.request.data.get("content", "")
 
         if not tag_id:
             raise serializers.ValidationError("태그는 반드시 1개여야 합니다.")
@@ -32,6 +35,13 @@ class ArticleCreateView(generics.CreateAPIView):
         # 임시 이미지들을 게시글과 연결 및 경로 변경
         S3Instance.move_temp_images_to_article(s3instance, temp_image_ids, article)
 
+        # content에 포함된 이미지 경로 업데이트 (S3Instance 내 메서드 사용)
+        s3 = S3Instance()  # S3Instance 객체 생성
+        updated_content = s3.update_image_urls(content, article.id)
+        article.content = updated_content
+        article.save()
+
+        # 직렬화된 게시글 데이터를 응답으로 반환
         response_data = ArticleSerializer(
             article, context={"request": self.request}
         ).data
