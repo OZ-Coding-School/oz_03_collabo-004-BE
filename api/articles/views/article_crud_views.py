@@ -75,20 +75,22 @@ class ArticleUpdateView(generics.UpdateAPIView):
         if not tag_id:
             raise serializers.ValidationError("태그는 반드시 1개여야 합니다.")
 
-        # 게시글 수정 및 저장 (ID는 저장 후 확정됨)
-        article = serializer.save(tag_id=tag_id)
+        # 문자열로 들어온 temp_image_ids를 정수형으로 변환
+        try:
+            temp_image_ids = list(
+                map(int, temp_image_ids)
+            )  # 문자열을 정수형 리스트로 변환
+        except ValueError:
+            raise serializers.ValidationError("유효한 이미지 ID가 필요합니다.")
 
-        # ID가 제대로 생성되었는지 확인
-        if not article.id:
-            raise serializers.ValidationError("게시글 ID가 존재하지 않습니다.")
+        # 게시글 수정 및 저장
+        article = serializer.save(tag_id=tag_id)
 
         # S3 인스턴스 생성
         s3instance = S3Instance().get_s3_instance()
 
         # 기존 이미지 처리 로직
-        existing_images = list(
-            article.images.values_list("id", flat=True)
-        )  # 기존 이미지 ID 목록
+        existing_images = list(article.images.values_list("id", flat=True))
 
         # 새로 들어온 이미지와 기존 이미지 비교하여 삭제할 이미지 선정
         images_to_delete = set(existing_images) - set(temp_image_ids)
@@ -102,7 +104,6 @@ class ArticleUpdateView(generics.UpdateAPIView):
                 # DB에서 이미지 객체 삭제
                 image.delete()
             except ArticleImage.DoesNotExist:
-                # 이미 DB에 없는 이미지 처리
                 pass
             except Exception as e:
                 raise serializers.ValidationError(
