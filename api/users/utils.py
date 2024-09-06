@@ -1,13 +1,14 @@
 import os
 from dataclasses import dataclass, field
 
+
 import pytz
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import timezone
+
 from rest_framework.permissions import BasePermission
 from rest_framework_simplejwt.tokens import RefreshToken
-
 
 
 
@@ -199,6 +200,7 @@ class GeneralAuthClass:
             expires_at = GeneralAuthClass()._refresh_expiration
         else:
             raise ValueError("key should be 'access' or 'refresh'")
+
 
         response.set_cookie(
             key=key,
