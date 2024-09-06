@@ -30,10 +30,8 @@ class ArticleCreateView(generics.CreateAPIView):
         s3instance = S3Instance().get_s3_instance()
 
         # 임시 이미지들을 게시글과 연결 및 경로 변경
-        # temp_image_ids는 이미 리스트이므로, split() 필요 없음
         S3Instance.move_temp_images_to_article(s3instance, temp_image_ids, article)
 
-        # 생성된 게시글을 직렬화하여 응답으로 반환
         response_data = ArticleSerializer(
             article, context={"request": self.request}
         ).data
@@ -112,6 +110,31 @@ class ArticleImageUploadView(APIView):
             {"temp_image_ids": temp_image_ids, "images": serialized_images.data},
             status=status.HTTP_201_CREATED,
         )
+
+
+# 이미지 삭제 뷰
+class ArticleImageDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        image_ids = request.data.get("images", [])
+        if not image_ids:
+            return Response(
+                {"error": "No image IDs provided"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # S3 인스턴스 생성
+        s3instance = S3Instance().get_s3_instance()
+
+        # S3Instance를 통해 이미지 삭제
+        try:
+            deleted_images = S3Instance.delete_images(s3instance, image_ids)
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        return Response({"deleted_images": deleted_images}, status=status.HTTP_200_OK)
 
 
 # 게시글 삭제

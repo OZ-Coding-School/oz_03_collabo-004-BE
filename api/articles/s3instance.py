@@ -95,7 +95,8 @@ class S3Instance:
 
             except ArticleImage.DoesNotExist:
                 pass
-
+            
+    #s3에서 이미지 객체 삭제
     @staticmethod
     def copy_file(s3_client, source_key, dest_key):
         """
@@ -124,3 +125,35 @@ class S3Instance:
             )
         except Exception as e:
             raise Exception(f"Could not delete file from S3: {str(e)}")
+    
+    #s3와 db에 있는 이미지 정보 모두 삭제   
+    @staticmethod
+    def delete_images(s3_client, image_ids):
+        """
+        이미지 ID 목록을 받아서 해당 이미지를 S3에서 삭제하고, DB에서도 삭제 처리합니다.
+        """
+        deleted_images = []
+        for image_id in image_ids:
+            try:
+                # DB에서 이미지 가져오기
+                image = ArticleImage.objects.get(id=image_id)
+
+                # S3에서 이미지 삭제
+                s3_key = image.image.split(
+                    f"https://{os.getenv('AWS_STORAGE_BUCKET_NAME')}.s3.{os.getenv('AWS_S3_REGION_NAME')}.amazonaws.com/"
+                )[-1]
+                
+                # S3에서 파일 삭제
+                S3Instance.delete_file(s3_client, s3_key)
+
+                # DB에서 이미지 삭제
+                image.delete()
+                deleted_images.append(image_id)
+            
+            except ArticleImage.DoesNotExist:
+                # 해당 이미지가 존재하지 않는 경우 처리
+                continue
+            except Exception as e:
+                raise Exception(f"Failed to delete image {image_id}: {str(e)}")
+
+        return deleted_images
