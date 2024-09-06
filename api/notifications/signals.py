@@ -19,6 +19,7 @@ def notify_user_on_comment(sender, instance, created, **kwargs):
             content_type=ContentType.objects.get_for_model(instance),
             object_id=instance.id,
             article=instance.article,
+            is_admin=False,
         )
 
 
@@ -38,6 +39,7 @@ def notify_user_on_like(sender, instance, action, **kwargs):
                 content_type=ContentType.objects.get_for_model(instance),
                 object_id=instance.id,
                 article=instance,
+                is_admin=False,
             )
 
 
@@ -52,6 +54,7 @@ def notify_user_on_comment_selection(sender, instance, **kwargs):
             content_type=ContentType.objects.get_for_model(instance),
             object_id=instance.id,
             article=instance.article,
+            is_admin=False,
         )
 
 
@@ -66,6 +69,7 @@ def notify_user_on_ai_hunsoo(sender, instance, created, **kwargs):
             content_type=ContentType.objects.get_for_model(instance),
             object_id=instance.id,
             article=instance.article,
+            is_admin=False,
         )
 
 
