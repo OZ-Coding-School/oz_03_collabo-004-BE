@@ -30,7 +30,9 @@ urlpatterns = [
         name="article-image-upload",
     ),
     path(
-        "images/delete/", ArticleImageDeleteView.as_view(), name="article-image-delete"
+        "images/<int:image_id>/",
+        ArticleImageDeleteView.as_view(),
+        name="article-image-delete",
     ),
     # 게시글 리스트 및 상세 조회 관련 URL
     path("", ArticleListView.as_view(), name="article-list"),
