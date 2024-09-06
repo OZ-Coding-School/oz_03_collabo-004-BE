@@ -79,6 +79,7 @@ def update_warning_article(sender, instance, created, **kwargs):
     # article_report가 업데이트되었고 status가 RS(resolved)로 변경된 경우
     if not created and instance.status == "RS":
         Notification.objects.create(
+            recipient=instance.reported_user,
             actor=instance.reported_user,
             verb="report",
             content_type=ContentType.objects.get_for_model(instance),
@@ -94,11 +95,12 @@ def update_warning_article(sender, instance, created, **kwargs):
     # comment_report가 업데이트되었고 status가 RS(resolved)로 변경된 경우
     if not created and instance.status == "RS":
         Notification.objects.create(
+            recipient=instance.reported_user,
             actor=instance.reported_user,
             verb="report",
             content_type=ContentType.objects.get_for_model(instance),
             object_id=instance.id,
-            article=instance.reported_article,
+            article=instance.reported_comment.article,
             is_admin=False,
         )
 
