@@ -36,7 +36,7 @@ def notify_user_on_like(sender, instance, action, **kwargs):
                 verb="like",
                 content_type=ContentType.objects.get_for_model(instance),
                 object_id=instance.id,
-                article=instance.id,
+                article=instance,
             )
 
 
