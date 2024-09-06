@@ -23,6 +23,7 @@ class ArticleImageSerializer(serializers.ModelSerializer):
         return None
 
 
+# 게시글 작성과 수정을 위한 시리얼라이저
 class ArticleSerializer(serializers.ModelSerializer):
     article_id = serializers.ReadOnlyField(source="id")
     images = ArticleImageSerializer(many=True, required=False, read_only=True)
@@ -41,9 +42,9 @@ class ArticleSerializer(serializers.ModelSerializer):
             "user",
             "title",
             "content",
+            "temp_image_ids",
             "images",
             "tag_id",
-            "temp_image_ids",
             "tags",
             "is_closed",
             "view_count",
