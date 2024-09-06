@@ -26,20 +26,24 @@ class ArticleCreateView(generics.CreateAPIView):
         if not tag_id:
             raise serializers.ValidationError("태그는 반드시 1개여야 합니다.")
 
-        # 게시글 생성
+        # 게시글 생성 및 저장 (ID는 저장 후 확정됨)
         article = serializer.save(user=self.request.user, tag_id=tag_id)
+
+        # ID가 제대로 생성되었는지 확인
+        if not article.id:
+            raise serializers.ValidationError("게시글 ID가 생성되지 않았습니다.")
 
         # S3 인스턴스 생성
         s3instance = S3Instance().get_s3_instance()
 
-        # 임시 이미지들을 게시글과 연결 및 경로 변경
+        # 임시 이미지들을 게시글과 연결 및 경로 변경 (ID가 확정된 후 실행)
         S3Instance.move_temp_images_to_article(s3instance, temp_image_ids, article)
 
         # content에 포함된 이미지 경로 업데이트 (S3Instance 내 메서드 사용)
         s3 = S3Instance()  # S3Instance 객체 생성
         updated_content = s3.update_image_urls(content, article.id)
         article.content = updated_content
-        article.save()
+        article.save()  # 변경된 content와 함께 게시글 다시 저장
 
         # 직렬화된 게시글 데이터를 응답으로 반환
         response_data = ArticleSerializer(
