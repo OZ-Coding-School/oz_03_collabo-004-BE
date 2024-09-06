@@ -14,6 +14,8 @@ class NotificationSerializer(serializers.ModelSerializer):
     object_id = serializers.IntegerField(read_only=True)
     article_id = serializers.IntegerField(source="article.id", read_only=True)
     description = serializers.SerializerMethodField()
+    article_title = serializers.CharField(source="article.title", read_only=True)
+    comment_content = serializers.SerializerMethodField()
 
     class Meta:
         model = Notification
@@ -27,6 +29,8 @@ class NotificationSerializer(serializers.ModelSerializer):
             "article_id",
             "object_id",
             "description",
+            "article_title",
+            "comment_content",
             "target_object",
             "read",
             "timestamp",
@@ -55,13 +59,21 @@ class NotificationSerializer(serializers.ModelSerializer):
     def get_description(self, obj):
         """content_type과 verb에 따라 description을 생성"""
         if obj.content_type.model == "article":
+            if obj.verb == "like":
+                return f"{obj.actor.nickname}님이 회원님의 게시글을 좋아합니다"
+        elif obj.content_type.model == "aihunsoo":
+            if obj.verb == "ai_response":
+                return f"회원님의 게시글에 AI 훈수가 답변을 남겼습니다"
+        elif obj.content_type.model == "comment":
             if obj.verb == "comment":
-                return f"{obj.actor.nickname}님이 회원님의 게시글에 댓글을 남겼습니다: {obj.article.title}"
-            elif obj.verb == "like":
-                return f"{obj.actor.nickname}님이 회원님의 게시글을 좋아합니다: {obj.article.title}"
-            elif obj.verb == "ai_hunsoo":
-                return f"회원님의 게시글에 AI 훈수가 답변을 남겼습니다: {obj.article.title}"
-        elif obj.content_type.model == "comment" and obj.verb == "select":
-            comment = Comment.objects.get(id=obj.object_id)
-            return f"회원님의 댓글이 채택되었습니다: {comment.content}"
+                return f"{obj.actor.nickname}님이 회원님의 게시글에 댓글을 남겼습니다"
+            elif obj.verb == "select":
+                return f"회원님의 댓글이 채택되었습니다"
         return "Unknown notification"
+
+    def get_comment_content(self, obj):
+        """content_type이 comment일 경우에만 필요"""
+        if obj.content_type.model == "comment":
+            comment = Comment.objects.get(id=obj.object_id)
+            return comment.content
+        return "None"
