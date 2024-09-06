@@ -139,7 +139,7 @@ class ArticleImageUploadView(APIView):
 
 # 이미지 삭제 뷰
 class ArticleImageDeleteView(APIView):
-    permission_classes = [AllowAny] 
+    permission_classes = [AllowAny]
 
     def delete(self, request, image_id):
         # S3 인스턴스 생성
@@ -154,7 +154,7 @@ class ArticleImageDeleteView(APIView):
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-        return Response({"deleted_images": deleted_images}, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_200_OK)
 
 
 # 게시글 삭제
