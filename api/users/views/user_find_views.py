@@ -1,6 +1,8 @@
+from smtplib import SMTPException
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import BadHeaderError, SMTPException, send_mail
+from django.core.mail import BadHeaderError, send_mail
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.http import force_bytes, urlsafe_base64_decode, urlsafe_base64_encode
