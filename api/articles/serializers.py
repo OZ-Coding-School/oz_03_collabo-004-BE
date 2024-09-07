@@ -23,7 +23,7 @@ class ArticleImageSerializer(serializers.ModelSerializer):
         return None
 
 
-# 유저의 게시글 작성과 수정을 위한 시리얼라이저
+# 게시글 작성과 수정을 위한 시리얼라이저
 class ArticleSerializer(serializers.ModelSerializer):
     article_id = serializers.ReadOnlyField(source="id")
     images = ArticleImageSerializer(many=True, required=False, read_only=True)
@@ -42,9 +42,9 @@ class ArticleSerializer(serializers.ModelSerializer):
             "user",
             "title",
             "content",
+            "temp_image_ids",
             "images",
             "tag_id",
-            "temp_image_ids",
             "tags",
             "is_closed",
             "view_count",
@@ -71,6 +71,14 @@ class ArticleSerializer(serializers.ModelSerializer):
             s3instance = S3Instance().get_s3_instance()
             S3Instance.move_temp_images_to_article(s3instance, temp_image_ids, article)
 
+            # 첫 번째 임시 이미지를 썸네일로 설정
+            first_image = (
+                ArticleImage.objects.filter(article=article).order_by("id").first()
+            )
+            if first_image:
+                first_image.is_thumbnail = True
+                first_image.save()
+
         return article
 
     def update(self, instance, validated_data):
@@ -89,6 +97,17 @@ class ArticleSerializer(serializers.ModelSerializer):
         if temp_image_ids:
             s3instance = S3Instance().get_s3_instance()
             S3Instance.move_temp_images_to_article(s3instance, temp_image_ids, instance)
+
+            # 기존 썸네일이 있으면 초기화
+            instance.images.update(is_thumbnail=False)
+
+            # 새로 들어온 첫 번째 이미지를 썸네일로 설정
+            first_image = (
+                ArticleImage.objects.filter(article=instance).order_by("id").first()
+            )
+            if first_image:
+                first_image.is_thumbnail = True
+                first_image.save()
 
         return instance
 
@@ -135,10 +154,11 @@ class ArticleListSerializer(serializers.ModelSerializer):
         }
 
     def get_thumbnail_image(self, obj):
+        # 썸네일 이미지가 있으면 가져오고, 없으면 첫 번째 이미지를 가져옴
         thumbnail_image = obj.images.filter(is_thumbnail=True).first()
-        if thumbnail_image:
-            return thumbnail_image.image_url
-        return None  # 썸네일 이미지가 없는경우(이미지가 아예없는 게시글)
+        if not thumbnail_image:
+            thumbnail_image = obj.images.first()
+        return thumbnail_image.image_url if thumbnail_image else None
 
     def get_comments_count(self, obj):
         return obj.comments.count()  # 댓글 수 반환
@@ -193,10 +213,11 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
         }
 
     def get_thumbnail_image(self, obj):
+        # 썸네일 이미지가 있으면 가져오고, 없으면 첫 번째 이미지를 가져옴
         thumbnail_image = obj.images.filter(is_thumbnail=True).first()
-        if thumbnail_image:
-            return thumbnail_image.image_url
-        return None  # 썸네일 이미지가 없는경우(이미지가 아예없는 게시글)
+        if not thumbnail_image:
+            thumbnail_image = obj.images.first()
+        return thumbnail_image.image_url if thumbnail_image else None
 
     def get_status(self, obj):
         request = self.context.get("request")

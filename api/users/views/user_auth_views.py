@@ -4,6 +4,7 @@ from common.logger import logger
 from django.contrib.auth import authenticate, get_user_model
 from django.db import transaction
 from django.utils import timezone
+from profiles.models import Profile
 from rest_framework import generics, status
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.generics import GenericAPIView
@@ -42,6 +43,8 @@ class UserRegisterView(generics.CreateAPIView):
 
         user.last_login = timezone.now()
         user.save()
+
+        Profile.objects.create(user=user)
 
         jwt_tokens = GeneralAuthClass.set_auth_tokens_for_user(user)
 
