@@ -3,6 +3,7 @@ import os
 from common.logger import logger
 from django.contrib.auth import authenticate, get_user_model
 from django.db import transaction
+from django.utils import timezone
 from profiles.models import Profile
 from rest_framework import generics, status
 from rest_framework.authentication import BasicAuthentication
@@ -40,7 +41,8 @@ class UserRegisterView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
-        Profile.objects.create(user=user)
+        user.last_login = timezone.now()
+        user.save()
 
         jwt_tokens = GeneralAuthClass.set_auth_tokens_for_user(user)
 
@@ -76,6 +78,10 @@ class UserLoginView(APIView):
         )
 
         if user is not None:
+
+            user.last_login = timezone.now()
+            user.save()
+
             jwt_tokens = GeneralAuthClass.set_auth_tokens_for_user(user)
 
             response_data = {
