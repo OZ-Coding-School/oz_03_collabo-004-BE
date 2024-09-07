@@ -166,3 +166,28 @@ class UserSerializer(serializers.ModelSerializer):
             "warning_count",
             "selected_tags",
         ]
+
+
+# 유저아이디 필드 검증시리얼라이저
+class FindUsernameSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        if not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("해당 이메일로 가입된 사용자가 없습니다.")
+        return value
+
+
+# 유저 비밀번호 재설정 요청시 아이디검증 시리얼라이저
+class PasswordResetRequestSerializer(serializers.Serializer):
+    username = serializers.CharField()
+
+    def validate_username(self, value):
+        if not User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("해당 아이디로 가입된 사용자가 없습니다.")
+        return value
+
+
+# 유저 비밀번호 재설정 시리얼라이저
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    new_password = serializers.CharField(write_only=True)
