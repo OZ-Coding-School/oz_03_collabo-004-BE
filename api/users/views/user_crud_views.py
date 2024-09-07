@@ -222,8 +222,8 @@ class ReportListView(GenericAPIView):
     serializer_class = ReportStatusSerializer
 
     def get(self, request, *args, **kwargs):
-        article_reports = ArticleReport.objects.all()
-        comment_reports = CommentReport.objects.all()
+        article_reports = ArticleReport.objects.filter(status="PD")
+        comment_reports = CommentReport.objects.filter(status="PD")
 
         # 직렬화
         serializer = self.get_serializer(
