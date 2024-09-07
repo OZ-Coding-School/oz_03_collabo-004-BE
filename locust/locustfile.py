@@ -339,8 +339,6 @@ class WebsiteUser(HttpUser):
                         exception=Exception(f"Failed to view article: {response.status_code}")
                     )
 
-
-
     @task
     def report_article(self):
         """게시글 신고 요청을 보냅니다."""
