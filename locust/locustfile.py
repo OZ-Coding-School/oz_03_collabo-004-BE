@@ -1,8 +1,6 @@
 import random
 import string
-
-from locust import HttpUser, between, task
-
+from locust import HttpUser, between, task, events
 
 class WebsiteUser(HttpUser):
     wait_time = between(1, 5)
@@ -17,9 +15,15 @@ class WebsiteUser(HttpUser):
         self.register()
         self.login()
 
-        self.article_id = None
-        self.create_article()
-        self.comment_id = None
+        if self.cookies:
+            self.article_id = None
+            self.comment_id = None
+            self.create_article()
+
+            if self.article_id:
+                self.create_comment()
+            else:
+                print("Article creation failed, skipping comment creation.")
 
     def generate_random_username(self):
         return "user_" + "".join(random.choices(string.ascii_letters, k=8))
@@ -46,7 +50,7 @@ class WebsiteUser(HttpUser):
 
     def register(self):
         """회원가입을 수행합니다."""
-        response = self.client.post(
+        with self.client.post(
             "/api/auth/register/",
             json={
                 "username": self.username,
@@ -54,40 +58,70 @@ class WebsiteUser(HttpUser):
                 "nickname": self.nickname,
                 "email": self.email,
             },
-        )
-        if response.status_code == 201:
-            print(f"User {self.username} registered successfully.")
-        else:
-            print(
-                f"Failed to register user {self.username}. Status code: {response.status_code}"
-            )
+            catch_response=True
+        ) as response:
+            if response.status_code == 201:
+                events.request_success.fire(
+                    request_type="POST",
+                    name="/api/auth/register/",
+                    response_time=response.elapsed.total_seconds() * 1000,
+                    response_length=len(response.content),
+                )
+            else:
+                events.request_failure.fire(
+                    request_type="POST",
+                    name="/api/auth/register/",
+                    response_time=response.elapsed.total_seconds() * 1000,
+                    response_length=len(response.content),
+                    exception=Exception(f"Failed to register user: {response.status_code}")
+                )
 
     def login(self):
         """로그인을 수행하고 쿠키를 저장합니다."""
-        response = self.client.post(
+        with self.client.post(
             "/api/auth/login/",
             json={"username": self.username, "password": self.password},
-        )
-        if response.status_code == 200:
-            self.cookies = response.cookies
-            print(f"User {self.username} logged in successfully.")
-        else:
-            self.cookies = None  # 로그인 실패 시 쿠키를 None으로 설정
-            print(
-                f"Failed to log in user {self.username}. Status code: {response.status_code}"
-            )
+            catch_response=True
+        ) as response:
+            if response.status_code == 200:
+                self.cookies = response.cookies
+                events.request_success.fire(
+                    request_type="POST",
+                    name="/api/auth/login/",
+                    response_time=response.elapsed.total_seconds() * 1000,
+                    response_length=len(response.content),
+                )
+            else:
+                self.cookies = None
+                events.request_failure.fire(
+                    request_type="POST",
+                    name="/api/auth/login/",
+                    response_time=response.elapsed.total_seconds() * 1000,
+                    response_length=len(response.content),
+                    exception=Exception(f"Failed to log in user: {response.status_code}")
+                )
+                self.environment.runner.quit()
 
     @task
     def view_profile(self):
         """프로필 조회 요청을 보냅니다."""
         if self.cookies:
-            response = self.client.get("/api/account/profile/", cookies=self.cookies)
-            if response.status_code == 200:
-                print(f"User {self.username} profile viewed successfully.")
-            else:
-                print(
-                    f"Failed to view profile for {self.username}. Status code: {response.status_code}"
-                )
+            with self.client.get("/api/account/profile/", cookies=self.cookies, catch_response=True) as response:
+                if response.status_code == 200:
+                    events.request_success.fire(
+                        request_type="GET",
+                        name="/api/account/profile/",
+                        response_time=response.elapsed.total_seconds() * 1000,
+                        response_length=len(response.content),
+                    )
+                else:
+                    events.request_failure.fire(
+                        request_type="GET",
+                        name="/api/account/profile/",
+                        response_time=response.elapsed.total_seconds() * 1000,
+                        response_length=len(response.content),
+                        exception=Exception(f"Failed to view profile: {response.status_code}")
+                    )
 
     @task
     def update_profile(self):
@@ -95,7 +129,7 @@ class WebsiteUser(HttpUser):
         if self.cookies:
             updated_nickname = self.generate_random_nickname()
             selected_tags = self.generate_random_tags()
-            response = self.client.put(
+            with self.client.put(
                 "/api/account/profile/update/",
                 json={
                     "nickname": updated_nickname,
@@ -103,142 +137,66 @@ class WebsiteUser(HttpUser):
                     "selected_tags": selected_tags,
                 },
                 cookies=self.cookies,
-            )
-            if response.status_code == 200:
-                print(f"User {self.username} profile updated successfully.")
-            else:
-                print(
-                    f"Failed to update profile for {self.username}. Status code: {response.status_code}"
-                )
+                catch_response=True
+            ) as response:
+                if response.status_code == 200:
+                    events.request_success.fire(
+                        request_type="PUT",
+                        name="/api/account/profile/update/",
+                        response_time=response.elapsed.total_seconds() * 1000,
+                        response_length=len(response.content),
+                    )
+                else:
+                    events.request_failure.fire(
+                        request_type="PUT",
+                        name="/api/account/profile/update/",
+                        response_time=response.elapsed.total_seconds() * 1000,
+                        response_length=len(response.content),
+                        exception=Exception(f"Failed to update profile: {response.status_code}")
+                    )
 
     @task
     def create_article(self):
         """게시글을 작성합니다."""
         if self.cookies:
-
             valid_tag_ids = [2, 3, 4, 5, 6, 7, 9, 10, 11]
             tag_id = random.choice(valid_tag_ids)
 
-            response = self.client.post(
+            with self.client.post(
                 "/api/article/create/",
                 json={
                     "title": "Test Article",
                     "content": "This is a test article created by Locust.",
-                    "tag_id": tag_id,  # 1~11 태그 중 랜덤 선택
+                    "tag_id": tag_id,
                 },
                 cookies=self.cookies,
-            )
-            if response.status_code == 201:
-                self.article_id = response.json().get("article_id")
-                print(f"Article {self.article_id} created successfully.")
-            else:
-                print(f"Failed to create article. Status code: {response.status_code}")
-
-    @task
-    def create_comment(self):
-        """게시글에 댓글을 작성합니다."""
-        if self.article_id and self.cookies:
-            # 먼저 게시글 정보를 가져와 작성자가 본인인지 확인합니다.
-            article_response = self.client.get(f"/api/article/{self.article_id}/", cookies=self.cookies)
-            if article_response.status_code == 200:
-                article_author = article_response.json().get("author")
-                if article_author == self.username:
-                    print(f"User {self.username} cannot comment on their own article.")
-                    return  # 자신의 게시글에 댓글을 작성하지 않음
-
-            # 자신이 작성하지 않은 게시글에 대해서만 댓글 작성
-            response = self.client.post(
-                f"/comments/create/articles/{self.article_id}/",
-                json={"content": "This is a test comment created by Locust."},
-                cookies=self.cookies,
-            )
-            if response.status_code == 201:
-                self.comment_id = response.json().get("id")
-                print(f"Comment {self.comment_id} created successfully.")
-            else:
-                print(f"Failed to create comment. Status code: {response.status_code}")
-
-    @task
-    def update_comment(self):
-        """댓글을 수정합니다."""
-        if self.comment_id and self.cookies:
-            response = self.client.put(
-                f"/comments/edit/{self.comment_id}/",
-                json={"content": "This is an updated comment."},
-                cookies=self.cookies,
-            )
-            if response.status_code == 200:
-                print(f"Comment {self.comment_id} updated successfully.")
-            else:
-                print(f"Failed to update comment. Status code: {response.status_code}")
-
-    @task
-    def delete_comment(self):
-        """댓글을 삭제합니다."""
-        if self.comment_id and self.cookies:
-            response = self.client.delete(f"/comments/edit/{self.comment_id}/", cookies=self.cookies)
-            if response.status_code == 204:
-                print(f"Comment {self.comment_id} deleted successfully.")
-                self.comment_id = None  # 댓글 삭제 후 comment_id 초기화
-            else:
-                print(f"Failed to delete comment. Status code: {response.status_code}")
-
-    @task
-    def react_to_comment(self):
-        """댓글에 도움이 돼요/안 돼요 반응을 추가하거나 삭제합니다."""
-        if self.comment_id and self.cookies:
-
-            if self.comment_author == self.username:
-                print(f"User {self.username} cannot react to their own comment.")
-                return
-            
-            reaction_type = random.choice(["helpful", "not_helpful"])
-            response = self.client.post(
-                f"/comments/{self.comment_id}/react/",
-                json={"reaction_type": reaction_type},
-                cookies=self.cookies,
-            )
-            if response.status_code in [200, 201]:
-                print(f"Comment {self.comment_id} reaction {reaction_type} toggled successfully.")
-            else:
-                print(f"Failed to react to comment. Status code: {response.status_code}")
-
-    @task
-    def like_article(self):
-        """게시글에 좋아요를 누르거나 취소합니다."""
-        if self.article_id and self.cookies:
-
-            if self.article_author == self.username:
-                print(f"User {self.username} cannot like their own article.")
-                return
-            
-            response = self.client.post(
-                f"/api/article/{self.article_id}/like/", cookies=self.cookies
-            )
-            if response.status_code == 200:
-                print(f"Article {self.article_id} like toggled successfully.")
-            else:
-                print(f"Failed to toggle like. Status code: {response.status_code}")
-
-    @task
-    def view_article(self):
-        """게시글 조회수 증가를 테스트합니다."""
-        if self.article_id:
-            response = self.client.get(f"/api/article/{self.article_id}/view/")
-            if response.status_code == 200:
-                print(f"Article {self.article_id} viewed successfully.")
-            else:
-                print(f"Failed to view article. Status code: {response.status_code}")
+                catch_response=True
+            ) as response:
+                if response.status_code == 201:
+                    self.article_id = response.json().get("article_id")
+                    events.request_success.fire(
+                        request_type="POST",
+                        name="/api/article/create/",
+                        response_time=response.elapsed.total_seconds() * 1000,
+                        response_length=len(response.content),
+                    )
+                else:
+                    events.request_failure.fire(
+                        request_type="POST",
+                        name="/api/article/create/",
+                        response_time=response.elapsed.total_seconds() * 1000,
+                        response_length=len(response.content),
+                        exception=Exception(f"Failed to create article: {response.status_code}")
+                    )
 
     @task
     def update_article(self):
         """게시글을 수정합니다."""
         if self.article_id and self.cookies:
-
             valid_tag_ids = [2, 3, 4, 5, 6, 7, 9, 10, 11]
             tag_id = random.choice(valid_tag_ids)
 
-            response = self.client.put(
+            with self.client.put(
                 f"/api/article/update/{self.article_id}/",
                 json={
                     "title": "Updated Title",
@@ -246,24 +204,142 @@ class WebsiteUser(HttpUser):
                     "tag_id": tag_id,
                 },
                 cookies=self.cookies,
-            )
-            if response.status_code == 200:
-                print(f"Article {self.article_id} updated successfully.")
-            else:
-                print(f"Failed to update article. Status code: {response.status_code}")
+                catch_response=True
+            ) as response:
+                if response.status_code == 200:
+                    events.request_success.fire(
+                        request_type="PUT",
+                        name=f"/api/article/update/{self.article_id}/",
+                        response_time=response.elapsed.total_seconds() * 1000,
+                        response_length=len(response.content),
+                    )
+                else:
+                    events.request_failure.fire(
+                        request_type="PUT",
+                        name=f"/api/article/update/{self.article_id}/",
+                        response_time=response.elapsed.total_seconds() * 1000,
+                        response_length=len(response.content),
+                        exception=Exception(f"Failed to update article: {response.status_code}")
+                    )
 
     @task
-    def delete_article(self):
-        """게시글을 삭제합니다."""
+    def create_comment(self):
+        """게시글에 댓글을 작성합니다."""
         if self.article_id and self.cookies:
-            response = self.client.delete(
-                f"/api/article/delete/{self.article_id}/", cookies=self.cookies
-            )
-            if response.status_code == 204:
-                print(f"Article {self.article_id} deleted successfully.")
-                self.article_id = None  # 게시글 삭제 후 article_id 초기화
-            else:
-                print(f"Failed to delete article. Status code: {response.status_code}")
+            article_response = self.client.get(f"/api/article/{self.article_id}/", cookies=self.cookies)
+            if article_response.status_code == 200:
+                article_author = article_response.json().get("author")
+                if article_author == self.username:
+                    print(f"User {self.username} cannot comment on their own article.")
+                    return  # 자신의 게시글에 댓글을 작성하지 않음
+
+            with self.client.post(
+                f"/comments/create/articles/{self.article_id}/",
+                json={"content": "This is a test comment created by Locust."},
+                cookies=self.cookies,
+                catch_response=True
+            ) as response:
+                if response.status_code == 201:
+                    self.comment_id = response.json().get("id")
+                    events.request_success.fire(
+                        request_type="POST",
+                        name=f"/comments/create/articles/{self.article_id}/",
+                        response_time=response.elapsed.total_seconds() * 1000,
+                        response_length=len(response.content),
+                    )
+                else:
+                    events.request_failure.fire(
+                        request_type="POST",
+                        name=f"/comments/create/articles/{self.article_id}/",
+                        response_time=response.elapsed.total_seconds() * 1000,
+                        response_length=len(response.content),
+                        exception=Exception(f"Failed to create comment: {response.status_code}")
+                    )
+
+    @task
+    def react_to_comment(self):
+        """댓글에 도움이 돼요/안 돼요 반응을 추가하거나 삭제합니다."""
+        if self.comment_id and self.cookies:
+            article_response = self.client.get(f"/api/article/{self.article_id}/", cookies=self.cookies)
+            if article_response.status_code == 200:
+                article_author = article_response.json().get("author")
+                if article_author == self.username:
+                    print(f"User {self.username} cannot react to their own comment.")
+                    return
+
+            reaction_type = random.choice(["helpful", "not_helpful"])
+            with self.client.post(
+                f"/comments/{self.comment_id}/react/",
+                json={"reaction_type": reaction_type},
+                cookies=self.cookies,
+                catch_response=True
+            ) as response:
+                if response.status_code in [200, 201]:
+                    events.request_success.fire(
+                        request_type="POST",
+                        name=f"/comments/{self.comment_id}/react/",
+                        response_time=response.elapsed.total_seconds() * 1000,
+                        response_length=len(response.content),
+                    )
+                else:
+                    events.request_failure.fire(
+                        request_type="POST",
+                        name=f"/comments/{self.comment_id}/react/",
+                        response_time=response.elapsed.total_seconds() * 1000,
+                        response_length=len(response.content),
+                        exception=Exception(f"Failed to react to comment: {response.status_code}")
+                    )
+
+    @task
+    def like_article(self):
+        """게시글에 좋아요를 누르거나 취소합니다."""
+        if self.article_id and self.cookies:
+            article_response = self.client.get(f"/api/article/{self.article_id}/", cookies=self.cookies)
+            if article_response.status_code == 200:
+                article_author = article_response.json().get("author")
+                if article_author == self.username:
+                    print(f"User {self.username} cannot like their own article.")
+                    return
+
+            with self.client.post(f"/api/article/{self.article_id}/like/", cookies=self.cookies, catch_response=True) as response:
+                if response.status_code == 200:
+                    events.request_success.fire(
+                        request_type="POST",
+                        name=f"/api/article/{self.article_id}/like/",
+                        response_time=response.elapsed.total_seconds() * 1000,
+                        response_length=len(response.content),
+                    )
+                else:
+                    events.request_failure.fire(
+                        request_type="POST",
+                        name=f"/api/article/{self.article_id}/like/",
+                        response_time=response.elapsed.total_seconds() * 1000,
+                        response_length=len(response.content),
+                        exception=Exception(f"Failed to like article: {response.status_code}")
+                    )
+
+    @task
+    def view_article(self):
+        """게시글 조회수 증가를 테스트합니다."""
+        if self.article_id:
+            with self.client.get(f"/api/article/{self.article_id}/view/", catch_response=True) as response:
+                if response.status_code == 200:
+                    events.request_success.fire(
+                        request_type="GET",
+                        name=f"/api/article/{self.article_id}/view/",
+                        response_time=response.elapsed.total_seconds() * 1000,
+                        response_length=len(response.content),
+                    )
+                else:
+                    events.request_failure.fire(
+                        request_type="GET",
+                        name=f"/api/article/{self.article_id}/view/",
+                        response_time=response.elapsed.total_seconds() * 1000,
+                        response_length=len(response.content),
+                        exception=Exception(f"Failed to view article: {response.status_code}")
+                    )
+
+
 
     @task
     def report_article(self):
@@ -288,7 +364,7 @@ class WebsiteUser(HttpUser):
         """댓글 신고 요청을 보냅니다."""
         if self.comment_id and self.cookies:
             response = self.client.post(
-                "/api/report/comment/{comment_id}/",
+                "/api/report/comment/{self.comment_id}/",
                 json={
                     "report_detail": "spam or inappropriate content",
                 },
@@ -314,3 +390,102 @@ class WebsiteUser(HttpUser):
                 print(
                     f"Failed to get ai_hunsoo for {self.article}. Status code: {response.status_code}"
                 )
+
+    @task
+    def list_notifications(self):
+        """알림 목록을 조회하고 첫 번째 알림의 ID를 저장합니다."""
+        if self.cookies:
+            with self.client.get("/api/notification/", cookies=self.cookies, catch_response=True) as response:
+                if response.status_code == 200:
+                    notifications = response.json()
+                    if notifications:
+                        self.notification_id = notifications[0]['id']
+                    events.request_success.fire(
+                        request_type="GET",
+                        name="/api/notification/",
+                        response_time=response.elapsed.total_seconds() * 1000,
+                        response_length=len(response.content),
+                    )
+                else:
+                    events.request_failure.fire(
+                        request_type="GET",
+                        name="/api/notification/",
+                        response_time=response.elapsed.total_seconds() * 1000,
+                        response_length=len(response.content),
+                        exception=Exception(f"Failed to retrieve notifications: {response.status_code}")
+                    )
+
+    @task
+    def mark_notification_as_read(self):
+        """저장된 notification_id로 알림을 읽음 상태로 변경합니다."""
+        if self.cookies and self.notification_id:
+            with self.client.post(
+                f"/api/notification/{self.notification_id}/read/",
+                cookies=self.cookies,
+                catch_response=True
+            ) as response:
+                if response.status_code == 200:
+                    events.request_success.fire(
+                        request_type="POST",
+                        name=f"/api/notification/{self.notification_id}/read/",
+                        response_time=response.elapsed.total_seconds() * 1000,
+                        response_length=len(response.content),
+                    )
+                else:
+                    events.request_failure.fire(
+                        request_type="POST",
+                        name=f"/api/notification/{self.notification_id}/read/",
+                        response_time=response.elapsed.total_seconds() * 1000,
+                        response_length=len(response.content),
+                        exception=Exception(f"Failed to mark notification as read: {response.status_code}")
+                    )
+
+    @task
+    def delete_notification(self):
+        """저장된 notification_id로 알림을 삭제합니다."""
+        if self.cookies and self.notification_id:
+            with self.client.delete(
+                f"/api/notification/{self.notification_id}/delete/",
+                cookies=self.cookies,
+                catch_response=True
+            ) as response:
+                if response.status_code == 204:
+                    events.request_success.fire(
+                        request_type="DELETE",
+                        name=f"/api/notification/{self.notification_id}/delete/",
+                        response_time=response.elapsed.total_seconds() * 1000,
+                        response_length=len(response.content),
+                    )
+                else:
+                    events.request_failure.fire(
+                        request_type="DELETE",
+                        name=f"/api/notification/{self.notification_id}/delete/",
+                        response_time=response.elapsed.total_seconds() * 1000,
+                        response_length=len(response.content),
+                        exception=Exception(f"Failed to delete notification: {response.status_code}")
+                    )
+
+    @task
+    def delete_article(self):
+        """게시글을 삭제합니다."""
+        if self.article_id and self.cookies:
+            with self.client.delete(f"/api/article/delete/{self.article_id}/", cookies=self.cookies, catch_response=True) as response:
+                if response.status_code == 204:
+                    self.article_id = None  # 게시글 삭제 후 article_id 초기화
+                    events.request_success.fire(
+                        request_type="DELETE",
+                        name=f"/api/article/delete/{self.article_id}/",
+                        response_time=response.elapsed.total_seconds() * 1000,
+                        response_length=len(response.content),
+                    )
+                else:
+                    events.request_failure.fire(
+                        request_type="DELETE",
+                        name=f"/api/article/delete/{self.article_id}/",
+                        response_time=response.elapsed.total_seconds() * 1000,
+                        response_length=len(response.content),
+                        exception=Exception(f"Failed to delete article: {response.status_code}")
+                    )
+
+
+

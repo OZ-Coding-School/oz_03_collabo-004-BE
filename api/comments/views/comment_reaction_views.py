@@ -23,6 +23,7 @@ class CommentSelectView(generics.UpdateAPIView):
         # 댓글이 속한 게시글의 작성자만 댓글을 채택할 수 있도록 제한
         if comment.article.user != self.request.user:
             raise PermissionDenied("이 댓글을 채택할 권한이 없습니다.")
+
         return comment
 
     def perform_update(self, serializer):
@@ -39,6 +40,9 @@ class CommentSelectView(generics.UpdateAPIView):
                 article=comment.article, is_selected=True
             ).exists():
                 raise PermissionDenied("이미 다른 댓글이 채택되었습니다.")
+
+            # select_for_update()로 댓글을 잠금 처리
+            comment = Comment.objects.select_for_update().get(id=comment.id)
 
             # 댓글을 채택하고 게시글을 마감
             comment.is_selected = True

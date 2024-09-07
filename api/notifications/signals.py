@@ -2,6 +2,7 @@ from ai_hunsoos.models import AiHunsoo
 from articles.models import Article
 from comments.models import Comment
 from django.contrib.contenttypes.models import ContentType
+from django.db import transaction
 from django.db.models.signals import m2m_changed, post_save
 from django.dispatch import receiver
 from notifications.models import Notification
@@ -47,14 +48,16 @@ def notify_user_on_like(sender, instance, action, **kwargs):
 @receiver(post_save, sender=Comment)
 def notify_user_on_comment_selection(sender, instance, **kwargs):
     if instance.is_selected:
-        Notification.objects.create(
-            recipient=instance.user,
-            actor=instance.article.user,
-            verb="select",
-            content_type=ContentType.objects.get_for_model(instance),
-            object_id=instance.id,
-            article=instance.article,
-            is_admin=False,
+        transaction.on_commit(
+            lambda: Notification.objects.create(
+                recipient=instance.user,
+                actor=instance.article.user,
+                verb="select",
+                content_type=ContentType.objects.get_for_model(instance),
+                object_id=instance.id,
+                article=instance.article,
+                is_admin=False,
+            )
         )
 
 
