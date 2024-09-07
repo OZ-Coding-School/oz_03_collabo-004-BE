@@ -30,7 +30,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
                 )
             raise serializers.ValidationError("일반회원으로 이미 가입된 사용자 입니다.")
         return value
-    
+
     def validate_nickname(self, value):
         if User.objects.filter(nickname=value).exists():
             raise serializers.ValidationError("이미 사용 중인 닉네임입니다.")
@@ -154,6 +154,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "username",
+            "nickname",
             "email",
             "social_platform",
             "is_superuser",

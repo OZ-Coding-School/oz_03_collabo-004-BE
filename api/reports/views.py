@@ -93,6 +93,7 @@ class CommentReportCreateView(APIView):
             "reporter": reporter.id,
             "reported_user": reported_user.id,
             "reported_comment": comment.id,
+            "reported_article": comment.article.id,
         }
 
         serializer = CommentReportSerializer(data=data)
