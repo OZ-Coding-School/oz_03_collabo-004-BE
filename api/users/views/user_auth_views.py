@@ -1,9 +1,16 @@
 import os
 
 from common.logger import logger
-from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth import authenticate, get_user_model, update_session_auth_hash
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
 from django.db import transaction
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from rest_framework import generics, status
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.generics import GenericAPIView
@@ -40,6 +47,21 @@ class UserRegisterView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
+        # 이메일 인증을 위한 토큰 생성 및 인증 URL 생성
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        verification_url = reverse(
+            "verify_email", kwargs={"uidb64": uid, "token": token}
+        )
+        full_url = f"{request.scheme}://{request.get_host()}{verification_url}"
+
+        # 이메일 발송
+        send_mail(
+            "이메일 인증 요청",
+            f"이메일을 인증하려면 다음 링크를 클릭하세요: {full_url}",
+            "no-reply@example.com",
+            [user.email],
+        )
 
         jwt_tokens = GeneralAuthClass.set_auth_tokens_for_user(user)
 
@@ -75,6 +97,16 @@ class UserLoginView(APIView):
         )
 
         if user is not None:
+
+            # 이메일 인증 확인
+            if not user.is_email_verified:
+                logger.error(
+                    f"User {user.email} attempted login without email verification"
+                )
+                return Response(
+                    {"detail": "이메일을 인증해야 합니다."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
             user.last_login = timezone.now()
             user.save()
@@ -258,3 +290,133 @@ class LoginStatusView(GenericAPIView):
     def get(self, request):
         is_authenticated = request.user.is_authenticated
         return Response({"login": is_authenticated})
+
+
+# 이메일 인증 처리 view
+def verify_email(request, uidb64, token):
+    User = get_user_model()
+    uid = urlsafe_base64_decode(uidb64).decode()
+    user = get_object_or_404(User, pk=uid)
+
+    if default_token_generator.check_token(user, token):
+        user.is_email_verified = True
+        user.save()
+        return redirect("verification_success")
+    else:
+        return redirect("verification_failed")
+
+
+# 이메일 인증 성공
+def verification_success(request):
+    return HttpResponse("이메일 인증에 성공했습니다. 로그인 후 이용해주세요.")
+
+
+# 이메일 인증 실패
+def verification_failed(request):
+    return HttpResponse("이메일 인증에 실패했습니다. 다시 시도해 주세요.")
+
+
+# 인증 이메일 발송
+class SendVerificationEmailView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        email = request.data.get("email")
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response(
+                {"detail": "해당 이메일로 가입된 사용자가 없습니다."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # 이메일 인증 토큰 생성
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        verification_url = reverse(
+            "verify_email", kwargs={"uidb64": uid, "token": token}
+        )
+        full_url = f"{request.scheme}://{request.get_host()}{verification_url}"
+
+        # 이메일 발송
+        send_mail(
+            "이메일 인증",
+            f"이메일을 인증하려면 다음 링크를 클릭하세요: {full_url}",
+            "no-reply@example.com",
+            [user.email],
+        )
+        return Response(
+            {"detail": "이메일 인증 메일이 발송되었습니다."},
+            status=status.HTTP_200_OK,
+        )
+
+
+# 비밀번호 재설정 이메일 발송
+class SendPasswordResetEmailView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        username = request.data.get("username")
+
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return Response(
+                {"detail": "해당 사용자 이름으로 가입된 사용자가 없습니다."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # 비밀번호 재설정 토큰 생성
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        reset_url = f"https://hunsuking.yoyobar.xyz/password-reset/{uid}/{token}/"
+
+        # 이메일 발송
+        send_mail(
+            "비밀번호 재설정 요청",
+            f"비밀번호를 재설정하려면 다음 링크를 클릭하세요: {reset_url}",
+            "no-reply@example.com",
+            [user.email],
+        )
+        return Response(
+            {f"detail : {user.email}로 비밀번호 재설정 메일이 발송되었습니다."},
+            status=status.HTTP_200_OK,
+        )
+
+
+# 비밀번호 재설정
+class PasswordResetConfirmView(APIView):
+    def post(self, request, *args, **kwargs):
+        uidb64 = request.data.get("uidb64")
+        token = request.data.get("token")
+        new_password = request.data.get("new_password")
+
+        if not all([uidb64, token, new_password]):
+            return Response(
+                {"detail": "모든 필드를 제공해야 합니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            return Response(
+                {"detail": "유효하지 않은 사용자입니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if default_token_generator.check_token(user, token):
+            user.set_password(new_password)  # 비밀번호 해시화 및 저장
+            user.save()
+            update_session_auth_hash(request, user)  # 로그인 유지
+            return Response(
+                {"detail": "비밀번호가 성공적으로 변경되었습니다."},
+                status=status.HTTP_200_OK,
+            )
+        else:
+            return Response(
+                {"detail": "유효하지 않은 토큰입니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )

@@ -45,6 +45,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             is_staff=False,
         )
         user.social_platform = "general"
+        user.is_email_verified = False
         return user
 
 

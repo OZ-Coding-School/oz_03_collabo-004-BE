@@ -256,6 +256,20 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# 이메일 백엔드 설정
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+# SMTP 서버 설정
+EMAIL_HOST = "smtp.gmail.com"  # SMTP 서버 주소
+EMAIL_PORT = 587  # SMTP 포트 (587은 TLS/STARTTLS, 465는 SSL)
+EMAIL_USE_TLS = True  # 또는 EMAIL_USE_SSL = True, SMTP 서버의 요구 사항에 따라 선택
+EMAIL_USE_SSL = False  # True로 설정하면 TLS가 아닌 SSL 사용
+EMAIL_HOST_USER = "da906516@gmail.com"  # SMTP 서버 사용자
+EMAIL_HOST_PASSWORD = "mieyhwjabhhivipr"  # SMTP 서버 비밀번호
+
+# 발송 이메일 설정
+DEFAULT_FROM_EMAIL = "da906516@gmail.com"
+
 
 LOGGING = {
     "version": 1,
