@@ -321,13 +321,13 @@ class SendVerificationEmailView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
-        email = request.data.get("email")
+        username = request.data.get("username")
 
         try:
-            user = User.objects.get(email=email)
+            user = User.objects.get(username=username)
         except User.DoesNotExist:
             return Response(
-                {"detail": "해당 이메일로 가입된 사용자가 없습니다."},
+                {"detail": "해당 사용자 이름으로 가입된 사용자가 없습니다."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
@@ -347,7 +347,7 @@ class SendVerificationEmailView(APIView):
             [user.email],
         )
         return Response(
-            {"detail": "이메일 인증 메일이 발송되었습니다."},
+            {f"detail : {user.email}로 비밀번호 재설정 메일이 발송되었습니다."},
             status=status.HTTP_200_OK,
         )
 
