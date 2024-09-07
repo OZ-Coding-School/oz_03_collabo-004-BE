@@ -28,11 +28,7 @@ def notify_user_on_comment(sender, instance, created, **kwargs):
 @receiver(m2m_changed, sender=Article.likes.through)
 def notify_user_on_like(sender, instance, action, **kwargs):
     if action == "post_add":
-        for (
-            user
-        ) in (
-            instance.likes.all()
-        ):  # 여러 명의 사용자가 좋아요를 추가할 수 있으므로 반복문 사용
+        for user in instance.likes.all():
             Notification.objects.create(
                 recipient=instance.user,
                 actor=user,
@@ -42,6 +38,16 @@ def notify_user_on_like(sender, instance, action, **kwargs):
                 article=instance,
                 is_admin=False,
             )
+
+    elif action == "post_remove":
+        for user in kwargs.get("pk_set", []):  # 좋아요 취소한 사용자들
+            Notification.objects.filter(
+                recipient=instance.user,
+                actor_id=user,  # user_id로 필터링
+                verb="like",
+                object_id=instance.id,
+                content_type=ContentType.objects.get_for_model(instance),
+            ).delete()
 
 
 # 댓글이 채택될 때 알림
