@@ -44,8 +44,6 @@ class UserRegisterView(generics.CreateAPIView):
         user.last_login = timezone.now()
         user.save()
 
-        Profile.objects.create(user=user)
-
         jwt_tokens = GeneralAuthClass.set_auth_tokens_for_user(user)
 
         response = Response(
