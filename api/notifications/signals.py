@@ -118,13 +118,15 @@ def update_warning_article(sender, instance, created, **kwargs):
 @receiver(post_save, sender=ArticleReport)
 def notify_admin_on_article_report(sender, instance, created, **kwargs):
     if created:
-        Notification.objects.create(
-            actor=instance.reported_user,
-            verb="report",
-            content_type=ContentType.objects.get_for_model(instance),
-            object_id=instance.id,
-            article=instance.reported_article,
-            is_admin=True,
+        transaction.on_commit(
+            lambda: Notification.objects.create(
+                actor=instance.reported_user,
+                verb="report",
+                content_type=ContentType.objects.get_for_model(instance),
+                object_id=instance.id,
+                article=instance.reported_article,
+                is_admin=True,
+            )
         )
 
 
@@ -132,11 +134,13 @@ def notify_admin_on_article_report(sender, instance, created, **kwargs):
 @receiver(post_save, sender=CommentReport)
 def notify_admin_on_comment_report(sender, instance, created, **kwargs):
     if created:
-        Notification.objects.create(
-            actor=instance.reported_user,
-            verb="report",
-            content_type=ContentType.objects.get_for_model(instance),
-            object_id=instance.id,
-            article=instance.reported_comment.article,
-            is_admin=True,
+        transaction.on_commit(
+            lambda: Notification.objects.create(
+                actor=instance.reported_user,
+                verb="report",
+                content_type=ContentType.objects.get_for_model(instance),
+                object_id=instance.id,
+                article=instance.reported_comment.article,
+                is_admin=True,
+            )
         )
