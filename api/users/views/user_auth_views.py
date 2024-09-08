@@ -25,7 +25,6 @@ from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from users.serializers import (
     EmptySerializer,
-    UserDeleteSerializer,
     UserLoginSerializer,
     UserLogoutSerializer,
     UserRegisterSerializer,
@@ -234,23 +233,31 @@ class UserLogoutView(generics.GenericAPIView):
             )
 
 
+# 유저 회원 탈퇴 뷰
 class UserDeleteView(generics.GenericAPIView):
-    serializer_class = UserDeleteSerializer
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, *args, **kwargs):
-        logger.info("DELETE /api/auth/delete")
-        data = request.data.copy()
-        data["refresh_token"] = request.COOKIES.get("refresh")
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
+        logger.info(f"DELETE /api/auth/delete for user: {request.user.email}")
+
+        # refresh_token을 쿠키에서 가져옴
+        refresh_token = request.COOKIES.get("refresh")
+        if not refresh_token:
+            logger.error("Refresh token not found in cookies")
+            return Response(
+                {"detail": "Refresh token not found in cookies"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         try:
-            user = serializer.validated_data["user"]
-            refresh_token = serializer.validated_data["refresh_token"]
+            # 현재 로그인된 유저 정보 사용
+            user = request.user
             with transaction.atomic():
                 user.delete()
-                refresh_token.blacklist()
+                # refresh_token 블랙리스트 처리
+                RefreshToken(refresh_token).blacklist()
+
+            # 쿠키에서 JWT 삭제
             response = Response(status=status.HTTP_204_NO_CONTENT)
             response.delete_cookie(
                 "access", domain=os.getenv("COOKIE_DOMAIN"), path="/"
@@ -258,18 +265,22 @@ class UserDeleteView(generics.GenericAPIView):
             response.delete_cookie(
                 "refresh", domain=os.getenv("COOKIE_DOMAIN"), path="/"
             )
-            logger.info("/api/auth/delete: User deleted successfully")
+
+            logger.info(f"User {user.email} deleted successfully")
             return response
+
         except (InvalidToken, TokenError) as e:
-            logger.error(f"/api/auth/delete: {e}")
+            logger.error(f"Invalid refresh token: {e}")
             return Response(
-                data={"message": "Invalid refresh token", "error": str(e)},
+                {"detail": "Invalid refresh token", "error": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
         except Exception as e:
-            logger.error(f"/api/auth/delete: {str(e)}")
+            logger.error(f"Error during user deletion: {str(e)}")
             return Response(
-                {"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {"detail": "An error occurred", "error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 
