@@ -398,6 +398,8 @@ class SendPasswordResetEmailView(APIView):
 
 # 비밀번호 재설정
 class PasswordResetConfirmView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request, *args, **kwargs):
         uidb64 = request.data.get("uidb64")
         token = request.data.get("token")
