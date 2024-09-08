@@ -116,6 +116,7 @@ class CommentListSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
+        
 
     def get_user_profile_image(self, obj):
         profile = obj.user.profile
@@ -169,6 +170,7 @@ class CommentArticleListSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
+        
 
     def get_user_profile_image(self, obj):
         profile = obj.user.profile
@@ -227,6 +229,7 @@ class UserCommentListSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
+        
 
 
 # 특정 댓글 조회 시리얼라이저
