@@ -128,6 +128,38 @@ class UsernameCheckView(APIView):
         )
 
 
+class EmailCheckView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        email = request.query_params.get("email")
+
+        if not email:
+            return Response(
+                {"detail": "이메일을 제공해야 합니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if User.objects.filter(email=email).exists():
+            user = User.objects.get(email=email)
+            if user.social_platform == "google":
+                return Response(
+                    {
+                        "message": "구글 계정으로 이미 가입된 사용자입니다.",
+                        "code": "01",
+                    },
+                    status=status.HTTP_409_CONFLICT,
+                )
+            return Response(
+                {"message": "일반 회원으로 이미 가입된 사용자입니다.", "code": "02"},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        return Response(
+            {"message": "사용 가능한 이메일입니다."}, status=status.HTTP_200_OK
+        )
+
+
 class UserLoginView(APIView):
     authentication_classes = []  # 일반 로그인에서는 별도의 인증 클래스 사용 안 함
     permission_classes = [AllowAny]

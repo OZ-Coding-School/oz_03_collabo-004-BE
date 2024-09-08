@@ -26,24 +26,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             "nickname": {"validators": []},
         }
 
-    def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
-            user = User.objects.get(email=value)
-            if user.social_platform != "general":
-                raise serializers.ValidationError(
-                    detail={
-                        "message": "구글 계정으로 이미 가입된 사용자입니다.",
-                        "code": "01",
-                    }
-                )
-            raise serializers.ValidationError(
-                detail={
-                    "message": "일반 회원으로 이미 가입된 사용자입니다.",
-                    "code": "02",
-                }
-            )
-        return value
-
     def create(self, validated_data):
         user = User.objects.create_user(
             username=validated_data["username"],
