@@ -13,15 +13,24 @@ from reports.models import ArticleReport, CommentReport
 @receiver(post_save, sender=Comment)
 def notify_user_on_comment(sender, instance, created, **kwargs):
     if created:
-        Notification.objects.create(
+        # 동일한 알림이 이미 존재하는지 확인
+        if not Notification.objects.filter(
             recipient=instance.article.user,
             actor=instance.user,
             verb="comment",
-            content_type=ContentType.objects.get_for_model(instance),
             object_id=instance.id,
-            article=instance.article,
-            is_admin=False,
-        )
+            content_type=ContentType.objects.get_for_model(instance),
+        ).exists():
+            # 중복 알림이 없다면 새 알림 생성
+            Notification.objects.create(
+                recipient=instance.article.user,
+                actor=instance.user,
+                verb="comment",
+                content_type=ContentType.objects.get_for_model(instance),
+                object_id=instance.id,
+                article=instance.article,
+                is_admin=False,
+            )
 
 
 # 게시글에 좋아요가 추가될 때 알림
@@ -54,32 +63,48 @@ def notify_user_on_like(sender, instance, action, **kwargs):
 @receiver(post_save, sender=Comment)
 def notify_user_on_comment_selection(sender, instance, **kwargs):
     if instance.is_selected:
-        transaction.on_commit(
-            lambda: Notification.objects.create(
-                recipient=instance.user,
-                actor=instance.article.user,
-                verb="select",
-                content_type=ContentType.objects.get_for_model(instance),
-                object_id=instance.id,
-                article=instance.article,
-                is_admin=False,
+        # 동일한 알림이 이미 존재하는지 확인
+        if not Notification.objects.filter(
+            recipient=instance.user,
+            actor=instance.article.user,
+            verb="select",
+            object_id=instance.id,
+            content_type=ContentType.objects.get_for_model(instance),
+        ).exists():
+            # 중복 알림이 없다면 새 알림 생성
+            transaction.on_commit(
+                lambda: Notification.objects.create(
+                    recipient=instance.user,
+                    actor=instance.article.user,
+                    verb="select",
+                    content_type=ContentType.objects.get_for_model(instance),
+                    object_id=instance.id,
+                    article=instance.article,
+                    is_admin=False,
+                )
             )
-        )
 
 
 # AI 댓글이 생성될 때 알림
 @receiver(post_save, sender=AiHunsoo)
 def notify_user_on_ai_hunsoo(sender, instance, created, **kwargs):
     if not created and instance.status:
-        Notification.objects.create(
+        # 동일한 알림이 이미 존재하는지 확인
+        if not Notification.objects.filter(
             recipient=instance.article.user,
-            actor=None,  # AI는 사용자 대신 자동으로 생성되므로 actor가 없을 수 있음
             verb="ai_response",
-            content_type=ContentType.objects.get_for_model(instance),
             object_id=instance.id,
-            article=instance.article,
-            is_admin=False,
-        )
+            content_type=ContentType.objects.get_for_model(instance),
+        ).exists():
+            Notification.objects.create(
+                recipient=instance.article.user,
+                actor=None,  # AI는 사용자 대신 자동으로 생성되므로 actor가 없을 수 있음
+                verb="ai_response",
+                content_type=ContentType.objects.get_for_model(instance),
+                object_id=instance.id,
+                article=instance.article,
+                is_admin=False,
+            )
 
 
 # 게시글 신고가 처리 완료되었을 때 알림
@@ -87,31 +112,45 @@ def notify_user_on_ai_hunsoo(sender, instance, created, **kwargs):
 def update_warning_article(sender, instance, created, **kwargs):
     # article_report가 업데이트되었고 status가 RS(resolved)로 변경된 경우
     if not created and instance.status == "RS":
-        Notification.objects.create(
+        # 동일한 알림이 이미 존재하는지 확인
+        if not Notification.objects.filter(
             recipient=instance.reported_user,
-            actor=instance.reported_user,
             verb="report",
-            content_type=ContentType.objects.get_for_model(instance),
             object_id=instance.id,
-            article=instance.reported_article,
-            is_admin=False,
-        )
+            content_type=ContentType.objects.get_for_model(instance),
+        ).exists():
+            Notification.objects.create(
+                recipient=instance.reported_user,
+                actor=instance.reported_user,
+                verb="report",
+                content_type=ContentType.objects.get_for_model(instance),
+                object_id=instance.id,
+                article=instance.reported_article,
+                is_admin=False,
+            )
 
 
 # 댓글 신고가 처리 완료되었을 때 알림
 @receiver(post_save, sender=CommentReport)
-def update_warning_article(sender, instance, created, **kwargs):
+def update_warning_comment(sender, instance, created, **kwargs):
     # comment_report가 업데이트되었고 status가 RS(resolved)로 변경된 경우
     if not created and instance.status == "RS":
-        Notification.objects.create(
+        # 동일한 알림이 이미 존재하는지 확인
+        if not Notification.objects.filter(
             recipient=instance.reported_user,
-            actor=instance.reported_user,
             verb="report",
-            content_type=ContentType.objects.get_for_model(instance),
             object_id=instance.id,
-            article=instance.reported_comment.article,
-            is_admin=False,
-        )
+            content_type=ContentType.objects.get_for_model(instance),
+        ).exists():
+            Notification.objects.create(
+                recipient=instance.reported_user,
+                actor=instance.reported_user,
+                verb="report",
+                content_type=ContentType.objects.get_for_model(instance),
+                object_id=instance.id,
+                article=instance.reported_comment.article,
+                is_admin=False,
+            )
 
 
 # 게시글 신고가 접수될 때 알림
