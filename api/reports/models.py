@@ -46,6 +46,7 @@ class CommentReport(TimeStampModel):
         User, on_delete=models.CASCADE, related_name="comments_against_user", null=False
     )
     reported_comment = models.ForeignKey(Comment, on_delete=models.CASCADE, null=False)
+    reported_article = models.ForeignKey(Article, on_delete=models.CASCADE, null=False)
     report_detail = models.CharField(max_length=255, null=False)
     status = models.CharField(
         max_length=2,

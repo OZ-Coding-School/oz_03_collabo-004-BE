@@ -20,21 +20,11 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["username", "email", "password", "nickname"]
-
-    def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
-            user = User.objects.get(email=value)
-            if user.social_platform != "general":
-                raise serializers.ValidationError(
-                    "구글계정으로 이미 가입된 사용자 입니다."
-                )
-            raise serializers.ValidationError("일반회원으로 이미 가입된 사용자 입니다.")
-        return value
-    
-    def validate_nickname(self, value):
-        if User.objects.filter(nickname=value).exists():
-            raise serializers.ValidationError("이미 사용 중인 닉네임입니다.")
-        return value
+        extra_kwargs = {
+            "email": {"validators": []},
+            "username": {"validators": []},
+            "nickname": {"validators": []},
+        }
 
     def create(self, validated_data):
         user = User.objects.create_user(
@@ -45,6 +35,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             is_staff=False,
         )
         user.social_platform = "general"
+        user.is_email_verified = False
         return user
 
 
@@ -154,6 +145,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "username",
+            "nickname",
             "email",
             "social_platform",
             "is_superuser",
@@ -165,3 +157,28 @@ class UserSerializer(serializers.ModelSerializer):
             "warning_count",
             "selected_tags",
         ]
+
+
+# 유저아이디 필드 검증시리얼라이저
+class FindUsernameSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        if not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("해당 이메일로 가입된 사용자가 없습니다.")
+        return value
+
+
+# 유저 비밀번호 재설정 요청시 아이디검증 시리얼라이저
+class PasswordResetRequestSerializer(serializers.Serializer):
+    username = serializers.CharField()
+
+    def validate_username(self, value):
+        if not User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("해당 아이디로 가입된 사용자가 없습니다.")
+        return value
+
+
+# 유저 비밀번호 재설정 시리얼라이저
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    new_password = serializers.CharField(write_only=True)
