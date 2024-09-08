@@ -63,21 +63,16 @@ class UserRegisterView(generics.CreateAPIView):
             [user.email],
         )
 
-        jwt_tokens = GeneralAuthClass.set_auth_tokens_for_user(user)
-
         response = Response(
             {
                 "username": user.username,
                 "email": user.email,
                 "nickname": user.nickname,
-                "access_token": jwt_tokens["access"],
-                "refresh_token": jwt_tokens["refresh"],
+                "message": "회원가입이 완료되었습니다. 이메일 인증을 진행해주세요.",
                 "created_at": user.created_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
             },
             status=status.HTTP_201_CREATED,
         )
-
-        response = GeneralAuthClass().set_jwt_auth_cookie(response, jwt_tokens)
 
         logger.info(f"User {user.email} registered successfully")
         return response
@@ -105,7 +100,7 @@ class UserLoginView(APIView):
                 )
                 return Response(
                     {"detail": "이메일을 인증해야 합니다."},
-                    status=status.HTTP_400_BAD_REQUEST,
+                    status=status.HTTP_409_CONFLICT,
                 )
 
             user.last_login = timezone.now()
