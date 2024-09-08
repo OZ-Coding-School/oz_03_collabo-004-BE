@@ -77,7 +77,7 @@ class User(TimeStampModel, AbstractBaseUser, PermissionsMixin):
     is_email_verified = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)  # 사용자 활성 상태 관리 필드 추가
+    is_active = models.BooleanField(default=True)  
 
     objects = UserManager()
 
