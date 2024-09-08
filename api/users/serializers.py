@@ -20,7 +20,11 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["username", "email", "password", "nickname"]
-        extra_kwargs = {"email": {"validators": []}}
+        extra_kwargs = {
+            "email": {"validators": []},
+            "username": {"validators": []},
+            "nickname": {"validators": []},
+        }
 
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
