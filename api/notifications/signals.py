@@ -118,29 +118,47 @@ def update_warning_article(sender, instance, created, **kwargs):
 @receiver(post_save, sender=ArticleReport)
 def notify_admin_on_article_report(sender, instance, created, **kwargs):
     if created:
-        transaction.on_commit(
-            lambda: Notification.objects.create(
-                actor=instance.reported_user,
-                verb="report",
-                content_type=ContentType.objects.get_for_model(instance),
-                object_id=instance.id,
-                article=instance.reported_article,
-                is_admin=True,
+        # 동일한 알림이 이미 존재하는지 확인
+        if not Notification.objects.filter(
+            actor=instance.reported_user,
+            verb="report",
+            object_id=instance.id,
+            content_type=ContentType.objects.get_for_model(instance),
+            is_admin=True,
+        ).exists():
+            # 중복 알림이 없다면 새 알림 생성
+            transaction.on_commit(
+                lambda: Notification.objects.create(
+                    actor=instance.reported_user,
+                    verb="report",
+                    content_type=ContentType.objects.get_for_model(instance),
+                    object_id=instance.id,
+                    article=instance.reported_article,
+                    is_admin=True,
+                )
             )
-        )
 
 
 # 댓글 신고가 접수될 때 알림
 @receiver(post_save, sender=CommentReport)
 def notify_admin_on_comment_report(sender, instance, created, **kwargs):
     if created:
-        transaction.on_commit(
-            lambda: Notification.objects.create(
-                actor=instance.reported_user,
-                verb="report",
-                content_type=ContentType.objects.get_for_model(instance),
-                object_id=instance.id,
-                article=instance.reported_comment.article,
-                is_admin=True,
+        # 동일한 알림이 이미 존재하는지 확인
+        if not Notification.objects.filter(
+            actor=instance.reported_user,
+            verb="report",
+            object_id=instance.id,
+            content_type=ContentType.objects.get_for_model(instance),
+            is_admin=True,
+        ).exists():
+            # 중복 알림이 없다면 새 알림 생성
+            transaction.on_commit(
+                lambda: Notification.objects.create(
+                    actor=instance.reported_user,
+                    verb="report",
+                    content_type=ContentType.objects.get_for_model(instance),
+                    object_id=instance.id,
+                    article=instance.reported_comment.article,
+                    is_admin=True,
+                )
             )
-        )
