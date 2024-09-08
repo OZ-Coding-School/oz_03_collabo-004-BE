@@ -2,7 +2,6 @@ from django.urls import path
 
 from ..views.google_auth_views import UserGoogleTokenReceiver
 from ..views.user_auth_views import (
-    FindUsernameView,
     EmailCheckView,
     LoginStatusView,
     NicknameCheckView,
