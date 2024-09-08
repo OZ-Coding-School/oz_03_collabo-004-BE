@@ -165,13 +165,16 @@ def notify_admin_on_article_report(sender, instance, created, **kwargs):
             content_type=ContentType.objects.get_for_model(instance),
             is_admin=True,
         ).exists():
-            Notification.objects.create(
-                actor=instance.reported_user,
-                verb="report",
-                content_type=ContentType.objects.get_for_model(instance),
-                object_id=instance.id,
-                article=instance.reported_article,
-                is_admin=True,
+            # 중복 알림이 없다면 새 알림 생성
+            transaction.on_commit(
+                lambda: Notification.objects.create(
+                    actor=instance.reported_user,
+                    verb="report",
+                    content_type=ContentType.objects.get_for_model(instance),
+                    object_id=instance.id,
+                    article=instance.reported_article,
+                    is_admin=True,
+                )
             )
 
 
@@ -187,11 +190,14 @@ def notify_admin_on_comment_report(sender, instance, created, **kwargs):
             content_type=ContentType.objects.get_for_model(instance),
             is_admin=True,
         ).exists():
-            Notification.objects.create(
-                actor=instance.reported_user,
-                verb="report",
-                content_type=ContentType.objects.get_for_model(instance),
-                object_id=instance.id,
-                article=instance.reported_comment.article,
-                is_admin=True,
+            # 중복 알림이 없다면 새 알림 생성
+            transaction.on_commit(
+                lambda: Notification.objects.create(
+                    actor=instance.reported_user,
+                    verb="report",
+                    content_type=ContentType.objects.get_for_model(instance),
+                    object_id=instance.id,
+                    article=instance.reported_comment.article,
+                    is_admin=True,
+                )
             )
