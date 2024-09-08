@@ -20,21 +20,11 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["username", "email", "password", "nickname"]
-
-    def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
-            user = User.objects.get(email=value)
-            if user.social_platform != "general":
-                raise serializers.ValidationError(
-                    "구글계정으로 이미 가입된 사용자 입니다."
-                )
-            raise serializers.ValidationError("일반회원으로 이미 가입된 사용자 입니다.")
-        return value
-
-    def validate_nickname(self, value):
-        if User.objects.filter(nickname=value).exists():
-            raise serializers.ValidationError("이미 사용 중인 닉네임입니다.")
-        return value
+        extra_kwargs = {
+            "email": {"validators": []},
+            "username": {"validators": []},
+            "nickname": {"validators": []},
+        }
 
     def create(self, validated_data):
         user = User.objects.create_user(

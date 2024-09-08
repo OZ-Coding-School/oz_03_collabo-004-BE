@@ -2,14 +2,16 @@ from django.urls import path
 
 from ..views.google_auth_views import UserGoogleTokenReceiver
 from ..views.user_auth_views import (
-    FindUsernameView,
+    EmailCheckView,
     LoginStatusView,
+    NicknameCheckView,
     PasswordResetConfirmView,
     SendPasswordResetEmailView,
     SendVerificationEmailView,
     UserDeleteView,
     UserLoginView,
     UserLogoutView,
+    UsernameCheckView,
     UserRegisterView,
     UserStatusView,
     UserTokenRefreshView,
@@ -21,6 +23,9 @@ from ..views.user_auth_views import (
 
 urlpatterns = [
     path("register/", UserRegisterView.as_view(), name="user_register"),
+    path("check-nickname/", NicknameCheckView.as_view(), name="check_nickname"),
+    path("check-username/", UsernameCheckView.as_view(), name="check_username"),
+    path("check-email/", EmailCheckView.as_view(), name="check_email"),
     path("login/", UserLoginView.as_view(), name="user_login"),
     path("google/receiver/", UserGoogleTokenReceiver.as_view(), name="google_receiver"),
     path("token/verify/", UserTokenVerifyView.as_view(), name="token_verify"),
