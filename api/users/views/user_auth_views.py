@@ -62,6 +62,8 @@ class UserRegisterView(generics.CreateAPIView):
             [user.email],
         )
 
+        # jwt_tokens = GeneralAuthClass.set_auth_tokens_for_user(user)
+
         response = Response(
             {
                 "username": user.username,

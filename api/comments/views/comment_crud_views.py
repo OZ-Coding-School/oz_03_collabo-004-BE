@@ -2,7 +2,6 @@ from rest_framework import generics, permissions
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.parsers import FormParser, MultiPartParser
 
-
 from ..models import Comment, CommentImage
 from ..s3instance import S3Instance
 from ..serializers import (
@@ -86,7 +85,7 @@ class CommentListView(generics.ListAPIView):
 
     def get_queryset(self):
         article_id = self.kwargs["article_id"]
-        return Comment.objects.filter(article_id=article_id)
+        return Comment.objects.filter(article_id=article_id).order_by("created_at")
 
 
 # 댓글 상세 조회 뷰
@@ -101,6 +100,3 @@ class CommentDetailView(generics.RetrieveAPIView):
     def get_object(self):
         comment = super().get_object()
         return comment
-
-
-
