@@ -167,3 +167,13 @@ class UserSerializer(serializers.ModelSerializer):
             "warning_count",
             "selected_tags",
         ]
+
+
+# 유저아이디 필드 검증시리얼라이저
+class FindUsernameSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        if not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("해당 이메일로 가입된 사용자가 없습니다.")
+        return value

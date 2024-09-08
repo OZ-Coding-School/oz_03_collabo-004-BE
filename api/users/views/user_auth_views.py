@@ -25,6 +25,7 @@ from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from users.serializers import (
     EmptySerializer,
+    FindUsernameSerializer,
     UserLoginSerializer,
     UserLogoutSerializer,
     UserRegisterSerializer,
@@ -433,3 +434,26 @@ class PasswordResetConfirmView(APIView):
                 {"detail": "유효하지 않은 토큰입니다."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+
+# 아이디 찾기 이메일 확인뷰
+class FindUsernameView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = FindUsernameSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        email = serializer.validated_data["email"]
+
+        try:
+            user = get_user_model().objects.get(email=email)
+        except get_user_model().DoesNotExist:
+            return Response(
+                {"error": "해당 이메일로 가입된 사용자가 없습니다."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        masked_username = user.username[:-3] + "***"
+        return Response({"masked_username": masked_username}, status=status.HTTP_200_OK)

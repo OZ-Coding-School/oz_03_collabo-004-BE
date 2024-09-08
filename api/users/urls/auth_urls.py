@@ -2,6 +2,7 @@ from django.urls import path
 
 from ..views.google_auth_views import UserGoogleTokenReceiver
 from ..views.user_auth_views import (
+    FindUsernameView,
     LoginStatusView,
     PasswordResetConfirmView,
     SendPasswordResetEmailView,
@@ -46,4 +47,5 @@ urlpatterns = [
     path("verify-email/<uidb64>/<token>/", verify_email, name="verify_email"),
     path("verification-failed/", verification_failed, name="verification_failed"),
     path("verification-success/", verification_success, name="verification_success"),
+    path("username/", FindUsernameView.as_view(), name="find_username"),
 ]
