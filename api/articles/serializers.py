@@ -170,7 +170,7 @@ class ArticleListSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         if request and request.user and request.user.is_authenticated:
             # 사용자가 해당 게시글의 좋아요를 눌렀는지 확인
-            return obj.likes.filter(id=request.user.id).exists()ㄴ
+            return obj.likes.filter(id=request.user.id).exists()
         return False
 
     def get_status(self, obj):
