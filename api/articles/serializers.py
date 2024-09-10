@@ -123,6 +123,7 @@ class ArticleListSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
     thumbnail_image = serializers.SerializerMethodField()
     comments_count = serializers.SerializerMethodField()
+    
 
     class Meta:
         model = Article

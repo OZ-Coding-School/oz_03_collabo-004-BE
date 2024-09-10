@@ -6,7 +6,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db import transaction
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import force_bytes
@@ -393,7 +393,7 @@ def verify_email(request, uidb64, token):
 
 # 이메일 인증 성공
 def verification_success(request):
-    return HttpResponse("이메일 인증에 성공했습니다. 로그인 후 이용해주세요.")
+    return render(request, "index.html")
 
 
 # 이메일 인증 실패
