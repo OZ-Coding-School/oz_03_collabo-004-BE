@@ -4,9 +4,6 @@ import string
 from locust import HttpUser, between, events, task
 
 
-from locust import HttpUser, between, events, task
-
-
 class WebsiteUser(HttpUser):
     wait_time = between(1, 5)
 
@@ -68,34 +65,26 @@ class WebsiteUser(HttpUser):
                 "email": self.email,
             },
             catch_response=True,
-            catch_response=True,
         ) as response:
+            # response.content가 None일 수 있으므로 이를 처리합니다.
+            response_length = len(response.content) if response.content else 0
+
             if response.status_code == 201:
-                events.request.fire(
                 events.request.fire(
                     request_type="POST",
                     name="/api/auth/register/",
                     response_time=response.elapsed.total_seconds() * 1000,
-                    response_length=len(response.content),
-                    response=response,
-                    context=None,
-                    exception=None,
+                    response_length=response_length,
                     response=response,
                     context=None,
                     exception=None,
                 )
             else:
                 events.request.fire(
-                events.request.fire(
                     request_type="POST",
                     name="/api/auth/register/",
                     response_time=response.elapsed.total_seconds() * 1000,
-                    response_length=len(response.content),
-                    response=response,
-                    context=None,
-                    exception=Exception(
-                        f"Failed to register user: {response.status_code}"
-                    ),
+                    response_length=response_length,
                     response=response,
                     context=None,
                     exception=Exception(
@@ -109,19 +98,14 @@ class WebsiteUser(HttpUser):
             "/api/auth/login/",
             json={"username": self.username, "password": self.password},
             catch_response=True,
-            catch_response=True,
         ) as response:
             if response.status_code == 200:
                 self.cookies = response.cookies
-                events.request.fire(
                 events.request.fire(
                     request_type="POST",
                     name="/api/auth/login/",
                     response_time=response.elapsed.total_seconds() * 1000,
                     response_length=len(response.content),
-                    response=response,
-                    context=None,
-                    exception=None,
                     response=response,
                     context=None,
                     exception=None,
@@ -129,16 +113,10 @@ class WebsiteUser(HttpUser):
             else:
                 self.cookies = None
                 events.request.fire(
-                events.request.fire(
                     request_type="POST",
                     name="/api/auth/login/",
                     response_time=response.elapsed.total_seconds() * 1000,
                     response_length=len(response.content),
-                    response=response,
-                    context=None,
-                    exception=Exception(
-                        f"Failed to log in user: {response.status_code}"
-                    ),
                     response=response,
                     context=None,
                     exception=Exception(
@@ -154,11 +132,7 @@ class WebsiteUser(HttpUser):
             with self.client.get(
                 "/api/account/profile/", cookies=self.cookies, catch_response=True
             ) as response:
-            with self.client.get(
-                "/api/account/profile/", cookies=self.cookies, catch_response=True
-            ) as response:
                 if response.status_code == 200:
-                    events.request.fire(
                     events.request.fire(
                         request_type="GET",
                         name="/api/account/profile/",
@@ -167,12 +141,8 @@ class WebsiteUser(HttpUser):
                         response=response,
                         context=None,
                         exception=None,
-                        response=response,
-                        context=None,
-                        exception=None,
                     )
                 else:
-                    events.request.fire(
                     events.request.fire(
                         request_type="GET",
                         name="/api/account/profile/",
@@ -200,10 +170,8 @@ class WebsiteUser(HttpUser):
                 },
                 cookies=self.cookies,
                 catch_response=True,
-                catch_response=True,
             ) as response:
                 if response.status_code == 200:
-                    events.request.fire(
                     events.request.fire(
                         request_type="PUT",
                         name="/api/account/profile/update/",
@@ -212,12 +180,8 @@ class WebsiteUser(HttpUser):
                         response=response,
                         context=None,
                         exception=None,
-                        response=response,
-                        context=None,
-                        exception=None,
                     )
                 else:
-                    events.request.fire(
                     events.request.fire(
                         request_type="PUT",
                         name="/api/account/profile/update/",
@@ -246,35 +210,24 @@ class WebsiteUser(HttpUser):
                 },
                 cookies=self.cookies,
                 catch_response=True,
-                catch_response=True,
             ) as response:
                 if response.status_code == 201:
                     self.article_id = response.json().get("article_id")
-                    events.request.fire(
                     events.request.fire(
                         request_type="POST",
                         name="/api/article/create/",
                         response_time=response.elapsed.total_seconds() * 1000,
                         response_length=len(response.content),
-                        response=response,
-                        context=None,
-                        exception=None,
                         response=response,
                         context=None,
                         exception=None,
                     )
                 else:
                     events.request.fire(
-                    events.request.fire(
                         request_type="POST",
                         name="/api/article/create/",
                         response_time=response.elapsed.total_seconds() * 1000,
                         response_length=len(response.content),
-                        response=response,
-                        context=None,
-                        exception=Exception(
-                            f"Failed to create article: {response.status_code}"
-                        ),
                         response=response,
                         context=None,
                         exception=Exception(
@@ -298,34 +251,23 @@ class WebsiteUser(HttpUser):
                 },
                 cookies=self.cookies,
                 catch_response=True,
-                catch_response=True,
             ) as response:
                 if response.status_code == 200:
-                    events.request.fire(
                     events.request.fire(
                         request_type="PUT",
                         name=f"/api/article/update/{self.article_id}/",
                         response_time=response.elapsed.total_seconds() * 1000,
                         response_length=len(response.content),
-                        response=response,
-                        context=None,
-                        exception=None,
                         response=response,
                         context=None,
                         exception=None,
                     )
                 else:
                     events.request.fire(
-                    events.request.fire(
                         request_type="PUT",
                         name=f"/api/article/update/{self.article_id}/",
                         response_time=response.elapsed.total_seconds() * 1000,
                         response_length=len(response.content),
-                        response=response,
-                        context=None,
-                        exception=Exception(
-                            f"Failed to update article: {response.status_code}"
-                        ),
                         response=response,
                         context=None,
                         exception=Exception(
@@ -339,9 +281,6 @@ class WebsiteUser(HttpUser):
             article_response = self.client.get(
                 f"/api/article/{self.article_id}/", cookies=self.cookies
             )
-            article_response = self.client.get(
-                f"/api/article/{self.article_id}/", cookies=self.cookies
-            )
             if article_response.status_code == 200:
                 article_author = article_response.json().get("author")
                 if article_author == self.username:
@@ -352,7 +291,6 @@ class WebsiteUser(HttpUser):
                 f"/api/comment/create/articles/{self.article_id}/",
                 files={"content": (None, "This is a test comment created by Locust.")},
                 cookies=self.cookies,
-                catch_response=True,
                 catch_response=True,
             ) as response:
                 if response.status_code == 201:
@@ -418,9 +356,6 @@ class WebsiteUser(HttpUser):
                         response=response,
                         context=None,
                         exception=None,
-                        response=response,
-                        context=None,
-                        exception=None,
                     )
                 else:
                     events.request.fire(
@@ -482,9 +417,6 @@ class WebsiteUser(HttpUser):
     def report_article(self):
         """게시글 신고 요청을 보냅니다."""
         if self.article_id and self.cookies:
-            article_response = self.client.get(
-                f"/api/article/{self.article_id}/", cookies=self.cookies
-            )
             article_response = self.client.get(
                 f"/api/article/{self.article_id}/", cookies=self.cookies
             )
@@ -558,19 +490,7 @@ class WebsiteUser(HttpUser):
     @task
     def get_ai_hunsoo(self):
         """AI 답변 조회 요청을 보냅니다."""
-        """AI 답변 조회 요청을 보냅니다."""
         if self.article_id:
-            with self.client.get(
-                f"/api/ai_hunsu/{self.article_id}", catch_response=True
-            ) as response:
-                if response.status_code == 200:
-                    print(
-                        f"AI Hunsoo for article {self.article_id} fetched successfully."
-                    )
-                else:
-                    print(
-                        f"Failed to fetch AI Hunsoo for article {self.article_id}. Status code: {response.status_code}"
-                    )
             with self.client.get(
                 f"/api/ai_hunsu/{self.article_id}", catch_response=True
             ) as response:
@@ -590,39 +510,25 @@ class WebsiteUser(HttpUser):
             with self.client.get(
                 "/api/notification/", cookies=self.cookies, catch_response=True
             ) as response:
-            with self.client.get(
-                "/api/notification/", cookies=self.cookies, catch_response=True
-            ) as response:
                 if response.status_code == 200:
                     notifications = response.json()
                     if notifications:
-                        self.notification_id = notifications[0]["id"]
-                    events.request.fire(
                         self.notification_id = notifications[0]["id"]
                     events.request.fire(
                         request_type="GET",
                         name="/api/notification/",
                         response_time=response.elapsed.total_seconds() * 1000,
                         response_length=len(response.content),
-                        response=response,
-                        context=None,
-                        exception=None,
                         response=response,
                         context=None,
                         exception=None,
                     )
                 else:
                     events.request.fire(
-                    events.request.fire(
                         request_type="GET",
                         name="/api/notification/",
                         response_time=response.elapsed.total_seconds() * 1000,
                         response_length=len(response.content),
-                        response=response,
-                        context=None,
-                        exception=Exception(
-                            f"Failed to retrieve notifications: {response.status_code}"
-                        ),
                         response=response,
                         context=None,
                         exception=Exception(
@@ -638,34 +544,23 @@ class WebsiteUser(HttpUser):
                 f"/api/notification/{self.notification_id}/read/",
                 cookies=self.cookies,
                 catch_response=True,
-                catch_response=True,
             ) as response:
                 if response.status_code == 200:
-                    events.request.fire(
                     events.request.fire(
                         request_type="POST",
                         name=f"/api/notification/{self.notification_id}/read/",
                         response_time=response.elapsed.total_seconds() * 1000,
                         response_length=len(response.content),
-                        response=response,
-                        context=None,
-                        exception=None,
                         response=response,
                         context=None,
                         exception=None,
                     )
                 else:
                     events.request.fire(
-                    events.request.fire(
                         request_type="POST",
                         name=f"/api/notification/{self.notification_id}/read/",
                         response_time=response.elapsed.total_seconds() * 1000,
                         response_length=len(response.content),
-                        response=response,
-                        context=None,
-                        exception=Exception(
-                            f"Failed to mark notification as read: {response.status_code}"
-                        ),
                         response=response,
                         context=None,
                         exception=Exception(
@@ -681,34 +576,23 @@ class WebsiteUser(HttpUser):
                 f"/api/notification/{self.notification_id}/delete/",
                 cookies=self.cookies,
                 catch_response=True,
-                catch_response=True,
             ) as response:
                 if response.status_code == 204:
-                    events.request.fire(
                     events.request.fire(
                         request_type="DELETE",
                         name=f"/api/notification/{self.notification_id}/delete/",
                         response_time=response.elapsed.total_seconds() * 1000,
                         response_length=len(response.content),
-                        response=response,
-                        context=None,
-                        exception=None,
                         response=response,
                         context=None,
                         exception=None,
                     )
                 else:
                     events.request.fire(
-                    events.request.fire(
                         request_type="DELETE",
                         name=f"/api/notification/{self.notification_id}/delete/",
                         response_time=response.elapsed.total_seconds() * 1000,
                         response_length=len(response.content),
-                        response=response,
-                        context=None,
-                        exception=Exception(
-                            f"Failed to delete notification: {response.status_code}"
-                        ),
                         response=response,
                         context=None,
                         exception=Exception(
@@ -725,38 +609,23 @@ class WebsiteUser(HttpUser):
                 cookies=self.cookies,
                 catch_response=True,
             ) as response:
-            with self.client.delete(
-                f"/api/article/delete/{self.article_id}/",
-                cookies=self.cookies,
-                catch_response=True,
-            ) as response:
                 if response.status_code == 204:
                     self.article_id = None  # 게시글 삭제 후 article_id 초기화
-                    events.request.fire(
                     events.request.fire(
                         request_type="DELETE",
                         name=f"/api/article/delete/{self.article_id}/",
                         response_time=response.elapsed.total_seconds() * 1000,
                         response_length=len(response.content),
-                        response=response,
-                        context=None,
-                        exception=None,
                         response=response,
                         context=None,
                         exception=None,
                     )
                 else:
                     events.request.fire(
-                    events.request.fire(
                         request_type="DELETE",
                         name=f"/api/article/delete/{self.article_id}/",
                         response_time=response.elapsed.total_seconds() * 1000,
                         response_length=len(response.content),
-                        response=response,
-                        context=None,
-                        exception=Exception(
-                            f"Failed to delete article: {response.status_code}"
-                        ),
                         response=response,
                         context=None,
                         exception=Exception(
