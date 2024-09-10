@@ -121,9 +121,9 @@ class AdminNotificationSerializer(serializers.ModelSerializer):
     def get_description(self, obj):
         """content_type에 따라 description을 생성"""
         if obj.content_type.model == "articlereport":
-            return f"님의 게시글이 신고 접수 되었습니다"
+            return f"{obj.actor.nickname}님의 게시글이 신고 접수 되었습니다"
         elif obj.content_type.model == "commentreport":
-            return f"님의 훈수가 신고 접수 되었습니다"
+            return f"{obj.actor.nickname}님의 훈수가 신고 접수 되었습니다"
         return "Unknown notification"
 
     def get_comment_content(self, obj):
