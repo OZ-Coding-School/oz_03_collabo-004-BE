@@ -123,11 +123,13 @@ class ArticleListSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
     thumbnail_image = serializers.SerializerMethodField()
     comments_count = serializers.SerializerMethodField()
-    
+    like = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = Article
         fields = [
+            "status",
             "article_id",
             "title",
             "content",
@@ -137,6 +139,7 @@ class ArticleListSerializer(serializers.ModelSerializer):
             "tags",
             "view_count",
             "like_count",
+            "like",
             "comments_count",
             "created_at",
             "updated_at",
@@ -163,6 +166,17 @@ class ArticleListSerializer(serializers.ModelSerializer):
     def get_comments_count(self, obj):
         return obj.comments.count()  # 댓글 수 반환
 
+    def get_like(self, obj):
+        request = self.context.get("request")
+        if request and request.user.is_authenticated:
+            # 사용자가 해당 게시글의 좋아요를 눌렀는지 확인
+            return obj.likes.filter(id=request.user.id).exists()
+        return False
+
+    def get_status(self, obj):
+        request = self.context.get("request")
+        return request.user.is_authenticated
+
 
 # 게시글 상세 조회를 위한 시리얼라이저
 class ArticleDetailSerializer(serializers.ModelSerializer):
@@ -179,7 +193,8 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
     )  # 댓글 목록을 포함
     comments_count = serializers.IntegerField(source="comments.count", read_only=True)
     # 댓글 수
-    status = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()  # 로그인여부
+
 
     class Meta:
         model = Article
