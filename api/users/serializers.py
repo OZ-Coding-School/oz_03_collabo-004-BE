@@ -157,3 +157,4 @@ class UserSerializer(serializers.ModelSerializer):
             "warning_count",
             "selected_tags",
         ]
+

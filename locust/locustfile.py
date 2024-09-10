@@ -4,10 +4,14 @@ import string
 from locust import HttpUser, between, events, task
 
 
+from locust import HttpUser, between, events, task
+
+
 class WebsiteUser(HttpUser):
     wait_time = between(1, 5)
 
     def on_start(self):
+        self.notification_id = None
         self.username = self.generate_random_username()
         self.password = "password123"
         self.nickname = self.generate_random_nickname()
@@ -47,7 +51,10 @@ class WebsiteUser(HttpUser):
             {"tag_id": 11, "name": "교육 훈수"},
         ]
 
-        selected_tags = random.sample(available_tags, k=random.randint(0, 3))
+        selected_tags = [
+            tag["tag_id"]
+            for tag in random.sample(available_tags, k=random.randint(1, 3))
+        ]
         return selected_tags
 
     def register(self):
@@ -61,8 +68,10 @@ class WebsiteUser(HttpUser):
                 "email": self.email,
             },
             catch_response=True,
+            catch_response=True,
         ) as response:
             if response.status_code == 201:
+                events.request.fire(
                 events.request.fire(
                     request_type="POST",
                     name="/api/auth/register/",
@@ -71,13 +80,22 @@ class WebsiteUser(HttpUser):
                     response=response,
                     context=None,
                     exception=None,
+                    response=response,
+                    context=None,
+                    exception=None,
                 )
             else:
+                events.request.fire(
                 events.request.fire(
                     request_type="POST",
                     name="/api/auth/register/",
                     response_time=response.elapsed.total_seconds() * 1000,
                     response_length=len(response.content),
+                    response=response,
+                    context=None,
+                    exception=Exception(
+                        f"Failed to register user: {response.status_code}"
+                    ),
                     response=response,
                     context=None,
                     exception=Exception(
@@ -91,9 +109,11 @@ class WebsiteUser(HttpUser):
             "/api/auth/login/",
             json={"username": self.username, "password": self.password},
             catch_response=True,
+            catch_response=True,
         ) as response:
             if response.status_code == 200:
                 self.cookies = response.cookies
+                events.request.fire(
                 events.request.fire(
                     request_type="POST",
                     name="/api/auth/login/",
@@ -102,14 +122,23 @@ class WebsiteUser(HttpUser):
                     response=response,
                     context=None,
                     exception=None,
+                    response=response,
+                    context=None,
+                    exception=None,
                 )
             else:
                 self.cookies = None
+                events.request.fire(
                 events.request.fire(
                     request_type="POST",
                     name="/api/auth/login/",
                     response_time=response.elapsed.total_seconds() * 1000,
                     response_length=len(response.content),
+                    response=response,
+                    context=None,
+                    exception=Exception(
+                        f"Failed to log in user: {response.status_code}"
+                    ),
                     response=response,
                     context=None,
                     exception=Exception(
@@ -125,7 +154,11 @@ class WebsiteUser(HttpUser):
             with self.client.get(
                 "/api/account/profile/", cookies=self.cookies, catch_response=True
             ) as response:
+            with self.client.get(
+                "/api/account/profile/", cookies=self.cookies, catch_response=True
+            ) as response:
                 if response.status_code == 200:
+                    events.request.fire(
                     events.request.fire(
                         request_type="GET",
                         name="/api/account/profile/",
@@ -134,8 +167,12 @@ class WebsiteUser(HttpUser):
                         response=response,
                         context=None,
                         exception=None,
+                        response=response,
+                        context=None,
+                        exception=None,
                     )
                 else:
+                    events.request.fire(
                     events.request.fire(
                         request_type="GET",
                         name="/api/account/profile/",
@@ -144,7 +181,7 @@ class WebsiteUser(HttpUser):
                         response=response,
                         context=None,
                         exception=Exception(
-                            f"Failed to view profile: {response.status_code}"
+                            f"Failed to view profile: {response.status_code}, Response: {response.text}"
                         ),
                     )
 
@@ -163,8 +200,10 @@ class WebsiteUser(HttpUser):
                 },
                 cookies=self.cookies,
                 catch_response=True,
+                catch_response=True,
             ) as response:
                 if response.status_code == 200:
+                    events.request.fire(
                     events.request.fire(
                         request_type="PUT",
                         name="/api/account/profile/update/",
@@ -173,8 +212,12 @@ class WebsiteUser(HttpUser):
                         response=response,
                         context=None,
                         exception=None,
+                        response=response,
+                        context=None,
+                        exception=None,
                     )
                 else:
+                    events.request.fire(
                     events.request.fire(
                         request_type="PUT",
                         name="/api/account/profile/update/",
@@ -183,7 +226,7 @@ class WebsiteUser(HttpUser):
                         response=response,
                         context=None,
                         exception=Exception(
-                            f"Failed to update profile: {response.status_code}"
+                            f"Failed to update profile: {response.status_code}, Response: {response.text}"
                         ),
                     )
 
@@ -203,9 +246,11 @@ class WebsiteUser(HttpUser):
                 },
                 cookies=self.cookies,
                 catch_response=True,
+                catch_response=True,
             ) as response:
                 if response.status_code == 201:
                     self.article_id = response.json().get("article_id")
+                    events.request.fire(
                     events.request.fire(
                         request_type="POST",
                         name="/api/article/create/",
@@ -214,13 +259,22 @@ class WebsiteUser(HttpUser):
                         response=response,
                         context=None,
                         exception=None,
+                        response=response,
+                        context=None,
+                        exception=None,
                     )
                 else:
+                    events.request.fire(
                     events.request.fire(
                         request_type="POST",
                         name="/api/article/create/",
                         response_time=response.elapsed.total_seconds() * 1000,
                         response_length=len(response.content),
+                        response=response,
+                        context=None,
+                        exception=Exception(
+                            f"Failed to create article: {response.status_code}"
+                        ),
                         response=response,
                         context=None,
                         exception=Exception(
@@ -244,8 +298,10 @@ class WebsiteUser(HttpUser):
                 },
                 cookies=self.cookies,
                 catch_response=True,
+                catch_response=True,
             ) as response:
                 if response.status_code == 200:
+                    events.request.fire(
                     events.request.fire(
                         request_type="PUT",
                         name=f"/api/article/update/{self.article_id}/",
@@ -254,8 +310,12 @@ class WebsiteUser(HttpUser):
                         response=response,
                         context=None,
                         exception=None,
+                        response=response,
+                        context=None,
+                        exception=None,
                     )
                 else:
+                    events.request.fire(
                     events.request.fire(
                         request_type="PUT",
                         name=f"/api/article/update/{self.article_id}/",
@@ -266,12 +326,19 @@ class WebsiteUser(HttpUser):
                         exception=Exception(
                             f"Failed to update article: {response.status_code}"
                         ),
+                        response=response,
+                        context=None,
+                        exception=Exception(
+                            f"Failed to update article: {response.status_code}"
+                        ),
                     )
 
     @task
     def create_comment(self):
-        """게시글에 댓글을 작성합니다."""
         if self.article_id and self.cookies:
+            article_response = self.client.get(
+                f"/api/article/{self.article_id}/", cookies=self.cookies
+            )
             article_response = self.client.get(
                 f"/api/article/{self.article_id}/", cookies=self.cookies
             )
@@ -279,41 +346,34 @@ class WebsiteUser(HttpUser):
                 article_author = article_response.json().get("author")
                 if article_author == self.username:
                     print(f"User {self.username} cannot comment on their own article.")
-                    return  # 자신의 게시글에 댓글을 작성하지 않음
+                    return
 
             with self.client.post(
-                f"/comments/create/articles/{self.article_id}/",
-                json={"content": "This is a test comment created by Locust."},
+                f"/api/comment/create/articles/{self.article_id}/",
+                files={"content": (None, "This is a test comment created by Locust.")},
                 cookies=self.cookies,
+                catch_response=True,
                 catch_response=True,
             ) as response:
                 if response.status_code == 201:
                     self.comment_id = response.json().get("id")
-                    events.request.fire(
-                        request_type="POST",
-                        name=f"/comments/create/articles/{self.article_id}/",
-                        response_time=response.elapsed.total_seconds() * 1000,
-                        response_length=len(response.content),
-                        response=response,
-                        context=None,
-                        exception=None,
+                    response.success()
+                elif (
+                    response.status_code == 400
+                    and "게시글 작성자는 해당 게시글에 댓글을 달 수 없습니다"
+                    in response.text
+                ):
+                    print(
+                        f"User {self.username} attempted to comment on their own article."
                     )
+                    response.success()
                 else:
-                    events.request.fire(
-                        request_type="POST",
-                        name=f"/comments/create/articles/{self.article_id}/",
-                        response_time=response.elapsed.total_seconds() * 1000,
-                        response_length=len(response.content),
-                        response=response,
-                        context=None,
-                        exception=Exception(
-                            f"Failed to create comment: {response.status_code}"
-                        ),
+                    response.failure(
+                        f"Failed to create comment: {response.status_code}, Response: {response.text}"
                     )
 
     @task
     def like_article(self):
-        """게시글에 좋아요를 누르거나 취소합니다."""
         if self.article_id and self.cookies:
             article_response = self.client.get(
                 f"/api/article/{self.article_id}/", cookies=self.cookies
@@ -330,26 +390,16 @@ class WebsiteUser(HttpUser):
                 catch_response=True,
             ) as response:
                 if response.status_code == 200:
-                    events.request.fire(
-                        request_type="POST",
-                        name=f"/api/article/{self.article_id}/like/",
-                        response_time=response.elapsed.total_seconds() * 1000,
-                        response_length=len(response.content),
-                        response=response,
-                        context=None,
-                        exception=None,
-                    )
+                    response.success()
+                elif (
+                    response.status_code == 400
+                    and "게시글 작성자는 좋아요를 누를 수 없습니다" in response.text
+                ):
+                    print(f"User {self.username} attempted to like their own article.")
+                    response.success()
                 else:
-                    events.request.fire(
-                        request_type="POST",
-                        name=f"/api/article/{self.article_id}/like/",
-                        response_time=response.elapsed.total_seconds() * 1000,
-                        response_length=len(response.content),
-                        response=response,
-                        context=None,
-                        exception=Exception(
-                            f"Failed to like article: {response.status_code}"
-                        ),
+                    response.failure(
+                        f"Failed to like article: {response.status_code}, Response: {response.text}"
                     )
 
     @task
@@ -365,6 +415,9 @@ class WebsiteUser(HttpUser):
                         name=f"/api/article/{self.article_id}/view/",
                         response_time=response.elapsed.total_seconds() * 1000,
                         response_length=len(response.content),
+                        response=response,
+                        context=None,
+                        exception=None,
                         response=response,
                         context=None,
                         exception=None,
@@ -397,7 +450,7 @@ class WebsiteUser(HttpUser):
 
             reaction_type = random.choice(["helpful", "not_helpful"])
             with self.client.post(
-                f"/comments/{self.comment_id}/react/",
+                f"/comment/{self.comment_id}/react/",
                 json={"reaction_type": reaction_type},
                 cookies=self.cookies,
                 catch_response=True,
@@ -429,40 +482,95 @@ class WebsiteUser(HttpUser):
     def report_article(self):
         """게시글 신고 요청을 보냅니다."""
         if self.article_id and self.cookies:
+            article_response = self.client.get(
+                f"/api/article/{self.article_id}/", cookies=self.cookies
+            )
+            article_response = self.client.get(
+                f"/api/article/{self.article_id}/", cookies=self.cookies
+            )
+            if article_response.status_code == 200:
+                article_author = article_response.json().get("author")
+                if article_author == self.username:
+                    print(f"User {self.username} cannot report their own article.")
+                    return  # 자신의 게시글이면 신고하지 않고 종료
+
             with self.client.post(
                 f"/api/report/article/{self.article_id}/",
                 json={"report_detail": "spam or inappropriate content"},
                 cookies=self.cookies,
                 catch_response=True,
             ) as response:
-                if response.status_code == 200:
-                    print(f"Article {self.article_id} reported successfully.")
-                else:
+                if response.status_code in [200, 201]:  # 201도 성공으로 처리
+                    response.success()
+                elif response.status_code == 409:
+                    print(f"Article {self.article_id} already reported.")
+                    response.success()  # 예상된 예외사항이므로 성공 처리
+                elif (
+                    response.status_code == 400
+                    and "자신의 게시글을 신고할 수 없습니다" in response.text
+                ):
                     print(
-                        f"Failed to report article {self.article_id}. Status code: {response.status_code}"
+                        f"User {self.username} attempted to report their own article."
+                    )
+                    response.success()  # 예상된 예외사항이므로 성공 처리
+                else:
+                    response.failure(
+                        f"Failed to report article: {response.status_code}, Response: {response.text}"
                     )
 
     @task
     def report_comment(self):
         """댓글 신고 요청을 보냅니다."""
         if self.comment_id and self.cookies:
+            comment_response = self.client.get(
+                f"/api/comment/{self.comment_id}/", cookies=self.cookies
+            )
+            if comment_response.status_code == 200:
+                comment_author = comment_response.json().get("author")
+                if comment_author == self.username:
+                    print(f"User {self.username} cannot report their own comment.")
+                    return  # 자신의 댓글이면 신고하지 않고 종료
+
             with self.client.post(
                 f"/api/report/comment/{self.comment_id}/",
                 json={"report_detail": "spam or inappropriate content"},
                 cookies=self.cookies,
                 catch_response=True,
             ) as response:
-                if response.status_code == 200:
-                    print(f"Comment {self.comment_id} reported successfully.")
-                else:
+                if response.status_code in [200, 201]:  # 201도 성공으로 처리
+                    response.success()
+                elif response.status_code == 409:
+                    print(f"Comment {self.comment_id} already reported.")
+                    response.success()  # 예상된 예외사항이므로 성공 처리
+                elif (
+                    response.status_code == 400
+                    and "자신의 댓글을 신고할 수 없습니다" in response.text
+                ):
                     print(
-                        f"Failed to report comment {self.comment_id}. Status code: {response.status_code}"
+                        f"User {self.username} attempted to report their own comment."
+                    )
+                    response.success()  # 예상된 예외사항이므로 성공 처리
+                else:
+                    response.failure(
+                        f"Failed to report comment: {response.status_code}, Response: {response.text}"
                     )
 
     @task
     def get_ai_hunsoo(self):
         """AI 답변 조회 요청을 보냅니다."""
+        """AI 답변 조회 요청을 보냅니다."""
         if self.article_id:
+            with self.client.get(
+                f"/api/ai_hunsu/{self.article_id}", catch_response=True
+            ) as response:
+                if response.status_code == 200:
+                    print(
+                        f"AI Hunsoo for article {self.article_id} fetched successfully."
+                    )
+                else:
+                    print(
+                        f"Failed to fetch AI Hunsoo for article {self.article_id}. Status code: {response.status_code}"
+                    )
             with self.client.get(
                 f"/api/ai_hunsu/{self.article_id}", catch_response=True
             ) as response:
@@ -482,9 +590,14 @@ class WebsiteUser(HttpUser):
             with self.client.get(
                 "/api/notification/", cookies=self.cookies, catch_response=True
             ) as response:
+            with self.client.get(
+                "/api/notification/", cookies=self.cookies, catch_response=True
+            ) as response:
                 if response.status_code == 200:
                     notifications = response.json()
                     if notifications:
+                        self.notification_id = notifications[0]["id"]
+                    events.request.fire(
                         self.notification_id = notifications[0]["id"]
                     events.request.fire(
                         request_type="GET",
@@ -494,13 +607,22 @@ class WebsiteUser(HttpUser):
                         response=response,
                         context=None,
                         exception=None,
+                        response=response,
+                        context=None,
+                        exception=None,
                     )
                 else:
+                    events.request.fire(
                     events.request.fire(
                         request_type="GET",
                         name="/api/notification/",
                         response_time=response.elapsed.total_seconds() * 1000,
                         response_length=len(response.content),
+                        response=response,
+                        context=None,
+                        exception=Exception(
+                            f"Failed to retrieve notifications: {response.status_code}"
+                        ),
                         response=response,
                         context=None,
                         exception=Exception(
@@ -516,8 +638,10 @@ class WebsiteUser(HttpUser):
                 f"/api/notification/{self.notification_id}/read/",
                 cookies=self.cookies,
                 catch_response=True,
+                catch_response=True,
             ) as response:
                 if response.status_code == 200:
+                    events.request.fire(
                     events.request.fire(
                         request_type="POST",
                         name=f"/api/notification/{self.notification_id}/read/",
@@ -526,13 +650,22 @@ class WebsiteUser(HttpUser):
                         response=response,
                         context=None,
                         exception=None,
+                        response=response,
+                        context=None,
+                        exception=None,
                     )
                 else:
+                    events.request.fire(
                     events.request.fire(
                         request_type="POST",
                         name=f"/api/notification/{self.notification_id}/read/",
                         response_time=response.elapsed.total_seconds() * 1000,
                         response_length=len(response.content),
+                        response=response,
+                        context=None,
+                        exception=Exception(
+                            f"Failed to mark notification as read: {response.status_code}"
+                        ),
                         response=response,
                         context=None,
                         exception=Exception(
@@ -548,8 +681,10 @@ class WebsiteUser(HttpUser):
                 f"/api/notification/{self.notification_id}/delete/",
                 cookies=self.cookies,
                 catch_response=True,
+                catch_response=True,
             ) as response:
                 if response.status_code == 204:
+                    events.request.fire(
                     events.request.fire(
                         request_type="DELETE",
                         name=f"/api/notification/{self.notification_id}/delete/",
@@ -558,13 +693,22 @@ class WebsiteUser(HttpUser):
                         response=response,
                         context=None,
                         exception=None,
+                        response=response,
+                        context=None,
+                        exception=None,
                     )
                 else:
+                    events.request.fire(
                     events.request.fire(
                         request_type="DELETE",
                         name=f"/api/notification/{self.notification_id}/delete/",
                         response_time=response.elapsed.total_seconds() * 1000,
                         response_length=len(response.content),
+                        response=response,
+                        context=None,
+                        exception=Exception(
+                            f"Failed to delete notification: {response.status_code}"
+                        ),
                         response=response,
                         context=None,
                         exception=Exception(
@@ -581,8 +725,14 @@ class WebsiteUser(HttpUser):
                 cookies=self.cookies,
                 catch_response=True,
             ) as response:
+            with self.client.delete(
+                f"/api/article/delete/{self.article_id}/",
+                cookies=self.cookies,
+                catch_response=True,
+            ) as response:
                 if response.status_code == 204:
                     self.article_id = None  # 게시글 삭제 후 article_id 초기화
+                    events.request.fire(
                     events.request.fire(
                         request_type="DELETE",
                         name=f"/api/article/delete/{self.article_id}/",
@@ -591,13 +741,22 @@ class WebsiteUser(HttpUser):
                         response=response,
                         context=None,
                         exception=None,
+                        response=response,
+                        context=None,
+                        exception=None,
                     )
                 else:
+                    events.request.fire(
                     events.request.fire(
                         request_type="DELETE",
                         name=f"/api/article/delete/{self.article_id}/",
                         response_time=response.elapsed.total_seconds() * 1000,
                         response_length=len(response.content),
+                        response=response,
+                        context=None,
+                        exception=Exception(
+                            f"Failed to delete article: {response.status_code}"
+                        ),
                         response=response,
                         context=None,
                         exception=Exception(
