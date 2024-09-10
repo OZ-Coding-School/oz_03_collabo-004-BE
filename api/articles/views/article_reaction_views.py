@@ -72,7 +72,9 @@ class TopLikedArticlesView(APIView):
         ).order_by("-annotate_liked_count")[:5]
 
         # ArticleListSerializer를 사용하여 직렬화
-        serializer = ArticleListSerializer(top_articles, many=True)
+        serializer = ArticleListSerializer(
+            top_articles, many=True, context={"request": request}
+        )
 
         # 응답으로 반환
         return Response(serializer.data)

@@ -123,7 +123,7 @@ class ArticleListSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
     thumbnail_image = serializers.SerializerMethodField()
     comments_count = serializers.SerializerMethodField()
-    
+    is_liked = serializers.SerializerMethodField()
 
     class Meta:
         model = Article
@@ -137,12 +137,12 @@ class ArticleListSerializer(serializers.ModelSerializer):
             "tags",
             "view_count",
             "like_count",
+            "is_liked",
             "comments_count",
             "created_at",
             "updated_at",
             "thumbnail_image",
         ]
-        
 
     def get_user(self, obj):
         user = obj.user
@@ -164,6 +164,13 @@ class ArticleListSerializer(serializers.ModelSerializer):
     def get_comments_count(self, obj):
         return obj.comments.count()  # 댓글 수 반환
 
+    def get_is_liked(self, obj):
+        request = self.context.get("request")
+        # request가 존재하지 않거나 비로그인 상태일 경우 False 반환
+        if request is None or not request.user.is_authenticated:
+            return False
+        return obj.likes.filter(id=request.user.id).exists()
+
 
 # 게시글 상세 조회를 위한 시리얼라이저
 class ArticleDetailSerializer(serializers.ModelSerializer):
@@ -180,7 +187,8 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
     )  # 댓글 목록을 포함
     comments_count = serializers.IntegerField(source="comments.count", read_only=True)
     # 댓글 수
-    status = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()  # 로그인여부
+    is_liked = serializers.SerializerMethodField()
 
     class Meta:
         model = Article
@@ -201,6 +209,7 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "comments",
+            "is_liked",
         ]
 
     def get_user(self, obj):
@@ -223,3 +232,10 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
     def get_status(self, obj):
         request = self.context.get("request")
         return request.user.is_authenticated
+
+    def get_is_liked(self, obj):
+        request = self.context.get("request")
+        # request가 존재하지 않거나 비로그인 상태일 경우 False 반환
+        if request is None or not request.user.is_authenticated:
+            return False
+        return obj.likes.filter(id=request.user.id).exists()
