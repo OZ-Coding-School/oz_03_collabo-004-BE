@@ -26,7 +26,7 @@ class ArticleLikeToggleView(APIView):
         if article.user == user:
             return Response(
                 {"message": "게시글 작성자는 좋아요를 누를 수 없습니다."},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_409_CONFLICT,
             )
 
         if user in article.likes.all():
