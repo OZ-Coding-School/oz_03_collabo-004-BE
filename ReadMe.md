@@ -223,8 +223,8 @@ PR과 관련된 템플릿은 PR을 생성할때 자동으로 생성됩니다. <b
 ---
 ## 6. 서버 성능
 ### 테스트 커버리지
-![image](https://github.com/user-attachments/assets/73cb7330-74c5-44db-9a27-b9a20636a993)
-![image](https://github.com/user-attachments/assets/98e25e03-edd7-48d9-a3ff-5208e6ac4c91)
+<img width="1287" alt="image" src="https://github.com/user-attachments/assets/cb0906d3-f57b-4f29-8c72-07ae0020573b">
+
 
 ### 성능 테스트 (Locust)
 ![image](https://github.com/user-attachments/assets/f6c22d57-5099-4397-a926-852bcb367925)
