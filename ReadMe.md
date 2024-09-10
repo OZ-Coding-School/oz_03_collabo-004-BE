@@ -20,8 +20,10 @@
 | Kim, Min Su| 팀 & 프론트엔드 팀장 | <img src="https://github.com/yoyobar.png" width="50"/> | [GitHub](https://github.com/yoyobar)            | [Blog](https://wiki.yoyobar.xyz)            |
 | Kim, Se Rim | 프론트엔드 팀원  | <img src="https://github.com/srnnnn.png" width="50"/> | [GitHub](https://github.com/srnnnn)           | [Blog]()            |
 | Hwang, Seong Min | 프론트엔드 팀원  | <img src="https://github.com/akwjr963.png" width="50"/> | [GitHub](https://github.com/akwjr963)           | [Blog]()           |
-| Song, Yun Ju| 백엔드 팀장       | <img src="https://github.com/yoonju977.png" width="50"/> | [GitHub](https://github.com/yoonju977)          | [Blog]()           |
+| Song, Yoon Ju| 백엔드 팀장       | <img src="https://github.com/yoonju977.png" width="50"/> | [GitHub](https://github.com/yoonju977)          | [Blog]()           |
 | Kim, Da Yeon| 백엔드 팀원    | <img src="https://github.com/dayeonkimm.png" width="50"/> | [GitHub](https://github.com/dayeonkimm)       | [Blog]()         |
+| Seok, Yeong Joong| 백엔드 팀원    | <img src="https://github.com/Moon-Nights.png" width="50"/> | [GitHub](https://github.com/Moon-Nights)       | [Blog]()         |
+
 
 ---
 
@@ -130,7 +132,8 @@ PR과 관련된 템플릿은 PR을 생성할때 자동으로 생성됩니다. <b
 ## 4. 주요 기능 로직
 
 ### 로그인/회원가입
-![image](https://github.com/user-attachments/assets/5f59e81e-17b2-4dd1-8bc8-feb1dc84efde)
+![image](https://github.com/user-attachments/assets/688a00e5-41ae-4f90-9fce-f718a66cd904)
+
 
 
 ### 이미지 처리
@@ -138,8 +141,9 @@ PR과 관련된 템플릿은 PR을 생성할때 자동으로 생성됩니다. <b
 
 
 
-### AI봇 생성
-![image](https://github.com/user-attachments/assets/98656fd3-3e85-454c-ad01-32a037ec608a)
+### 훈수봇 생성
+![image](https://github.com/user-attachments/assets/30229c1f-7f2c-47ba-a4d9-5875be6b1906)
+
 
 ### AI 프롬프트 엔지니어링
 ```
@@ -217,8 +221,23 @@ PR과 관련된 템플릿은 PR을 생성할때 자동으로 생성됩니다. <b
 ![ERD](https://github.com/OZ-Coding-School/oz_03_collabo-004-FE/blob/main/src/doc/ERD.png)
 
 ---
+## 6. 서버 성능
+### 테스트 커버리지
+![image](https://github.com/user-attachments/assets/73cb7330-74c5-44db-9a27-b9a20636a993)
+![image](https://github.com/user-attachments/assets/98e25e03-edd7-48d9-a3ff-5208e6ac4c91)
 
-## 6. 담당 기능
+### 성능 테스트 (Locust)
+![image](https://github.com/user-attachments/assets/f6c22d57-5099-4397-a926-852bcb367925)
+
+### 모니터링 (Whatap)
+![image](https://github.com/user-attachments/assets/cdbfb624-f251-4905-8675-d7aef43979fc)
+
+
+
+
+---
+
+## 7. 담당 기능
 
 | 송윤주       | 김다연           |
 | ---------       | ---------         |
@@ -240,13 +259,14 @@ PR과 관련된 템플릿은 PR을 생성할때 자동으로 생성됩니다. <b
 
 
 
-## 7. 트러블 슈팅
+## 8. 트러블 슈팅
 
-- **문제:** Lorem Ipsum.
-  - **해결:** Lorem Ipsum.Lorem Ipsum.Lorem Ipsum.Lorem Ipsum.Lorem Ipsum.Lorem Ipsum.Lorem Ipsum.
+- **문제:** 이미지 처리 시 오류
+  - **해결:** 이미지 처리 로직 및 API 변경
 
-- **문제:** Lorem Ipsum.
-  - **해결:** Lorem Ipsum.Lorem Ipsum.Lorem Ipsum.Lorem Ipsum.Lorem Ipsum.Lorem Ipsum.Lorem Ipsum.
+- **문제:** CORS 오류
+  - **해결:** 백엔드 코드에 CORS_ALLOW_HEADERS에 "cache-control" 추가, 
+             프론트 코드에 withCredentials: true 추가
 
 - **문제:** Lorem Ipsum.
   - **해결:** Lorem Ipsum.Lorem Ipsum.Lorem Ipsum.Lorem Ipsum.Lorem Ipsum.Lorem Ipsum.Lorem Ipsum.
@@ -258,7 +278,7 @@ PR과 관련된 템플릿은 PR을 생성할때 자동으로 생성됩니다. <b
 
 ---
 
-## 8. 개선 방향성
+## 9. 개선 방향성
 
 - 파인튜닝을 이용한 훈수봇의 답변 미세 조정과 답변의 이미지 처리 기능 추가
 - Redis를 통한 캐싱 처리
@@ -266,7 +286,7 @@ PR과 관련된 템플릿은 PR을 생성할때 자동으로 생성됩니다. <b
 
 ---
 
-## 9. 프로젝트 후기
+## 10. 프로젝트 후기
 
 이번 프로젝트는 진행에 차질에 있었으나 빠르게 문제점을 파악하고 수정하고 <br/> 
 최신 기술 스택을 활용하여 사용자 중심의 서비스를 제공할 수 있었습니다. <br/> 
