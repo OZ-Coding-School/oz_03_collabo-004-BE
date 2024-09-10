@@ -4,7 +4,7 @@
 ### 프로젝트 제목
 **HunsuKing :: AI Question Community Platform**
 
-<img src="https://placehold.co/1280x720" width=100%>
+<img src="https://github.com/OZ-Coding-School/oz_03_collabo-004-FE/blob/main/src/doc/main_image.png" width=100%>
 
 ### 프로젝트 정보
 우리 팀은 네이버의 지식인 서비스를 착안하여, <br/>
@@ -100,82 +100,88 @@ PR과 관련된 템플릿은 PR을 생성할때 자동으로 생성됩니다. <b
 
 ---
 
+
 ## 3. 주요 페이지
 
 | 홈 페이지                                 | 
 |--------------------------------------------|
-| <img src="https://placehold.co/1280x720"/> | 
+| <img src="https://github.com/OZ-Coding-School/oz_03_collabo-004-FE/blob/main/src/doc/main_page.png"/> | 
 | 서비스 메인 페이지와 게시물을 볼 수 있습니다.              |
 
 | 로그인 페이지                             | 
 |--------------------------------------------|
-| <img src="https://placehold.co/1280x720"/> | 
+| <img src="https://github.com/OZ-Coding-School/oz_03_collabo-004-FE/blob/main/src/doc/register_page.png"/> | 
 | 현대웹 구조에 맞게 로그인 페이지를 구성하고, 이메일 인증과 비밀번호 찾기가 가능합니다.         |
 
 | 마이 페이지                             | 
 |--------------------------------------------|
-| <img src="https://placehold.co/1280x720"/> | 
+| <img src="https://github.com/OZ-Coding-School/oz_03_collabo-004-FE/blob/main/src/doc/my_page.png"/> | 
 | 사용자 정보를 확인하고 레벨, 사용자 이미지, 탈퇴처리, 작성한 게시물 등 다양한 작업이 가능합니다.|
 
 | 어드민 페이지                             | 
 |--------------------------------------------|
-| <img src="https://placehold.co/1280x720"/> | 
-| React-query를 통한 실시간 동기화 데이터를 지원하는 어드민 페이지입니다. 유저 신고관리, 게시물 관리, 유저 관리 등이 가능합니다.|
-
-
-| 에디터 모달                                 | 
-|--------------------------------------------|
-| <img src="https://placehold.co/1280x720"/> | 
-| TipTap을 통해 직접 구성한 에디터 모달입니다. `lowlight`를 통해 렌더링되며, 클라이언트로 데이터로 넘어올 경우 `highlight.js`로 렌더링 됩니다.|
+| <img src="https://github.com/OZ-Coding-School/oz_03_collabo-004-FE/blob/main/src/doc/admin_page.png"/> | 
+| 어드민 유저만 접속 가능하며 유저 신고관리, 게시물 관리, 유저 관리 등이 가능합니다.|
 
 
 
 ---
 
-## 4. 페이지별 주요 기능
+## 4. 주요 기능 로직
 
-### 공통 기능
-- 유저 Google 로그인 쿠키로 관리
-- 사설 유저 로그인 쿠키로 관리
+### 로그인/회원가입
+![image](https://github.com/user-attachments/assets/5f59e81e-17b2-4dd1-8bc8-feb1dc84efde)
 
-### 홈 페이지
+
+### 이미지 처리
 - `zustand`로 동기화된 게시물 데이터
 - 사용자의 게시물에 알림이 존재하여 실시간 반응 확인
 - 카테고리 별 게시물, 검색 기능, 댓글, 댓글 이미지 등 여러 모던 웹 기능 지원
 
-### 마이 페이지
-- 사용자 정보 편집 기능
-- 사용자 경험치, 레벨 확인
-- 사용자 작성 글, 작성 댓글 확인 및 수정
-- 사용자 계정 탈퇴
+### AI봇 생성
+![image](https://github.com/user-attachments/assets/98656fd3-3e85-454c-ad01-32a037ec608a)
 
-### 어드민 페이지
-- `react-query`로 실시간 동기화된 서버 데이터
-- 사용자 신고 내역 조회 / 처리
-- 사용자 게시물 조회 / 삭제
-- 사용자 조회 / Role Change / 탈퇴 처리
+### AI 프롬프트 엔지니어링
 
-### 로그인 페이지
-- 사설 로그인 / 소셜 로그인 지원
-- 가입 후 이메일 인증 기능
-- 비밀번호 찾기 기능
 
 ---
 
 ## 5. 아키텍처, 클라우드 아키텍처, ERD
 
 ### 아키텍처
-![Architecture](https://placehold.co/1280x720)
+![Architecture](https://github.com/OZ-Coding-School/oz_03_collabo-004-FE/blob/main/src/doc/architecture.png)
 
 ### 클라우드 아키텍처
-![CloudArchitecture](https://placehold.co/1280x720)
+![CloudArchitecture](https://github.com/OZ-Coding-School/oz_03_collabo-004-FE/blob/main/src/doc/cloud_architecture.png)
 
 ### ERD
-![ERD](https://placehold.co/1280x720)
+![ERD](https://github.com/OZ-Coding-School/oz_03_collabo-004-FE/blob/main/src/doc/ERD.png)
 
 ---
 
-## 6. Front-End 트러블 슈팅
+## 6. 담당 기능
+
+| 송윤주       | 김다연           |
+| ---------       | ---------         |
+| <img src="https://github.com/yoonju977.png" width="50"/>     | <img src="https://github.com/dayeonkimm.png" width="50"/>       |
+| - 전체적인 프로젝트 매니징   | - Rds, CloudWatch, WAF(보안)           |
+| - EC2, S3, Rds, Jenkins(CD)   | - Git Action(CI)          |
+| - ELB, cloudfront, route53, certificate manager(https 배포)   | - WapTap 모니터링           |
+| - Locust 성능테스트   | - Locust 성능테스트          |
+| - 게시글 업로드/삭제/수정/좋아요 기능  | - 훈수봇 답변 기능          |
+| - 이미지 업로드/수정/삭제 기능   |  - AI 프롬프트 엔지니어링          |
+|  - 댓글 작성/도움이돼요/안돼요/채택 기능   |  - 소셜로그인 및 이메일인증, 비밀번호 재설정         |
+|  - 일반로그인/ 마이페이지(프로필)       | - 어드민페이지 기능         |
+| - 알림기능(채택, 좋아요, 댓글, AI알림)     | - 사용자 신고기능         |
+| - 태그(카테고리)       |    - 알림기능(어드민신고처리알림)     |
+| - 검색기능        |         |
+
+
+---
+
+
+
+## 7. 트러블 슈팅
 
 - **문제:** Lorem Ipsum.
   - **해결:** Lorem Ipsum.Lorem Ipsum.Lorem Ipsum.Lorem Ipsum.Lorem Ipsum.Lorem Ipsum.Lorem Ipsum.
@@ -193,15 +199,15 @@ PR과 관련된 템플릿은 PR을 생성할때 자동으로 생성됩니다. <b
 
 ---
 
-## 7. 개선 방향성
+## 8. 개선 방향성
 
-- 게시물 데이터 `Pagination`
-- 게시물 데이터 `react-query`를 활용하여 실시간 동기화
-- 사용자 경험(`UX`) 개선을 위한 피드백 시스템 도입.
+- 파인튜닝을 이용한 훈수봇의 답변 미세 조정과 답변의 이미지 처리 기능 추가
+- Redis를 통한 캐싱 처리
+- 서비스의 확장성을 고려한 User서비스와 AI서비스의 컨테이너 분리를 통한 오케스트레이션
 
 ---
 
-## 8. 프로젝트 후기
+## 9. 프로젝트 후기
 
 이번 프로젝트는 진행에 차질에 있었으나 빠르게 문제점을 파악하고 수정하고 <br/> 
 최신 기술 스택을 활용하여 사용자 중심의 서비스를 제공할 수 있었습니다. <br/> 
