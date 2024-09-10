@@ -145,7 +145,6 @@ class ArticleListSerializer(serializers.ModelSerializer):
             "updated_at",
             "thumbnail_image",
         ]
-        
 
     def get_user(self, obj):
         user = obj.user

@@ -1,7 +1,11 @@
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import (
+    AllowAny,
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -63,7 +67,7 @@ class TopLikedArticlesView(APIView):
     좋아요 수가 많은 상위 5개의 게시글을 반환하는 API
     """
 
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request, *args, **kwargs):
         # Article 모델에서 좋아요 수를 Count하여 상위 5개의 게시글을 가져옵니다.
@@ -72,7 +76,9 @@ class TopLikedArticlesView(APIView):
         ).order_by("-annotate_liked_count")[:5]
 
         # ArticleListSerializer를 사용하여 직렬화
-        serializer = ArticleListSerializer(top_articles, many=True)
+        serializer = ArticleListSerializer(
+            top_articles, many=True, context={"request": request}
+        )
 
         # 응답으로 반환
         return Response(serializer.data)
