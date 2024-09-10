@@ -138,7 +138,7 @@ PR과 관련된 템플릿은 PR을 생성할때 자동으로 생성됩니다. <b
 
 
 
-### AI봇 생성
+### 훈수봇 생성
 ![image](https://github.com/user-attachments/assets/98656fd3-3e85-454c-ad01-32a037ec608a)
 
 ### AI 프롬프트 엔지니어링
