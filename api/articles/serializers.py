@@ -139,7 +139,8 @@ class ArticleListSerializer(serializers.ModelSerializer):
             "tags",
             "view_count",
             "like_count",
-            "like" "comments_count",
+            "like",
+            "comments_count",
             "created_at",
             "updated_at",
             "thumbnail_image",
@@ -193,7 +194,7 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
     comments_count = serializers.IntegerField(source="comments.count", read_only=True)
     # 댓글 수
     status = serializers.SerializerMethodField()  # 로그인여부
-    is_liked = serializers.SerializerMethodField()
+
 
     class Meta:
         model = Article
@@ -214,7 +215,6 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "comments",
-            "is_liked",
         ]
 
     def get_user(self, obj):
@@ -237,10 +237,3 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
     def get_status(self, obj):
         request = self.context.get("request")
         return request.user.is_authenticated
-
-    def get_is_liked(self, obj):
-        request = self.context.get("request")
-        # request가 존재하지 않거나 비로그인 상태일 경우 False 반환
-        if request is None or not request.user.is_authenticated:
-            return False
-        return obj.likes.filter(id=request.user.id).exists()
