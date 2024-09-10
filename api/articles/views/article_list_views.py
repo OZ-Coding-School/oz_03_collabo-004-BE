@@ -21,8 +21,7 @@ class ArticleDetailView(generics.RetrieveAPIView):
 class ArticleListView(generics.ListAPIView):
     queryset = Article.objects.all().order_by("-created_at")
     serializer_class = ArticleListSerializer
-    permission_classes = [AllowAny]
-
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
 
 # 특정 태그별 게시글 조회 리스트
