@@ -10,6 +10,7 @@ from .views.article_crud_views import (
 from .views.article_list_views import (
     ArticleByTagView,
     ArticleDetailView,
+    ArticleLikeListView,
     ArticleListView,
 )
 from .views.article_reaction_views import (
@@ -38,6 +39,7 @@ urlpatterns = [
     path("", ArticleListView.as_view(), name="article-list"),
     path("<int:id>/", ArticleDetailView.as_view(), name="article-detail"),
     path("tag/<int:tag_id>/", ArticleByTagView.as_view(), name="articles-by-tag"),
+    path("list/like/", ArticleLikeListView.as_view(), name="article-likes-list"),
     # 반응 (조회수, 좋아요) 관련 URL
     path("<int:id>/view/", ArticleViewCountView.as_view(), name="article-view-count"),
     path("<int:id>/like/", ArticleLikeToggleView.as_view(), name="article-like"),
