@@ -16,11 +16,6 @@ class ArticleDetailView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     lookup_field = "id"
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context["request"] = self.request
-        return context
-
 
 # 전체 게시글 조회 리스트
 class ArticleListView(generics.ListAPIView):
@@ -28,10 +23,6 @@ class ArticleListView(generics.ListAPIView):
     serializer_class = ArticleListSerializer
     permission_classes = [AllowAny]
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context["request"] = self.request
-        return context
 
 
 # 특정 태그별 게시글 조회 리스트
