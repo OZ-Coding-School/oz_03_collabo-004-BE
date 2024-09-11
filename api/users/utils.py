@@ -80,12 +80,12 @@ class HunsooKingAuthClass:
         """
         response = self.set_cookie_attributes(
             response=response,
-            key="access",
+            key="hunsu_access",
             token=jwt_tokens["access"],
         )
         response = self.set_cookie_attributes(
             response=response,
-            key="refresh",
+            key="hunsu_refresh",
             token=jwt_tokens["refresh"],
         )
 
@@ -184,12 +184,12 @@ class GeneralAuthClass:
     def set_jwt_auth_cookie(self, response, jwt_tokens):
         response = self.set_cookie_attributes(
             response=response,
-            key="access",
+            key="hunsu_access",
             token=jwt_tokens["access"],
         )
         response = self.set_cookie_attributes(
             response=response,
-            key="refresh",
+            key="hunsu_refresh",
             token=jwt_tokens["refresh"],
         )
         return response
