@@ -18,7 +18,7 @@ class CommentCRUDTests(APITestCase):
             nickname="TestNickname",
         )
         # 프로필 생성
-        self.profile = Profile.objects.create(user=self.user)
+        self.profile = Profile.objects.get(user=self.user)
 
         # JWT 토큰 생성 및 설정
         self.client.force_authenticate(user=self.user)
@@ -50,7 +50,7 @@ class CommentCRUDTests(APITestCase):
             password="newpassword",
             nickname="NewUserNickname",
         )
-        Profile.objects.create(user=new_user)
+        Profile.objects.get(user=new_user)
 
         self.client.force_authenticate(user=new_user)
 
@@ -81,7 +81,7 @@ class CommentCRUDTests(APITestCase):
             nickname="AnotherNickname",
         )
 
-        Profile.objects.create(user=new_user)
+        Profile.objects.get(user=new_user)
 
         self.client.force_authenticate(user=new_user)
 
@@ -145,7 +145,7 @@ class CommentCRUDTests(APITestCase):
             password="anotherpassword",
             nickname="AnotherUserNickname",
         )
-        Profile.objects.create(user=another_user)
+        Profile.objects.get(user=another_user)
         
         self.client.force_authenticate(user=another_user)
 

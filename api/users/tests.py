@@ -28,7 +28,7 @@ class AdminUserTests(APITestCase):
             password="userpassword",
             nickname="testnickname",
         )
-        self.profile = Profile.objects.create(user=self.user, hunsoo_level=1)
+        self.profile = Profile.objects.get(user=self.user)
 
         # 일반 유저2 생성
         self.user2 = User.objects.create_user(
@@ -61,6 +61,7 @@ class AdminUserTests(APITestCase):
             reporter=self.user2,
             reported_user=self.user,
             reported_comment=self.comment,
+            reported_article=self.article,
             report_detail="This is a test report.",
         )
 

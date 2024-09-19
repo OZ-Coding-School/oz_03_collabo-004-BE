@@ -36,7 +36,7 @@ class UpdateHunsooLevelTest(APITestCase):
             nickname="testnickname",
             social_platform="general",
         )
-        self.profile = Profile.objects.create(user=self.user, hunsoo_level=1)
+        self.profile = Profile.objects.get(user=self.user)
 
         # 어드민 JWT 토큰 생성
         self.refresh = RefreshToken.for_user(self.admin_user)
@@ -96,9 +96,10 @@ class UserProfileDetailTest(APITestCase):
             nickname="testnickname",
             social_platform="general",
         )
-        self.profile = Profile.objects.create(
-            user=self.user, hunsoo_level=1, bio="This is a test bio."
-        )
+        self.profile = Profile.objects.get(
+            user=self.user)
+        self.profile.bio="This is a test bio."
+        self.profile.save()
 
         # 닉네임 중복 테스트를 위해 추가 사용자 생성
         self.user2 = User.objects.create_user(
@@ -108,9 +109,11 @@ class UserProfileDetailTest(APITestCase):
             nickname="duplicatenickname",
             social_platform="general",
         )
-        self.profile2 = Profile.objects.create(
-            user=self.user2, hunsoo_level=2, bio="This is another test bio."
-        )
+        self.profile2 = Profile.objects.get(
+            user=self.user2)
+        self.profile2.hunsoo_level = 2
+        self.profile2.bio="This is another test bio."
+        self.profile2.save()
 
         # JWT 토큰 생성
         self.refresh = RefreshToken.for_user(self.user)

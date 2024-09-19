@@ -100,3 +100,8 @@ class ArticleReportCreateViewTest(APITestCase):
         response = self.client.post(self.url, data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        
+    def tearDown(self):
+        self.reporter.delete()
+        self.reported_user.delete()
+        self.article.delete()
