@@ -2,6 +2,7 @@ from articles.models import Article
 from articles.serializers import ArticleListSerializer
 from comments.models import Comment
 from comments.serializers import UserCommentListSerializer
+from django.db.models import Sum
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from tags.models import Tag
@@ -24,6 +25,9 @@ class ProfileSerializer(serializers.ModelSerializer):
     comments = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
     email = serializers.SerializerMethodField()
+    liked_articles_count = serializers.SerializerMethodField()
+    helpful_comments_count = serializers.SerializerMethodField()
+    not_helpful_comments_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
@@ -38,6 +42,9 @@ class ProfileSerializer(serializers.ModelSerializer):
             "warning_count",
             "hunsoo_level",
             "selected_comment_count",
+            "liked_articles_count",
+            "helpful_comments_count",
+            "not_helpful_comments_count",
             "articles",
             "comments",
         ]
@@ -92,6 +99,21 @@ class ProfileSerializer(serializers.ModelSerializer):
         if len(value) > 3:
             raise serializers.ValidationError("태그는 최대 3개까지 선택할 수 있습니다.")
         return value
+
+    def get_liked_articles_count(self, obj):
+        return obj.user.liked_articles.count()
+
+    def get_helpful_comments_count(self, obj):
+        result = Comment.objects.filter(user=obj.user).aggregate(
+            total_helpful=Sum("helpful_count")
+        )
+        return result["total_helpful"] or 0
+
+    def get_not_helpful_comments_count(self, obj):
+        result = Comment.objects.filter(user=obj.user).aggregate(
+            total_not_helpful=Sum("not_helpful_count")
+        )
+        return result["total_not_helpful"] or 0
 
 
 class AdminProfileSerializer(serializers.ModelSerializer):
