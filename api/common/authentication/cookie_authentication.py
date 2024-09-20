@@ -14,7 +14,7 @@ class CookieJWTAuthentication(JWTAuthentication):
         header = self.get_header(request)
         if header is None:
             # Authorization 헤더가 없는 경우 쿠키에서 Access token을 읽는다.
-            raw_token = request.COOKIES.get("access")
+            raw_token = request.COOKIES.get("hunsu_access")
         else:
             raw_token = self.get_raw_token(header)
 
