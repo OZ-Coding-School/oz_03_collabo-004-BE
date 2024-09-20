@@ -1,5 +1,5 @@
+from django.core.cache import cache
 from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
 from rest_framework import generics
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
@@ -35,9 +35,24 @@ class ArticleListView(generics.ListAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     pagination_class = ArticlePagination
 
-    @method_decorator(cache_page(60 * 15))  # 15분 동안 캐시
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
+    def list(self, request, *args, **kwargs):
+        # 단일 캐시 키 설정
+        cache_key = "article_list_cache_key"
+
+        # 캐시에서 데이터 가져오기
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            return Response(cached_data)
+
+        # 캐시된 데이터가 없으면 쿼리 실행 후 캐시에 저장
+        page = self.paginate_queryset(self.get_queryset())
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            data = serializer.data
+            cache.set(cache_key, data, 60 * 15)  # 15분 동안 캐시 유지
+            return self.get_paginated_response(data)
+
+        return Response({"detail": "No articles found."}, status=404)
 
 
 # 특정 태그별 게시글 조회 리스트
