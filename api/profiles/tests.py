@@ -44,8 +44,8 @@ class UpdateHunsooLevelTest(APITestCase):
         self.refresh_token = str(self.refresh)
 
         # 쿠키에 어드민 토큰 설정
-        self.client.cookies["access"] = self.access_token
-        self.client.cookies["refresh"] = self.refresh_token
+        self.client.cookies["hunsu_access"] = self.access_token
+        self.client.cookies["hunsu_refresh"] = self.refresh_token
 
         # 테스트할 URL (조정당하는 일반 유저의 ID 사용)
         self.url = f"/api/account/level/{self.user.id}/"
@@ -121,8 +121,8 @@ class UserProfileDetailTest(APITestCase):
         self.refresh_token = str(self.refresh)
 
         # 쿠키에 토큰 설정
-        self.client.cookies["access"] = self.access_token
-        self.client.cookies["refresh"] = self.refresh_token
+        self.client.cookies["hunsu_access"] = self.access_token
+        self.client.cookies["hunsu_refresh"] = self.refresh_token
 
         # 테스트할 URL
         self.url = "/api/account/profile/"

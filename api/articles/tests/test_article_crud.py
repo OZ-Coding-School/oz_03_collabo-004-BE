@@ -27,8 +27,8 @@ class ArticleCRUDTests(APITestCase):
         self.refresh_token = str(self.refresh)
 
         # 쿠키에 토큰 설정
-        self.client.cookies["access"] = self.access_token
-        self.client.cookies["refresh"] = self.refresh_token
+        self.client.cookies["hunsu_access"] = self.access_token
+        self.client.cookies["hunsu_refresh"] = self.refresh_token
 
         # 테스트 태그 생성
         self.tag1 = Tag.objects.create(tag_id=2, name="연애 훈수")
@@ -143,8 +143,8 @@ class ArticleListTests(APITestCase):
         self.refresh_token = str(self.refresh)
 
         # 쿠키에 토큰 설정
-        self.client.cookies["access"] = self.access_token
-        self.client.cookies["refresh"] = self.refresh_token
+        self.client.cookies["hunsu_access"] = self.access_token
+        self.client.cookies["hunsu_refresh"] = self.refresh_token
 
         # 테스트 태그 생성
         self.tag1 = Tag.objects.create(tag_id=0, name="연애 훈수")
@@ -168,9 +168,14 @@ class ArticleListTests(APITestCase):
         # 전체 게시글 조회 테스트
         response = self.client.get(list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)
-        self.assertEqual(response.data[1]["title"], "Article 1")
-        self.assertEqual(response.data[0]["title"], "Article 2")
+
+        # 페이지네이션이 적용된 경우, 'results'에 게시글 리스트가 있음
+        article_list = response.data.get("results", [])
+
+        # 게시글의 개수가 2개인지 확인
+        self.assertEqual(len(article_list), 2)
+        self.assertEqual(article_list[1]["title"], "Article 1")
+        self.assertEqual(article_list[0]["title"], "Article 2")
 
     def tearDown(self):
         self.user.delete()
@@ -198,8 +203,8 @@ class ArticleByTagTests(APITestCase):
         self.refresh_token = str(self.refresh)
 
         # 쿠키에 토큰 설정
-        self.client.cookies["access"] = self.access_token
-        self.client.cookies["refresh"] = self.refresh_token
+        self.client.cookies["hunsu_access"] = self.access_token
+        self.client.cookies["hunsu_refresh"] = self.refresh_token
 
         # 테스트 태그 생성
         self.tag1 = Tag.objects.create(tag_id=0, name="연애 훈수")
