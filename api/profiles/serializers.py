@@ -2,7 +2,7 @@ from articles.models import Article
 from articles.serializers import ArticleListSerializer
 from comments.models import Comment
 from comments.serializers import UserCommentListSerializer
-from django.db.models import Sum
+from django.db.models import Count, Sum
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from tags.models import Tag
@@ -101,7 +101,10 @@ class ProfileSerializer(serializers.ModelSerializer):
         return value
 
     def get_liked_articles_count(self, obj):
-        return obj.user.liked_articles.count()
+        result = Article.objects.filter(user=obj.user).aggregate(
+            total_likes=Count("likes")
+        )
+        return result["total_likes"] or 0
 
     def get_helpful_comments_count(self, obj):
         result = Comment.objects.filter(user=obj.user).aggregate(
