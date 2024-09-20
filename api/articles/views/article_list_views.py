@@ -36,8 +36,9 @@ class ArticleListView(generics.ListAPIView):
     pagination_class = ArticlePagination
 
     def list(self, request, *args, **kwargs):
-        # 단일 캐시 키 설정
-        cache_key = "article_list_cache_key"
+        # 페이지 번호를 캐시 키에 포함
+        page_number = request.query_params.get('page', 1)
+        cache_key = f"article_list_page_{page_number}"
 
         # 캐시에서 데이터 가져오기
         cached_data = cache.get(cache_key)
