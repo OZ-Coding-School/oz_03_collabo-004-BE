@@ -1,13 +1,19 @@
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework import generics
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
 from ..models import Article
-from ..serializers import (
-    ArticleDetailSerializer,
-    ArticleListSerializer,
-    ArticleSerializer,
-)
+from ..serializers import ArticleDetailSerializer, ArticleListSerializer
+
+
+# 페이지네이션 1페이지당 12개 게시물
+class ArticlePagination(PageNumberPagination):
+    page_size = 12
+    page_size_query_param = "page_size"
+    max_page_size = 100
 
 
 # 게시글 상세정보 조회
@@ -20,9 +26,18 @@ class ArticleDetailView(generics.RetrieveAPIView):
 
 # 전체 게시글 조회 리스트
 class ArticleListView(generics.ListAPIView):
-    queryset = Article.objects.all().order_by("-created_at")
+    queryset = (
+        Article.objects.select_related("user")
+        .prefetch_related("tags", "images")
+        .order_by("-created_at")
+    )
     serializer_class = ArticleListSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+    pagination_class = ArticlePagination
+
+    @method_decorator(cache_page(60 * 15))  # 15분 동안 캐시
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
 
 # 특정 태그별 게시글 조회 리스트
