@@ -37,7 +37,7 @@ class ArticleListView(generics.ListAPIView):
 
     def list(self, request, *args, **kwargs):
         # 페이지 번호를 캐시 키에 포함
-        page_number = request.query_params.get('page', 1)
+        page_number = request.query_params.get("page", 1)
         cache_key = f"article_list_page_{page_number}"
 
         # 캐시에서 데이터 가져오기
@@ -49,9 +49,16 @@ class ArticleListView(generics.ListAPIView):
         page = self.paginate_queryset(self.get_queryset())
         if page is not None:
             serializer = self.get_serializer(page, many=True)
-            data = serializer.data
-            cache.set(cache_key, data, 60 * 15)  # 15분 동안 캐시 유지
-            return self.get_paginated_response(data)
+            data = self.get_paginated_response(serializer.data)
+
+            # 응답 객체에 렌더러 설정
+            data.accepted_renderer = self.request.accepted_renderer
+            data.accepted_media_type = self.request.accepted_media_type
+            data.renderer_context = self.get_renderer_context()
+
+            data.render()
+            cache.set(cache_key, data.data, 60 * 15)  # 15분 동안 캐시 유지
+            return data
 
         return Response({"detail": "No articles found."}, status=404)
 
