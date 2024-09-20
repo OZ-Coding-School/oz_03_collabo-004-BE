@@ -48,6 +48,7 @@ class NotificationTests(APITestCase):
             verb="comment",
             content_type=ContentType.objects.get_for_model(self.comment),
             object_id=self.comment.id,
+            article=self.article,
         )
 
         # 테스트용 알림 생성 후의 알림 개수 확인

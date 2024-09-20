@@ -20,7 +20,7 @@ class ArticleCRUDTests(APITestCase):
             nickname="TestNickname",
         )
         # 프로필 생성
-        self.profile = Profile.objects.create(user=self.user)
+        self.profile = Profile.objects.get(user=self.user)
         # JWT 토큰 생성
         self.refresh = RefreshToken.for_user(self.user)
         self.access_token = str(self.refresh.access_token)
@@ -135,7 +135,7 @@ class ArticleListTests(APITestCase):
             nickname="TestNickname",
         )
 
-        self.profile = Profile.objects.create(user=self.user)
+        self.profile = Profile.objects.get(user=self.user)
 
         # JWT 토큰 생성
         self.refresh = RefreshToken.for_user(self.user)
@@ -190,7 +190,7 @@ class ArticleByTagTests(APITestCase):
             nickname="TestNickname",
         )
 
-        self.profile = Profile.objects.create(user=self.user)
+        self.profile = Profile.objects.get(user=self.user)
 
         # JWT 토큰 생성
         self.refresh = RefreshToken.for_user(self.user)

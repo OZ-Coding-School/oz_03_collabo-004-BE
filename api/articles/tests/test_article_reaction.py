@@ -68,7 +68,7 @@ class ArticleReactionTests(APITestCase):
     def test_author_cannot_like_own_article(self):
         # 게시글 작성자가 자신의 게시글에 좋아요를 시도하는 경우
         response = self.client.post(self.like_url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
         self.assertEqual(
             response.data["message"], "게시글 작성자는 좋아요를 누를 수 없습니다."
         )
