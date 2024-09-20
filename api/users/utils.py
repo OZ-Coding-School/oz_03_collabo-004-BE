@@ -1,16 +1,12 @@
 import os
 from dataclasses import dataclass, field
-#from pathlib import Path
 
 import pytz
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import timezone
-#from dotenv import load_dotenv
 from rest_framework.permissions import BasePermission
 from rest_framework_simplejwt.tokens import RefreshToken
-
-#BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 @dataclass
@@ -80,12 +76,12 @@ class HunsooKingAuthClass:
         """
         response = self.set_cookie_attributes(
             response=response,
-            key="access",
+            key="hunsu_access",
             token=jwt_tokens["access"],
         )
         response = self.set_cookie_attributes(
             response=response,
-            key="refresh",
+            key="hunsu_refresh",
             token=jwt_tokens["refresh"],
         )
 
@@ -98,9 +94,9 @@ class HunsooKingAuthClass:
         key: access or refresh
         token: jwt token
         """
-        if key == "access":
+        if key == "hunsu_access":
             expires_at = HunsooKingAuthClass()._access_expiration
-        elif key == "refresh":
+        elif key == "hunsu_refresh":
             expires_at = HunsooKingAuthClass()._refresh_expiration
         else:
             raise ValueError("key should be 'access' or 'refresh'")
@@ -183,21 +179,21 @@ class GeneralAuthClass:
     def set_jwt_auth_cookie(self, response, jwt_tokens):
         response = self.set_cookie_attributes(
             response=response,
-            key="access",
+            key="hunsu_access",
             token=jwt_tokens["access"],
         )
         response = self.set_cookie_attributes(
             response=response,
-            key="refresh",
+            key="hunsu_refresh",
             token=jwt_tokens["refresh"],
         )
         return response
 
     @staticmethod
     def set_cookie_attributes(response, key, token):
-        if key == "access":
+        if key == "hunsu_access":
             expires_at = GeneralAuthClass()._access_expiration
-        elif key == "refresh":
+        elif key == "hunsu_refresh":
             expires_at = GeneralAuthClass()._refresh_expiration
         else:
             raise ValueError("key should be 'access' or 'refresh'")
@@ -211,6 +207,7 @@ class GeneralAuthClass:
             expires=expires_at,
             path="/",
         )
+
         return response
 
     @staticmethod

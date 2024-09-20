@@ -145,7 +145,7 @@ PR과 관련된 템플릿은 PR을 생성할때 자동으로 생성됩니다. <b
 ![image](https://github.com/user-attachments/assets/30229c1f-7f2c-47ba-a4d9-5875be6b1906)
 
 ### 사용자 액션 알림 처리(댓글, 채택, 좋아요, 신고, 훈수봇 답변)
-(![알림처리 로직](https://github.com/user-attachments/assets/705f7807-0267-4b30-bdcc-0887584101ba)
+![알림처리 로직](https://github.com/user-attachments/assets/705f7807-0267-4b30-bdcc-0887584101ba)
 
 
 ### AI 프롬프트 엔지니어링

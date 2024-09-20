@@ -30,21 +30,6 @@ services:
     networks:
       - app_network
 
-  jenkins:
-    build:
-      context: .
-      dockerfile: Dockerfile.jenkins
-    image: jenkins/jenkins:lts
-    user: root  # Docker 소켓 접근을 위해 root 사용자로 실행
-    ports:
-      - "8080:8080"
-      - "50000:50000"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock  # Docker 소켓 공유
-      - jenkins_home:/var/jenkins_home  
-    networks:
-      - app_network
-
   locust:
     image: locustio/locust
     ports:
@@ -54,9 +39,6 @@ services:
     command: -f /mnt/locust/locustfile.py --host=http://app:8000
     networks:
       - app_network
-
-volumes:
-  jenkins_home:
 
 networks:
   app_network:
