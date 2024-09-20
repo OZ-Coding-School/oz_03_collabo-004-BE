@@ -30,8 +30,8 @@ class ArticleReportCreateViewTest(APITestCase):
         self.refresh_token = str(self.refresh)
 
         # 쿠키에 토큰 설정
-        self.client.cookies["access"] = self.access_token
-        self.client.cookies["refresh"] = self.refresh_token
+        self.client.cookies["hunsu_access"] = self.access_token
+        self.client.cookies["hunsu_refresh"] = self.refresh_token
 
         # 신고당할 게시글 작성자 생성
         self.reported_user = User.objects.create_user(
@@ -100,3 +100,8 @@ class ArticleReportCreateViewTest(APITestCase):
         response = self.client.post(self.url, data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        
+    def tearDown(self):
+        self.reporter.delete()
+        self.reported_user.delete()
+        self.article.delete()
