@@ -19,7 +19,6 @@ def article_changed_handler(sender, instance, **kwargs):
     """
     게시글 생성, 수정, 삭제 시 캐시 무효화.
     """
-    # 여러 페이지에 대해 캐시 키를 삭제
-    for page_num in range(1, 100):  # 페이지 수에 따라 적절한 범위 지정
-        cache_key = f"article_list_page_{page_num}"
-        cache.delete(cache_key)
+    # 단일캐시키 적용
+    cache_key = "article_list_cache_key"
+    cache.delete(cache_key)
