@@ -20,6 +20,7 @@ django-cors-headers = "^3.14.0"
 pillow = "^10.4.0"
 openai = "^1.42.0"
 locust = "^2.31.5"
+django-redis = "^5.0"
 
 
 
