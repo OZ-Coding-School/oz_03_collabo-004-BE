@@ -170,7 +170,7 @@ class ArticleListTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # 페이지네이션이 적용된 경우, 'results'에 게시글 리스트가 있음
-        article_list = response.data.get("results", [])
+        article_list = response.data
 
         # 게시글의 개수가 2개인지 확인
         self.assertEqual(len(article_list), 2)

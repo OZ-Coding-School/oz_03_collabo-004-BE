@@ -40,5 +40,13 @@ services:
     networks:
       - app_network
 
+  redis:
+    image: redis:latest
+    container_name: redis_cache
+    ports:
+      - "6379:6379"
+    networks:
+      - app_network
+
 networks:
   app_network:

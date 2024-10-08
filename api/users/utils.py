@@ -5,8 +5,15 @@ import pytz
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import timezone
+
+# from dotenv import load_dotenv
 from rest_framework.permissions import BasePermission
 from rest_framework_simplejwt.tokens import RefreshToken
+
+# from pathlib import Path
+
+
+# BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 @dataclass

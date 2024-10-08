@@ -15,6 +15,10 @@ class ArticlePagination(PageNumberPagination):
     page_size_query_param = "page_size"
     max_page_size = 100
 
+    # 메타데이터를 제거하고 게시글 리스트만 반환
+    def get_paginated_response(self, data):
+        return Response(data)
+
 
 # 게시글 상세정보 조회
 class ArticleDetailView(generics.RetrieveAPIView):
@@ -36,6 +40,7 @@ class ArticleListView(generics.ListAPIView):
     pagination_class = ArticlePagination
 
     def list(self, request, *args, **kwargs):
+
         # 페이지 번호를 캐시 키에 포함
         page_number = request.query_params.get("page", 1)
         cache_key = f"article_list_page_{page_number}"
@@ -49,16 +54,17 @@ class ArticleListView(generics.ListAPIView):
         page = self.paginate_queryset(self.get_queryset())
         if page is not None:
             serializer = self.get_serializer(page, many=True)
-            data = self.get_paginated_response(serializer.data)
+            data = serializer.data
 
             # 응답 객체에 렌더러 설정
-            data.accepted_renderer = self.request.accepted_renderer
-            data.accepted_media_type = self.request.accepted_media_type
-            data.renderer_context = self.get_renderer_context()
+            response = Response(data)
+            response.accepted_renderer = self.request.accepted_renderer
+            response.accepted_media_type = self.request.accepted_media_type
+            response.renderer_context = self.get_renderer_context()
 
-            data.render()
-            cache.set(cache_key, data.data, 60 * 15)  # 15분 동안 캐시 유지
-            return data
+            response.render()
+            cache.set(cache_key, response.data, 60 * 15)  # 15분 동안 캐시 유지
+            return response
 
         return Response({"detail": "No articles found."}, status=404)
 
