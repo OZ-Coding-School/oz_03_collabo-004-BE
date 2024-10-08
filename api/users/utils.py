@@ -1,19 +1,16 @@
 import os
 from dataclasses import dataclass, field
+from pathlib import Path
 
 import pytz
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import timezone
-
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 from rest_framework.permissions import BasePermission
 from rest_framework_simplejwt.tokens import RefreshToken
 
-# from pathlib import Path
-
-
-# BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 @dataclass
@@ -112,9 +109,10 @@ class HunsooKingAuthClass:
             key=key,
             value=token,
             httponly=True,
-            samesite="Lax",
-            secure=False,
+            samesite="None",
+            secure=True,
             expires=expires_at,
+            domain=os.getenv("COOKIE_DOMAIN"),
             path="/",
         )
 
@@ -209,12 +207,12 @@ class GeneralAuthClass:
             key=key,
             value=token,
             httponly=True,
-            samesite="Lax",
-            secure=False,
+            samesite="None",
+            secure=True,
             expires=expires_at,
+            domain=os.getenv("COOKIE_DOMAIN"),
             path="/",
         )
-
         return response
 
     @staticmethod
