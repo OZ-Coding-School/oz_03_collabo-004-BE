@@ -213,7 +213,6 @@ class GeneralAuthClass:
             domain=os.getenv("COOKIE_DOMAIN"),
             path="/",
         )
-
         return response
 
     @staticmethod
