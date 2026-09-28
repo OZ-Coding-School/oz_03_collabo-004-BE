@@ -2,7 +2,9 @@ import os
 
 from common.logger import logger
 from django.contrib.auth import authenticate, get_user_model, update_session_auth_hash
+from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.mail import send_mail
 from django.db import transaction
 from django.http import HttpResponse
@@ -312,7 +314,7 @@ class UserDeleteView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, *args, **kwargs):
-        logger.info(f"DELETE /api/auth/delete for user: {request.user.email}")
+        logger.info("DELETE /api/auth/delete for user_id=%s", request.user.pk)
 
         # refresh_token을 쿠키에서 가져옴
         refresh_token = request.COOKIES.get("hunsu_refresh")
@@ -495,6 +497,13 @@ class PasswordResetConfirmView(APIView):
             )
 
         if default_token_generator.check_token(user, token):
+            try:
+                validate_password(new_password, user)
+            except DjangoValidationError as exc:
+                return Response(
+                    {"detail": list(exc.messages)},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             user.set_password(new_password)  # 비밀번호 해시화 및 저장
             user.save()
             update_session_auth_hash(request, user)  # 로그인 유지

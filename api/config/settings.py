@@ -114,6 +114,14 @@ REST_FRAMEWORK = {
         "common.authentication.cookie_authentication.CookieJWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_THROTTLE_CLASSES": (
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ),
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": os.getenv("DRF_ANON_THROTTLE_RATE", "100/hour"),
+        "user": os.getenv("DRF_USER_THROTTLE_RATE", "1000/day"),
+    },
 }
 
 CSRF_TRUSTED_ORIGINS = [
@@ -265,11 +273,11 @@ EMAIL_HOST = "smtp.gmail.com"  # SMTP 서버 주소
 EMAIL_PORT = 587  # SMTP 포트 (587은 TLS/STARTTLS, 465는 SSL)
 EMAIL_USE_TLS = True  # 또는 EMAIL_USE_SSL = True, SMTP 서버의 요구 사항에 따라 선택
 EMAIL_USE_SSL = False  # True로 설정하면 TLS가 아닌 SSL 사용
-EMAIL_HOST_USER = "da906516@gmail.com"  # SMTP 서버 사용자
-EMAIL_HOST_PASSWORD = "mieyhwjabhhivipr"  # SMTP 서버 비밀번호
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")  # SMTP 서버 사용자
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")  # SMTP 서버 비밀번호
 
 # 발송 이메일 설정
-DEFAULT_FROM_EMAIL = "da906516@gmail.com"
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
 
 
 LOGGING = {

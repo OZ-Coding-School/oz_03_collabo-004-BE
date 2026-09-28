@@ -6,6 +6,7 @@ from django.contrib.auth.models import (
     BaseUserManager,
     PermissionsMixin,
 )
+from django.contrib.auth.password_validation import validate_password
 from django.db import models
 
 
@@ -42,6 +43,7 @@ class UserManager(BaseUserManager):
         )
 
         if social_platform == "general":
+            validate_password(password, user)
             user.set_password(password)
         else:
             user.set_unusable_password()
@@ -59,6 +61,7 @@ class UserManager(BaseUserManager):
             raise ValueError("이메일 정보를 가져올 수 없습니다")
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
+        validate_password(password, user)
         user.set_password(password)
         user.save(using=self._db)
         return user
